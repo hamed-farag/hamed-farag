@@ -5,4 +5,5 @@ export interface IPost {
   description: string;
   thumbnailUrl: string;
   tags: Array<string>;
+  content: string;
 }

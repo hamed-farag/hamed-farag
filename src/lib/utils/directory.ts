@@ -1,25 +1,38 @@
 import fs from "fs";
 import path from "path";
 
-export function fromDir(startPath: string, filter: string) {
-  const postNames: Array<string> = [];
+export function findFilesWithExtension(
+  directoryPath: string,
+  fileExtension: string
+) {
+  try {
+    const files = fs.readdirSync(directoryPath);
 
-  if (!fs.existsSync(startPath)) {
-    console.log("no dir ", startPath);
-    return;
+    const filePaths: Array<string> = files.reduce<Array<string>>(
+      (accumulator, file) => {
+        const filePath = path.join(directoryPath, file);
+        const isDirectory = fs.statSync(filePath).isDirectory();
+
+        if (isDirectory) {
+          const subDirectoryFiles = findFilesWithExtension(
+            filePath,
+            fileExtension
+          );
+          return accumulator.concat(subDirectoryFiles);
+        }
+
+        if (path.extname(file) === fileExtension) {
+          accumulator.push(filePath);
+        }
+
+        return accumulator;
+      },
+      []
+    );
+
+    return filePaths;
+  } catch (err) {
+    console.log(err);
+    return [];
   }
-
-  const files = fs.readdirSync(startPath);
-  for (let i = 0; i < files.length; i++) {
-    const filename = path.join(startPath, files[i]);
-    const stat = fs.lstatSync(filename);
-
-    if (stat.isDirectory()) {
-      fromDir(filename, filter); //recurse
-    } else if (filename.endsWith(filter)) {
-      postNames.push(filename);
-    }
-  }
-
-  return postNames;
 }
