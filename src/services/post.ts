@@ -4,13 +4,13 @@ import matter from "gray-matter";
 
 import { findFilesWithExtension } from "@lib/utils/directory";
 
-import { IPost } from "@types/post";
+import { IPost } from "@interfaces/post";
 
 const postsDirectory = path.join(process.cwd(), "src/app/posts");
 
 export function getPosts() {
   const filePaths = findFilesWithExtension(postsDirectory, ".mdx");
-  console.log(filePaths);
+
   return filePaths.map((filePath: string) => {
     const fileContents = fs.readFileSync(filePath, "utf-8");
 
