@@ -6,9 +6,8 @@ import { findFilesByName } from "@lib/utils/directory";
 
 import { IPost } from "@interfaces/post";
 
-const postsDirectory = path.join(process.cwd(), "src/app/posts");
-
 export function getPosts() {
+  const postsDirectory = path.join(process.cwd(), "src/app/posts");
   const filePaths = findFilesByName(postsDirectory, "metadata.mdx");
 
   return filePaths.map((filePath: string) => {
