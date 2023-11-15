@@ -1,5 +1,5 @@
-import MyBlog from "./my-blog.mdx";
+import Post from "./post.mdx";
 
-export default function MyBlogPage() {
-  return <MyBlog />;
+export default function PostPage() {
+  return <Post />;
 }
