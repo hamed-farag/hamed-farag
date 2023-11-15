@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 
 import { Header } from "@components/Header";
+import { Footer } from "@components/Footer";
 import { ThemeProvider } from "@components/ThemeProvider";
+
+import { Separator } from "@components/ui/Separator";
 
 import { cn } from "@lib/utils/tailwindUtils";
 
@@ -39,6 +42,8 @@ export default function RootLayout({
         >
           <Header />
           {children}
+          <Separator />
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
