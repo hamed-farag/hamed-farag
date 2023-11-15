@@ -1,3 +1,11 @@
+import { AboutCard } from "@components/AboutCard";
+import { LatestPosts } from "@components/LatestPosts";
+
 export default function HomePage() {
-  return <main>Home Page</main>;
+  return (
+    <main>
+      <LatestPosts />
+      <AboutCard />
+    </main>
+  );
 }

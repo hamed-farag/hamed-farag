@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardContent, CardFooter } from "@components/ui/Card";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar";
 
 import { getUser } from "@services/user";
 
