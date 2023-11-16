@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Link from "next/link";
 
 import {
   Card,
@@ -8,12 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@components/ui/Card";
-
 import { Badge } from "@components/ui/Badge";
 
 import { IPost } from "@interfaces/post";
 
-import { cn } from "@lib/utils/tailwindUtils";
+import { formatDate } from "@lib/utils/date";
 
 type TPostCardProps = {
   post: IPost;
@@ -23,30 +22,20 @@ export function PostCard({ post }: TPostCardProps) {
   return (
     <Card>
       <CardHeader>
-        <Image
-          src={post.thumbnailUrl}
-          alt={post.title}
-          width={250}
-          height={330}
-          className={cn(
-            "h-auto w-auto object-cover transition-all hover:scale-105",
-            "portrait" === "portrait" ? "aspect-[3/4]" : "aspect-square"
-          )}
-        />
-      </CardHeader>
-      <CardContent className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
-        <div className="space-y-1">
+        <Link href={`/posts/${post.id}`}>
           <CardTitle>{post.title}</CardTitle>
-          <CardDescription>{post.description}</CardDescription>
-          <CardDescription>
-            <small>{post.date}</small>
-          </CardDescription>
-        </div>
+        </Link>
+        <CardDescription>
+          <small>{formatDate(post.date)}</small>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>{post.description}</CardDescription>
       </CardContent>
       <CardFooter>
-        <section className="flex space-x-4 text-sm text-muted-foreground">
+        <section className="flex flex-wrap gap-3 text-sm text-muted-foreground">
           {post.tags.map((tag) => (
-            <Badge key={tag}>{tag}</Badge>
+            <Badge key={tag}>#{tag}</Badge>
           ))}
         </section>
       </CardFooter>

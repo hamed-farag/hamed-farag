@@ -1,20 +1,51 @@
+import Link from "next/link";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
+
 import { PostCard } from "@components/PostCard";
+import { EmptyCard } from "@components/EmptyCard";
 
 import { getPosts } from "@services/post";
 
 import { IPost } from "@interfaces/post";
 
-export function LatestPosts() {
-  // get top 4 posts
-  const topFourPosts = getPosts().slice(0, 4);
+import { sortPosts } from "@lib/utils/post";
 
-  if (topFourPosts.length === 0) return <span>Empty</span>;
+export function LatestPosts() {
+  const allPosts = sortPosts(getPosts());
+
+  const renderEmpty = () => (
+    <EmptyCard
+      title="No posts added"
+      placeholder="Author have not added any posts."
+      height={350}
+    />
+  );
+
+  const renderPosts = () => (
+    <>
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {allPosts.slice(0, 4).map((post: IPost) => {
+          return (
+            <article key={post.id}>
+              <PostCard post={post} />
+            </article>
+          );
+        })}
+      </section>
+      <Link href="/posts" className="group block text-end">
+        More Posts{" "}
+        <ArrowRightIcon className="inline-block  transition-all group-hover:translate-x-1" />
+      </Link>
+    </>
+  );
 
   return (
-    <div>
-      {topFourPosts.map((post: IPost) => {
-        return <PostCard key={post.id} post={post} />;
-      })}
-    </div>
+    <section className="mb-5">
+      <h2 className="text-3xl font-bold tracking-tight mb-2">Latest Posts</h2>
+      <h4 className="text-xl tracking-tight mb-4 text-gray-500 dark:text-gray-400">
+        A place for my random thoughts and ideas
+      </h4>
+      {allPosts.length === 0 ? renderEmpty() : renderPosts()}
+    </section>
   );
 }

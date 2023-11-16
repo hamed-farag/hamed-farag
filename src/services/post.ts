@@ -24,7 +24,6 @@ export function getPosts() {
       title: matterResults.data.title,
       date: matterResults.data.date,
       description: matterResults.data.description,
-      thumbnailUrl: matterResults.data.thumbnailUrl,
       tags: matterResults.data.tags,
       content: matterResults.content,
     };

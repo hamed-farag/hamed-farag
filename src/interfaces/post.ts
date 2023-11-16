@@ -3,7 +3,6 @@ export interface IPost {
   title: string;
   date: string;
   description: string;
-  thumbnailUrl: string;
   tags: Array<string>;
   content: string;
 }
