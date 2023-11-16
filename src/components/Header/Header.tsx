@@ -48,7 +48,7 @@ export function Header() {
       <header
         className={`header ${yAxis > yPositionForHeader ? "h-12" : "h-24"}`}
       >
-        <Link href="/" legacyBehavior>
+        <Link href="/">
           <Image
             src="/hf-logo.svg"
             alt="logo"
