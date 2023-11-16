@@ -46,7 +46,9 @@ export function Header() {
   return (
     <>
       <header
-        className={`header ${yAxis > yPositionForHeader ? "h-12" : "h-24"}`}
+        className={`header bg-background ${
+          yAxis > yPositionForHeader ? "h-12" : "h-24"
+        }`}
       >
         <Link href="/">
           <Image

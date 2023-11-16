@@ -23,7 +23,7 @@ export async function Footer() {
           <TwitterLogoIcon className="w-6 h-6 transition-all hover:scale-105" />
         </Link>
       </section>
-      <section className="flex space-x-2 mb-2 text-gray-500 text-sm dark:text-gray-400">
+      <section className="flex space-x-2 mb-2 text-sm text-gray-500 dark:text-gray-400">
         <span>{user?.name}</span>
         <span>{` • `}</span>
         <span>{`© ${new Date().getFullYear()}`}</span>

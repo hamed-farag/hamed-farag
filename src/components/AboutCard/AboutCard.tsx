@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent, CardFooter } from "@components/ui/Card";
+import { Card } from "@components/ui/Card";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar";
 
@@ -10,18 +10,25 @@ export async function AboutCard() {
   if (!user) throw new Error("src/data/about.mdx not found");
 
   return (
-    <Card>
-      <CardHeader></CardHeader>
-      <CardContent>
-        <section className="grid grid-cols-4 gap-4">
-          <Avatar className="h-32 w-32">
+    <Card className="p-6 w-full md:w-3/4 lg:1/2 mx-auto mb-5">
+      <section className="flex flex-col md:flex-row gap-3 text-center md:text-start">
+        <article className="px-6">
+          <Avatar className="h-32 w-32 mx-auto mb-3">
             <AvatarImage src={user.avatar} alt={user.name} />
             <AvatarFallback>{user.name}</AvatarFallback>
           </Avatar>
-          <section dangerouslySetInnerHTML={{ __html: user.content }} />
-        </section>
-      </CardContent>
-      <CardFooter></CardFooter>
+          <article className="whitespace-nowrap text-center mb-3">
+            <h3 className="block">{user.name}</h3>
+            <span className="block text-gray-500 dark:text-gray-400">
+              {user.jobTitle}
+            </span>
+          </article>
+        </article>
+        <section
+          className="grow"
+          dangerouslySetInnerHTML={{ __html: user.content }}
+        />
+      </section>
     </Card>
   );
 }
