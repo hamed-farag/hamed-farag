@@ -9,6 +9,8 @@ import { Separator } from "@components/ui/Separator";
 
 import { cn } from "@lib/utils/tailwindUtils";
 
+import "./layout.css";
+
 import "@styles/globals.css";
 
 export const fontSans = FontSans({
@@ -41,7 +43,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          {children}
+          <main className="main">{children}</main>
           <Separator />
           <Footer />
         </ThemeProvider>
