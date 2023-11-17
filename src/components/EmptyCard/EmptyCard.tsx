@@ -20,7 +20,7 @@ export function EmptyCard(props: TEmptyCardProps) {
         }px] shrink-0`}
       >
         <FileTextIcon className="h-20 w-20 mb-3" />
-        <h3 className="mb-3 text-lg font-semibold">{title}</h3>
+        <h3 className="font-semibold">{title}</h3>
         <p className="text-sm text-muted-foreground">{placeholder}</p>
       </CardContent>
     </Card>

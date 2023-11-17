@@ -10,7 +10,7 @@ export async function AboutCard() {
   if (!user) throw new Error("src/data/about.mdx not found");
 
   return (
-    <Card className="p-6 w-full md:w-3/4 lg:1/2 mx-auto mb-5">
+    <Card className="p-6 w-full md:w-3/4 lg:1/2 mx-auto">
       <section className="flex flex-col md:flex-row gap-3 text-center md:text-start">
         <article className="px-6">
           <Avatar className="h-32 w-32 mx-auto mb-3">

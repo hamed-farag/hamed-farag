@@ -33,9 +33,11 @@ export function PostCard({ post }: TPostCardProps) {
         <CardDescription>{post.description}</CardDescription>
       </CardContent>
       <CardFooter>
-        <section className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+        <section className="flex flex-wrap gap-3">
           {post.tags.map((tag) => (
-            <Badge key={tag}>#{tag}</Badge>
+            <Link key={tag} href={`/posts?tag=${tag}`}>
+              <Badge>#{tag}</Badge>
+            </Link>
           ))}
         </section>
       </CardFooter>

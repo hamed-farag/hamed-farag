@@ -41,8 +41,8 @@ export function LatestPosts() {
 
   return (
     <section className="mb-5">
-      <h2 className="text-3xl font-bold tracking-tight mb-2">Latest Posts</h2>
-      <h4 className="text-xl tracking-tight mb-4 text-gray-500 dark:text-gray-400">
+      <h1>Latest Posts</h1>
+      <h4 className="tracking-tight text-gray-500 dark:text-gray-400">
         A place for my random thoughts and ideas
       </h4>
       {allPosts.length === 0 ? renderEmpty() : renderPosts()}
