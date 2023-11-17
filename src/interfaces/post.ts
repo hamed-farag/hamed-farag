@@ -6,3 +6,7 @@ export interface IPost {
   tags: Array<string>;
   content: string;
 }
+
+export interface ISearchParams {
+  tag: string;
+}

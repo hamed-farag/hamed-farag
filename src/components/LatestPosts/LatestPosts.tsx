@@ -8,10 +8,10 @@ import { getPosts } from "@services/post";
 
 import { IPost } from "@interfaces/post";
 
-import { sortPosts } from "@lib/utils/post";
+import { sortPostsByDate } from "@lib/utils/post";
 
 export function LatestPosts() {
-  const allPosts = sortPosts(getPosts());
+  const allPosts = sortPostsByDate(getPosts());
 
   const renderEmpty = () => (
     <EmptyCard

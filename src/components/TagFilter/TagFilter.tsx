@@ -34,13 +34,15 @@ export function TagFilter({ posts }: TTagFilterProps) {
       </CardHeader>
       <CardContent>
         <ul className="list-none">
-          {tagCounts.map((tagCount) => (
-            <li key={tagCount.name}>
-              <Link
-                href={`/posts?tag=${tagCount.name}`}
-              >{`${tagCount.name} (${tagCount.count})`}</Link>
-            </li>
-          ))}
+          {tagCounts
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((tagCount) => (
+              <li key={tagCount.name} className="ms-2 mb-2 last:mb-0">
+                <Link
+                  href={`/posts?tag=${tagCount.name}`}
+                >{`${tagCount.name} (${tagCount.count})`}</Link>
+              </li>
+            ))}
         </ul>
       </CardContent>
     </Card>

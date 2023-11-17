@@ -4,12 +4,18 @@ import { TagFilter } from "@components/TagFilter";
 import { PostListItem } from "@components/PostListItem";
 import { EmptyCard } from "@components/EmptyCard";
 
-import { Input } from "@components/ui/Input";
+import { sortPostsByDate, filterPosts } from "@lib/utils/post";
 
-import { sortPosts } from "@lib/utils/post";
+import { ISearchParams } from "@interfaces/post";
 
-export default function PostsPage() {
-  const allPosts = sortPosts(getPosts());
+export default function PostsPage({
+  searchParams,
+}: {
+  searchParams: ISearchParams;
+}) {
+  const allPosts = getPosts();
+  const filteredPosts = filterPosts(allPosts, searchParams);
+  const sortedPosts = sortPostsByDate(filteredPosts);
 
   const renderEmpty = () => (
     <EmptyCard
@@ -20,14 +26,11 @@ export default function PostsPage() {
   );
 
   const renderPosts = () => (
-    <>
-      <Input type="text" placeholder="Search posts" className="mb-5" />
-      <article>
-        {allPosts.map((post) => {
-          return <PostListItem key={post.id} post={post} />;
-        })}
-      </article>
-    </>
+    <article>
+      {sortedPosts.map((post) => {
+        return <PostListItem key={post.id} post={post} />;
+      })}
+    </article>
   );
 
   return (
@@ -38,7 +41,7 @@ export default function PostsPage() {
           <TagFilter posts={allPosts} />
         </section>
         <section className="col-span-12 md:col-span-8 lg:col-span-9">
-          {allPosts.length === 0 ? renderEmpty() : renderPosts()}
+          {sortedPosts.length === 0 ? renderEmpty() : renderPosts()}
         </section>
       </section>
     </>
