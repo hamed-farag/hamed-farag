@@ -1,15 +1,19 @@
 import fs from "fs";
-import path from "path";
 import matter from "gray-matter";
+import getConfig from "next/config";
 
 import { findFilesByName } from "@lib/utils/directory";
 
 import { IPost } from "@interfaces/post";
 
+const { serverRuntimeConfig } = getConfig();
+
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPosts() {
-  const postsDirectory = path.join(process.cwd(), "src/app/posts");
-  const filePaths = findFilesByName(postsDirectory, "metadata.mdx");
+  const filePaths = findFilesByName(
+    serverRuntimeConfig.POSTS_ROOT,
+    "metadata.mdx"
+  );
 
   return filePaths.map((filePath: string) => {
     // GET BLOG NAME BASED ON FOLDER NAME

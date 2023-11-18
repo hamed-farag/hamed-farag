@@ -1,20 +1,20 @@
-/** @type {import('next').NextConfig} */
-
-import createMDX from "@next/mdx";
-import remarkGfm from "remark-gfm";
+const createMDX = require("@next/mdx");
 
 const nextConfig = {
   // Configure `pageExtensions` to include MDX files
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
-  // Optionally, add any other Next.js config below
+  // Optionally, add any other Next.js config below,
+  serverRuntimeConfig: {
+    PROJECT_ROOT: __dirname,
+    POSTS_ROOT: `${__dirname}/src/app/posts`,
+  },
 };
 
 const withMDX = createMDX({
   options: {
     extension: /\.mdx?$/,
-    remarkPlugins: [remarkGfm],
   },
 });
 
 // Merge MDX config with Next.js config
-export default withMDX(nextConfig);
+module.exports = withMDX(nextConfig);
