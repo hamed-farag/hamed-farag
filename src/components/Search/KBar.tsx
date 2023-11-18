@@ -12,7 +12,6 @@ import { KBarModal } from "./KBarModal";
 export interface KBarSearchProps {
   searchDocumentsPath: string | false;
   defaultActions?: Action[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSearchDocumentsLoad?: (json: any) => Action[];
 }
 
