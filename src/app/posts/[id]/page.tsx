@@ -3,19 +3,43 @@ import path from "path";
 import matter from "gray-matter";
 import { remark } from "remark";
 import remarkHtml from "remark-html";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
+
 import Link from "next/link";
 import getConfig from "next/config";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import type { Metadata } from "next";
 
 import { Separator } from "@components/ui/Separator";
 import { TOC } from "@components/TOC";
 import { PostMetadata } from "@components/PostMetadata";
 
+import { getPostsById, getPosts } from "@services/post";
 import { headingTree } from "@lib/plugins/remark-headingTree";
 
-const { serverRuntimeConfig } = getConfig();
+type Props = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export default async function PostPage({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = getPostsById(params.id);
+
+  return {
+    title: post?.title,
+  };
+}
+
+export async function generateStaticParams() {
+  const posts = getPosts();
+
+  return posts.map((post) => ({
+    slug: post.id,
+  }));
+}
+
+export default async function PostPage({ params }: Props) {
+  const { serverRuntimeConfig } = getConfig();
+
   const postFilePath = path.join(
     serverRuntimeConfig.POSTS_ROOT,
     `${params.id}.mdx`
