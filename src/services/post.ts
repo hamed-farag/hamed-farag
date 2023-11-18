@@ -39,7 +39,7 @@ export function getPosts() {
     ".mdx"
   );
 
-  console.log("getPosts:filePaths", filePaths);
+  console.log("serverRuntimeConfig.POSTS_ROOT", serverRuntimeConfig.POSTS_ROOT);
 
   const posts = filePaths.map((filePath: string) => {
     return extractPostFromPath(filePath);
