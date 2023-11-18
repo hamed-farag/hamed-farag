@@ -6,6 +6,7 @@ import { findFilesByName } from "@lib/utils/directory";
 
 import { IPost } from "@interfaces/post";
 
+// TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPosts() {
   const postsDirectory = path.join(process.cwd(), "src/app/posts");
   const filePaths = findFilesByName(postsDirectory, "metadata.mdx");

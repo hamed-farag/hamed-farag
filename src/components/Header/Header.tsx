@@ -2,11 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { ChevronUpIcon } from "@radix-ui/react-icons";
+import {
+  ChevronUpIcon,
+  MagnifyingGlassIcon,
+  HomeIcon,
+  FileTextIcon,
+} from "@radix-ui/react-icons";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { ThemeToggle } from "@components/ThemeToggle";
+import { SearchProvider, SearchButton } from "@components/Search";
 
 import {
   NavigationMenu,
@@ -21,6 +28,7 @@ import { Button } from "@components/ui/Button";
 import "./header.css";
 
 export function Header() {
+  const router = useRouter();
   const [{ y }, scrollTo] = useWindowScroll();
   const yAxis = y || 0;
   const yPositionForHeader = 50;
@@ -72,6 +80,28 @@ export function Header() {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
+          <SearchProvider
+            searchConfig={{
+              kbarConfig: {
+                searchDocumentsPath: "search.json",
+                defaultActions: [
+                  {
+                    id: "homeAction",
+                    name: "Home",
+                    shortcut: ["h"],
+                    keywords: "back",
+                    section: "Navigation",
+                    perform: () => router.push("/"),
+                    icon: <HomeIcon />,
+                  },
+                ],
+              },
+            }}
+          >
+            <SearchButton>
+              <MagnifyingGlassIcon />
+            </SearchButton>
+          </SearchProvider>
           <ThemeToggle />
         </section>
       </header>
