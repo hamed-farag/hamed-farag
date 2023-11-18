@@ -62,9 +62,6 @@ export default async function PostPage({ params }: Props) {
       </section>
       <Separator />
       <section className="grid grid-cols-12 lg:gap-10">
-        <article className="col-span-12 lg:col-span-9">
-          <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
-        </article>
         <aside className="hidden lg:block lg:col-span-3">
           <TOC data={htmlContent.data.headings as Array<any>} />
           <Separator />
@@ -78,6 +75,9 @@ export default async function PostPage({ params }: Props) {
             Back to the blog
           </Link>
         </aside>
+        <article className="col-span-12 lg:col-span-9">
+          <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
+        </article>
       </section>
     </section>
   );
