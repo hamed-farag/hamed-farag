@@ -1,12 +1,12 @@
 import fs from "fs";
 import path from "path";
 
-export function findFilesWithExtension(
+export function getFilesWithExtension(
   directoryPath: string,
   fileExtension: string
 ) {
   try {
-    const files = fs.readdirSync(directoryPath);
+    const files = fs.readdirSync(`${process.cwd()}/${directoryPath}`);
 
     const filePaths: Array<string> = files.reduce<Array<string>>(
       (accumulator, file) => {
@@ -14,7 +14,7 @@ export function findFilesWithExtension(
         const isDirectory = fs.statSync(filePath).isDirectory();
 
         if (isDirectory) {
-          const subDirectoryFiles = findFilesWithExtension(
+          const subDirectoryFiles = getFilesWithExtension(
             filePath,
             fileExtension
           );
@@ -37,9 +37,9 @@ export function findFilesWithExtension(
   }
 }
 
-export function findFilesByName(directoryPath: string, fileName: string) {
+export function getFilesByName(directoryPath: string, fileName: string) {
   try {
-    const files = fs.readdirSync(directoryPath);
+    const files = fs.readdirSync(`${process.cwd()}/${directoryPath}`);
 
     const filePaths: Array<string> = files.reduce<Array<string>>(
       (accumulator, file) => {
@@ -47,7 +47,7 @@ export function findFilesByName(directoryPath: string, fileName: string) {
         const isDirectory = fs.statSync(filePath).isDirectory();
 
         if (isDirectory) {
-          const subDirectoryFiles = findFilesByName(filePath, fileName);
+          const subDirectoryFiles = getFilesByName(filePath, fileName);
           return accumulator.concat(subDirectoryFiles);
         }
 

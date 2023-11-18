@@ -1,16 +1,17 @@
 import fs from "fs";
-import path from "path";
 import matter from "gray-matter";
 import { remark } from "remark";
 import remarkHtml from "remark-html";
 
-import { findFilesByName } from "@lib/utils/directory";
+import { getFilesByName } from "@lib/utils/directory";
 
 import { IUser } from "@interfaces/user";
 
 export async function getUser() {
-  const postsDirectory = path.join(process.cwd(), "src/data");
-  const filePaths = findFilesByName(postsDirectory, "about.mdx");
+  const postsDirectory = "src/data";
+
+  const filePaths = getFilesByName(postsDirectory, "about.mdx");
+
   const filePath = filePaths[0];
 
   if (!filePath) return null;

@@ -1,20 +1,14 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
-import { remark } from "remark";
-import remarkHtml from "remark-html";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 import Link from "next/link";
-import getConfig from "next/config";
 import type { Metadata } from "next";
 
 import { Separator } from "@components/ui/Separator";
 import { TOC } from "@components/TOC";
 import { PostMetadata } from "@components/PostMetadata";
+import { NotAvailableCard } from "@components/NotAvailableCard";
 
-import { getPostsById, getPosts } from "@services/post";
-import { headingTree } from "@lib/plugins/remark-headingTree";
+import { getPostsById, getPosts, getPostContentById } from "@services/post";
 
 type Props = {
   params: { id: string };
@@ -38,34 +32,33 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({ params }: Props) {
-  const { serverRuntimeConfig } = getConfig();
+  const post = await getPostContentById(params.id);
 
-  const postFilePath = path.join(
-    serverRuntimeConfig.POSTS_ROOT,
-    `${params.id}.mdx`
-  );
+  if (!post)
+    return (
+      <section>
+        <NotAvailableCard
+          title="Post not available"
+          placeholder="For some reason, the post is not available"
+        />
+      </section>
+    );
 
-  const postContent = fs.readFileSync(postFilePath, "utf-8");
-  const postResult = matter(postContent);
-
-  const htmlContent = await remark()
-    .use(headingTree)
-    .use(remarkHtml)
-    .process(postResult.content);
+  const { htmlContent, postData } = post;
 
   return (
     <section>
       <section className="text-center">
-        <small>{postResult.data.date}</small>
-        <h1>{postResult.data.title}</h1>
-        <h3>{postResult.data.description}</h3>
+        <small>{postData.data.date}</small>
+        <h1>{postData.data.title}</h1>
+        <h3>{postData.data.description}</h3>
       </section>
       <Separator />
       <section className="grid grid-cols-12 lg:gap-10">
         <aside className="hidden lg:block lg:col-span-3">
           <TOC data={htmlContent.data.headings as Array<any>} />
           <Separator />
-          <PostMetadata postMetadata={postResult.data} />
+          <PostMetadata postMetadata={postData.data} />
           <Separator />
           <Link
             href="/posts"

@@ -10,6 +10,8 @@ import { getUser } from "@services/user";
 export async function Footer() {
   const user = await getUser();
 
+  if (!user) throw new Error("src/data/about.mdx not found");
+
   return (
     <footer className="flex flex-col items-center py-10">
       <section className="flex space-x-4 mb-4 text-gray-500 dark:text-gray-400">

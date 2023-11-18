@@ -1,12 +1,12 @@
 import fs from "fs";
+import { remark } from "remark";
 import matter from "gray-matter";
-import getConfig from "next/config";
+import remarkHtml from "remark-html";
 
-import { findFilesWithExtension, findFilesByName } from "@lib/utils/directory";
+import { getFilesWithExtension, getFilesByName } from "@lib/utils/directory";
+import { headingTree } from "@lib/plugins/remark-headingTree";
 
 import { IPost } from "@interfaces/post";
-
-const { serverRuntimeConfig } = getConfig();
 
 function extractPostFromPath(path: string) {
   // GET BLOG NAME BASED ON FOLDER NAME
@@ -27,19 +27,12 @@ function extractPostFromPath(path: string) {
     content: matterResults.content,
   };
 
-  console.log("extractPostFromPath:posts", post);
-
   return post;
 }
 
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPosts() {
-  const filePaths = findFilesWithExtension(
-    serverRuntimeConfig.POSTS_ROOT,
-    ".mdx"
-  );
-
-  console.log("serverRuntimeConfig.POSTS_ROOT", serverRuntimeConfig.POSTS_ROOT);
+  const filePaths = getFilesWithExtension("posts", ".mdx");
 
   const posts = filePaths.map((filePath: string) => {
     return extractPostFromPath(filePath);
@@ -50,16 +43,33 @@ export function getPosts() {
 
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPostsById(id: string) {
-  const filePaths = findFilesByName(
-    serverRuntimeConfig.POSTS_ROOT,
-    `${id}.mdx`
-  );
+  const filePaths = getFilesByName("posts", `${id}.mdx`);
 
   if (filePaths.length > 0) {
     const filePath = filePaths[0];
 
-    console.log("getPostsById:filePath", filePath);
     return extractPostFromPath(filePath);
+  }
+
+  return null;
+}
+
+export async function getPostContentById(id: string) {
+  const postFilePath = getFilesByName("posts", `${id}.mdx`);
+
+  if (postFilePath.length > 0) {
+    const postContent = fs.readFileSync(postFilePath[0], "utf-8");
+    const postResult = matter(postContent);
+
+    const htmlContent = await remark()
+      .use(headingTree)
+      .use(remarkHtml)
+      .process(postResult.content);
+
+    return {
+      postData: postResult,
+      htmlContent: htmlContent,
+    };
   }
 
   return null;
