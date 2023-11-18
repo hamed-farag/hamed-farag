@@ -2,7 +2,7 @@ import fs from "fs";
 import matter from "gray-matter";
 import getConfig from "next/config";
 
-import { findFilesByName } from "@lib/utils/directory";
+import { findFilesWithExtension } from "@lib/utils/directory";
 
 import { IPost } from "@interfaces/post";
 
@@ -10,22 +10,23 @@ const { serverRuntimeConfig } = getConfig();
 
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPosts() {
-  const filePaths = findFilesByName(
+  const filePaths = findFilesWithExtension(
     serverRuntimeConfig.POSTS_ROOT,
-    "metadata.mdx"
+    ".mdx"
   );
 
   return filePaths.map((filePath: string) => {
     // GET BLOG NAME BASED ON FOLDER NAME
-    // filePathApart -> [ '', 'hamed-farag', 'src', 'app', 'posts', 'my-blog', 'my-blog.mdx' ]
+    // filePathApart -> [ '', 'hamed-farag', 'app', 'posts', 'my-blog.mdx' ]
     const filePathApart = filePath.split("/");
-    const id = filePathApart[filePathApart.length - 2];
+    let id = filePathApart[filePathApart.length - 1];
+    id = id.replace(/\.[^/.]+$/, ""); // remove extension
 
     const fileContents = fs.readFileSync(filePath, "utf-8");
     const matterResults = matter(fileContents);
 
     const post: IPost = {
-      id, // to be file name
+      id,
       title: matterResults.data.title,
       date: matterResults.data.date,
       description: matterResults.data.description,

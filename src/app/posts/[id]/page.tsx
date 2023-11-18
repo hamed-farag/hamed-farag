@@ -13,25 +13,11 @@ import { headingTree } from "@lib/plugins/remark-headingTree";
 
 const { serverRuntimeConfig } = getConfig();
 
-export default async function PostPage() {
-  const currentDirectoryPathApart = __dirname.split("/");
-  const currentDirectory =
-    currentDirectoryPathApart[currentDirectoryPathApart.length - 1];
-
-  const postMetadataFilePath = path.join(
-    serverRuntimeConfig.POSTS_ROOT,
-    currentDirectory,
-    "metadata.mdx"
-  );
-
+export default async function PostPage({ params }: { params: { id: string } }) {
   const postFilePath = path.join(
     serverRuntimeConfig.POSTS_ROOT,
-    currentDirectory,
-    "post.mdx"
+    `${params.id}.mdx`
   );
-
-  const metadataContent = fs.readFileSync(postMetadataFilePath, "utf-8");
-  const metadata = matter(metadataContent);
 
   const postContent = fs.readFileSync(postFilePath, "utf-8");
   const postResult = matter(postContent);
@@ -44,8 +30,8 @@ export default async function PostPage() {
   return (
     <section>
       <section className="text-center">
-        <small>{metadata.data.date}</small>
-        <h1>{metadata.data.title}</h1>
+        <small>{postResult.data.date}</small>
+        <h1>{postResult.data.title}</h1>
       </section>
       <Separator />
       <section className="grid grid-cols-12 lg:gap-10">
