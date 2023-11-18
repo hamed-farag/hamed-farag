@@ -1,0 +1,3 @@
+.header {
+  @apply md:fixed flex justify-between items-center w-11/12 md:w-2/3 md:left-1/2 md:-translate-x-2/4 mx-auto transition-all duration-200;
+}
