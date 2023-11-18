@@ -3,11 +3,13 @@ import path from "path";
 import matter from "gray-matter";
 import { remark } from "remark";
 import remarkHtml from "remark-html";
-
+import Link from "next/link";
 import getConfig from "next/config";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 import { Separator } from "@components/ui/Separator";
 import { TOC } from "@components/TOC";
+import { PostMetadata } from "@components/PostMetadata";
 
 import { headingTree } from "@lib/plugins/remark-headingTree";
 
@@ -32,6 +34,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
       <section className="text-center">
         <small>{postResult.data.date}</small>
         <h1>{postResult.data.title}</h1>
+        <h3>{postResult.data.description}</h3>
       </section>
       <Separator />
       <section className="grid grid-cols-12 lg:gap-10">
@@ -40,6 +43,16 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         </article>
         <aside className="hidden lg:block lg:col-span-3">
           <TOC data={htmlContent.data.headings as Array<any>} />
+          <Separator />
+          <PostMetadata postMetadata={postResult.data} />
+          <Separator />
+          <Link
+            href="/posts"
+            className="group block text-gray-500 dark:text-gray-400"
+          >
+            <ArrowLeftIcon className="inline-block  transition-all group-hover:-translate-x-1" />{" "}
+            Back to the blog
+          </Link>
         </aside>
       </section>
     </section>
