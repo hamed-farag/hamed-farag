@@ -27,6 +27,8 @@ function extractPostFromPath(path: string) {
     content: matterResults.content,
   };
 
+  console.log("extractPostFromPath:posts", post);
+
   return post;
 }
 
@@ -37,9 +39,13 @@ export function getPosts() {
     ".mdx"
   );
 
-  return filePaths.map((filePath: string) => {
+  console.log("getPosts:filePaths", filePaths);
+
+  const posts = filePaths.map((filePath: string) => {
     return extractPostFromPath(filePath);
   });
+
+  return posts;
 }
 
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
@@ -52,6 +58,7 @@ export function getPostsById(id: string) {
   if (filePaths.length > 0) {
     const filePath = filePaths[0];
 
+    console.log("getPostsById:filePath", filePath);
     return extractPostFromPath(filePath);
   }
 

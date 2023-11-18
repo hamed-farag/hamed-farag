@@ -1,8 +1,8 @@
-import { getPosts } from "@services/post";
-
 import { TagFilter } from "@components/TagFilter";
 import { PostListItem } from "@components/PostListItem";
 import { EmptyCard } from "@components/EmptyCard";
+
+import { getPosts } from "@services/post";
 
 import { sortPostsByDate, filterPosts } from "@lib/utils/post";
 
