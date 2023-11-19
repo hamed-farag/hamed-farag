@@ -8,7 +8,7 @@ import { getFilesByName } from "@lib/utils/directory";
 import { IUser } from "@interfaces/user";
 
 export async function getUser() {
-  const postsDirectory = "./data";
+  const postsDirectory = "./data/author";
 
   const filePaths = getFilesByName(postsDirectory, "about.mdx");
 

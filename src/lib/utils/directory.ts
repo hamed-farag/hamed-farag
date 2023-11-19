@@ -6,7 +6,8 @@ export function getFilesWithExtension(
   fileExtension: string
 ) {
   try {
-    const pathDirectory = path.resolve(directoryPath);
+    const pathDirectory = path.join(process.cwd(), directoryPath);
+    console.log("getFilesWithExtension", pathDirectory);
     const files = fs.readdirSync(pathDirectory, "utf-8");
 
     const filePaths: Array<string> = files.reduce<Array<string>>(
@@ -40,7 +41,10 @@ export function getFilesWithExtension(
 
 export function getFilesByName(directoryPath: string, fileName: string) {
   try {
-    const pathDirectory = path.resolve(directoryPath);
+    const pathDirectory = path.join(process.cwd(), directoryPath);
+    console.log("process.cwd()", process.cwd());
+    console.log("__dirname", __dirname);
+    console.log("getFilesByName", pathDirectory);
     const files = fs.readdirSync(pathDirectory, "utf-8");
 
     const filePaths: Array<string> = files.reduce<Array<string>>(
