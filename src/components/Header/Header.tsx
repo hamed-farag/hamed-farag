@@ -83,7 +83,6 @@ export function Header() {
           <SearchProvider
             searchConfig={{
               kbarConfig: {
-                searchDocumentsPath: "search.json",
                 defaultActions: [
                   {
                     id: "homeAction",

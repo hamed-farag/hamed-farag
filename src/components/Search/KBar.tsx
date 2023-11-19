@@ -3,14 +3,13 @@ import { useRouter } from "next/navigation";
 import { KBarProvider } from "kbar";
 import type { Action } from "kbar";
 
-import { IPost } from "@interfaces/post";
+import { getMiniPosts } from "@services/postClient";
+import { IMiniPost } from "@interfaces/post";
 
 import { KBarModal } from "./KBarModal";
 
 export interface KBarSearchProps {
-  searchDocumentsPath: string | false;
   defaultActions?: Action[];
-  onSearchDocumentsLoad?: (json: any) => Action[];
 }
 
 export interface KBarConfig {
@@ -22,13 +21,12 @@ export const KBarSearchProvider: FC<{
   kbarConfig: KBarSearchProps;
 }> = ({ kbarConfig, children }) => {
   const router = useRouter();
-  const { searchDocumentsPath, defaultActions, onSearchDocumentsLoad } =
-    kbarConfig;
+  const { defaultActions } = kbarConfig;
   const [searchActions, setSearchActions] = useState<Action[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    const mapPosts = (posts: Array<IPost>) => {
+    const mapPosts = (posts: Array<IMiniPost>) => {
       const actions: Action[] = [];
       for (const post of posts) {
         actions.push({
@@ -44,33 +42,18 @@ export const KBarSearchProvider: FC<{
     };
 
     async function fetchData() {
-      if (searchDocumentsPath) {
-        const url =
-          searchDocumentsPath.indexOf("://") > 0 ||
-          searchDocumentsPath.indexOf("//") === 0
-            ? searchDocumentsPath
-            : new URL(searchDocumentsPath, window.location.origin);
-        const res = await fetch(url);
-        const json = await res.json();
-        const actions = onSearchDocumentsLoad
-          ? onSearchDocumentsLoad(json)
-          : mapPosts(json);
-        setSearchActions(actions);
-        setDataLoaded(true);
-      }
+      const posts = await getMiniPosts();
+      const actions = mapPosts(posts.data);
+      setSearchActions(actions);
+      setDataLoaded(true);
     }
-    if (!dataLoaded && searchDocumentsPath) {
+
+    if (!dataLoaded) {
       fetchData();
     } else {
       setDataLoaded(true);
     }
-  }, [
-    defaultActions,
-    dataLoaded,
-    router,
-    searchDocumentsPath,
-    onSearchDocumentsLoad,
-  ]);
+  }, [defaultActions, dataLoaded, router]);
 
   return (
     <KBarProvider actions={defaultActions}>

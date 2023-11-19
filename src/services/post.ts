@@ -30,7 +30,6 @@ function extractPostFromPath(path: string) {
   return post;
 }
 
-// TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPosts() {
   const filePaths = getFilesWithExtension("posts", ".mdx");
 
