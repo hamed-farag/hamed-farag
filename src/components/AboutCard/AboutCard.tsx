@@ -7,7 +7,7 @@ import { getUser } from "@services/user";
 export async function AboutCard() {
   const user = await getUser();
 
-  if (!user) throw new Error("src/data/about.mdx not found");
+  if (!user) throw new Error("about.mdx not found");
 
   return (
     <Card className="p-6 w-full md:w-3/4 lg:1/2 mx-auto">

@@ -6,13 +6,12 @@ export function getFilesWithExtension(
   fileExtension: string
 ) {
   try {
-    const pathDirectory = path.join(process.cwd(), directoryPath);
-    console.log("getFilesWithExtension", pathDirectory);
+    const pathDirectory = path.join(process.cwd(), "data", directoryPath);
     const files = fs.readdirSync(pathDirectory, "utf-8");
 
     const filePaths: Array<string> = files.reduce<Array<string>>(
       (accumulator, file) => {
-        const filePath = path.join(directoryPath, file);
+        const filePath = path.join(pathDirectory, file);
         const isDirectory = fs.statSync(filePath).isDirectory();
 
         if (isDirectory) {
@@ -41,24 +40,21 @@ export function getFilesWithExtension(
 
 export function getFilesByName(directoryPath: string, fileName: string) {
   try {
-    const pathDirectory = path.join(process.cwd(), directoryPath);
-    console.log("process.cwd()", process.cwd());
-    console.log("__dirname", __dirname);
-    console.log("getFilesByName", pathDirectory);
+    const pathDirectory = path.join(process.cwd(), "data", directoryPath);
     const files = fs.readdirSync(pathDirectory, "utf-8");
 
     const filePaths: Array<string> = files.reduce<Array<string>>(
       (accumulator, file) => {
-        const filePath = path.join(directoryPath, file);
-        const isDirectory = fs.statSync(filePath).isDirectory();
+        const fullPath = path.join(pathDirectory, fileName);
+        const isDirectory = fs.statSync(fullPath).isDirectory();
 
         if (isDirectory) {
-          const subDirectoryFiles = getFilesByName(filePath, fileName);
+          const subDirectoryFiles = getFilesByName(fullPath, fileName);
           return accumulator.concat(subDirectoryFiles);
         }
 
         if (file === fileName) {
-          accumulator.push(filePath);
+          accumulator.push(fullPath);
         }
 
         return accumulator;
