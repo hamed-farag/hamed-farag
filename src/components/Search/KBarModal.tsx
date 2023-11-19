@@ -12,6 +12,8 @@ import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 import { Card } from "@components/ui/Card";
 
+import { formatDate } from "@lib/utils/date";
+
 export const KBarModal = ({
   actions,
   isLoading,
@@ -87,7 +89,7 @@ const RenderResults = () => {
                           active ? "text-gray-200" : "text-gray-400"
                         } text-xs`}
                       >
-                        {item.subtitle}
+                        {formatDate(item.subtitle)}
                       </div>
                     )}
                     <div>{item.name}</div>

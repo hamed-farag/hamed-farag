@@ -10,6 +10,8 @@ import { NotAvailableCard } from "@components/NotAvailableCard";
 
 import { getPostsById, getPosts, getPostContentById } from "@services/post";
 
+import { formatDate } from "@lib/utils/date";
+
 type Props = {
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
@@ -49,7 +51,7 @@ export default async function PostPage({ params }: Props) {
   return (
     <section>
       <section className="text-center">
-        <small>{postData.data.date}</small>
+        <small>{formatDate(postData.data.date)}</small>
         <h1>{postData.data.title}</h1>
         <h3>{postData.data.description}</h3>
       </section>

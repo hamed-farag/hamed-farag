@@ -3,8 +3,6 @@ import { useRouter } from "next/navigation";
 import { KBarProvider } from "kbar";
 import type { Action } from "kbar";
 
-import { formatDate } from "@lib/utils/date";
-
 import { IPost } from "@interfaces/post";
 
 import { KBarModal } from "./KBarModal";
@@ -38,7 +36,7 @@ export const KBarSearchProvider: FC<{
           name: post.title,
           keywords: post.description,
           section: "posts",
-          subtitle: formatDate(post.date),
+          subtitle: post.date,
           perform: () => router.push("/posts/" + post.id),
         });
       }
