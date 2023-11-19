@@ -8,7 +8,6 @@ import {
   ChevronUpIcon,
   MagnifyingGlassIcon,
   HomeIcon,
-  FileTextIcon,
 } from "@radix-ui/react-icons";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
