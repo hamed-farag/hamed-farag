@@ -32,7 +32,7 @@ function extractPostFromPath(path: string) {
 
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPosts() {
-  const filePaths = getFilesWithExtension("posts", ".mdx");
+  const filePaths = getFilesWithExtension("./posts", ".mdx");
 
   const posts = filePaths.map((filePath: string) => {
     return extractPostFromPath(filePath);
@@ -43,7 +43,7 @@ export function getPosts() {
 
 // TODO: WRAP THIS FUNCTION WITH AN API, FOR REPLACING search.json later on
 export function getPostsById(id: string) {
-  const filePaths = getFilesByName("posts", `${id}.mdx`);
+  const filePaths = getFilesByName("./posts", `${id}.mdx`);
 
   if (filePaths.length > 0) {
     const filePath = filePaths[0];
@@ -55,7 +55,7 @@ export function getPostsById(id: string) {
 }
 
 export async function getPostContentById(id: string) {
-  const postFilePath = getFilesByName("posts", `${id}.mdx`);
+  const postFilePath = getFilesByName("./posts", `${id}.mdx`);
 
   if (postFilePath.length > 0) {
     const postContent = fs.readFileSync(postFilePath[0], "utf-8");
