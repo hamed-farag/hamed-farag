@@ -99,5 +99,8 @@
     blockquote {
       @apply border-l-4 ps-4;
     }
+    code {
+      @apply rounded-xl border w-full p-4 inline-block whitespace-pre overflow-x-auto text-start;
+    }
   }
 }

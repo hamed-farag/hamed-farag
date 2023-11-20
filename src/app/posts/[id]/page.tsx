@@ -38,7 +38,7 @@ export default async function PostPage({ params }: Props) {
 
   if (!post) redirect("/404", RedirectType.push);
 
-  const { htmlContent, postData } = post;
+  const { htmlContent, postData, headings } = post;
 
   return (
     <section>
@@ -50,7 +50,7 @@ export default async function PostPage({ params }: Props) {
       <Separator />
       <section className="grid grid-cols-12 lg:gap-10">
         <aside className="hidden lg:block lg:col-span-3">
-          <TOC data={htmlContent.data.headings as Array<any>} />
+          <TOC data={headings as Array<any>} />
           <Separator />
           <PostMetadata postMetadata={postData.data} />
           <Separator />

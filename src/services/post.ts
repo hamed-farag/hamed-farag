@@ -1,7 +1,13 @@
 import fs from "fs";
-import { remark } from "remark";
 import matter from "gray-matter";
-import remarkHtml from "remark-html";
+
+import { remark } from "remark";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeFormat from "rehype-format";
+import rehypeStringify from "rehype-stringify";
+import rehypeHighlight from "rehype-highlight";
 
 import { getFilesWithExtension, getFilesByName } from "@lib/utils/directory";
 import { headingTree } from "@lib/plugins/remark-headingTree";
@@ -60,14 +66,22 @@ export async function getPostContentById(id: string) {
     const postContent = fs.readFileSync(postFilePath[0], "utf-8");
     const postResult = matter(postContent);
 
-    const htmlContent = await remark()
+    const headingsContent = await remark()
       .use(headingTree)
-      .use(remarkHtml)
+      .process(postResult.content);
+
+    const htmlContent = await unified()
+      .use(remarkParse)
+      .use(remarkRehype)
+      .use(rehypeHighlight)
+      .use(rehypeFormat)
+      .use(rehypeStringify)
       .process(postResult.content);
 
     return {
       postData: postResult,
       htmlContent: htmlContent,
+      headings: headingsContent.data.headings,
     };
   }
 

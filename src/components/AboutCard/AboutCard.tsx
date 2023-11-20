@@ -11,8 +11,8 @@ export async function AboutCard() {
 
   return (
     <Card className="p-6 w-full md:w-3/4 lg:1/2 mx-auto">
-      <section className="flex flex-col md:flex-row gap-3 text-center md:text-start">
-        <article className="px-6">
+      <section className="flex flex-col md:flex-row gap-5 text-center md:text-start">
+        <article>
           <Avatar className="h-32 w-32 mx-auto mb-3">
             <AvatarImage src={user.avatar} alt={user.name} />
             <AvatarFallback>{user.name}</AvatarFallback>

@@ -1,7 +1,11 @@
 import fs from "fs";
 import matter from "gray-matter";
-import { remark } from "remark";
-import remarkHtml from "remark-html";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeFormat from "rehype-format";
+import rehypeStringify from "rehype-stringify";
+import rehypeHighlight from "rehype-highlight";
 
 import { getFilesByName } from "@lib/utils/directory";
 
@@ -19,8 +23,12 @@ export async function getUser() {
   const fileContents = fs.readFileSync(filePath, "utf-8");
   const matterResults = matter(fileContents);
 
-  const htmlContent = await remark()
-    .use(remarkHtml)
+  const htmlContent = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeHighlight)
+    .use(rehypeFormat)
+    .use(rehypeStringify)
     .process(matterResults.content);
 
   const user: IUser = {

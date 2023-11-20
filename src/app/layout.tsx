@@ -9,9 +9,10 @@ import { Separator } from "@components/ui/Separator";
 
 import { cn } from "@lib/utils/tailwindUtils";
 
-import "./layout.css";
-
+import "@styles/hljs-tokyo-night.css";
 import "@styles/globals.css";
+
+import "./layout.css";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
