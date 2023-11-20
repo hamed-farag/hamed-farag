@@ -25,7 +25,7 @@ export async function AboutCard() {
           </article>
         </article>
         <section
-          className="grow"
+          className="grow mdx"
           dangerouslySetInnerHTML={{ __html: user.content }}
         />
       </section>

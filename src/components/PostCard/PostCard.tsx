@@ -23,14 +23,14 @@ export function PostCard({ post }: TPostCardProps) {
     <Card>
       <CardHeader>
         <Link href={`/posts/${post.id}`}>
-          <CardTitle>{post.title}</CardTitle>
+          <CardTitle className="my-0">{post.title}</CardTitle>
         </Link>
         <CardDescription>
           <small>{formatDate(post.date)}</small>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <CardDescription>{post.description}</CardDescription>
+        <CardDescription className="m-0">{post.description}</CardDescription>
       </CardContent>
       <CardFooter>
         <section className="flex flex-wrap gap-3">

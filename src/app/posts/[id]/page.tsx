@@ -63,7 +63,10 @@ export default async function PostPage({ params }: Props) {
           </Link>
         </aside>
         <article className="col-span-12 lg:col-span-9">
-          <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
+          <div
+            className="mdx"
+            dangerouslySetInnerHTML={{ __html: String(htmlContent) }}
+          />
         </article>
       </section>
     </section>

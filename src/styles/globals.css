@@ -88,4 +88,16 @@
   p {
     @apply font-normal font-normal my-2;
   }
+
+  .mdx {
+    p {
+      @apply font-normal font-normal mb-4;
+    }
+    ul {
+      @apply list-disc ms-6 my-2;
+    }
+    blockquote {
+      @apply border-l-4 ps-4;
+    }
+  }
 }
