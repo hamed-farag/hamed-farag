@@ -22,8 +22,8 @@ const hamed = {
     "NextJS",
     "Single-SPA",
   ],
-  architecture: ["Component-Based", "Object-Oriented", "Micro-Frontend"],
-  location: ["Cairo", "Dubai"],
+  architectures: ["Component-Based", "Object-Oriented", "Micro-Frontend"],
+  locations: ["Cairo", "Dubai"],
   hobbies: [
     { name: "Photography", url: "https://500px.com/p/hamedfarag" },
     {

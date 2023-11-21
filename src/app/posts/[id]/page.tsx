@@ -41,8 +41,19 @@ export default async function PostPage({ params }: Props) {
 
   const { htmlContent, postData, headings } = post;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    name: postData.data.title,
+    description: postData.data.description,
+  };
+
   return (
     <section>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="text-center">
         <small>{formatDate(postData.data.date)}</small>
         <h1>{postData.data.title}</h1>
