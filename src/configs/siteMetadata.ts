@@ -82,4 +82,26 @@ function generatePostMetadata(post: IPost): Metadata {
   };
 }
 
-export { siteMetadata, generateSiteMetadata, generatePostMetadata };
+function generatePostJSONLD(post: IPost) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: new Date(post.date).toISOString(),
+    author: [
+      {
+        "@type": "Person",
+        name: siteMetadata.author,
+        url: `${siteMetadata.siteUrl}/posts/${post.id}`,
+      },
+    ],
+  };
+}
+
+export {
+  siteMetadata,
+  generateSiteMetadata,
+  generatePostMetadata,
+  generatePostJSONLD,
+};

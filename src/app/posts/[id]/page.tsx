@@ -8,10 +8,14 @@ import { Separator } from "@components/ui/Separator";
 import { TOC } from "@components/TOC";
 import { PostMetadata } from "@components/PostMetadata";
 
+import { IPost } from "@interfaces/post";
 import { getPostsById, getPosts, getPostContentById } from "@services/post";
 
 import { formatDate } from "@lib/utils/date";
-import { generatePostMetadata } from "@configs/siteMetadata";
+import {
+  generatePostMetadata,
+  generatePostJSONLD,
+} from "@configs/siteMetadata";
 
 type Props = {
   params: { id: string };
@@ -41,18 +45,13 @@ export default async function PostPage({ params }: Props) {
 
   const { htmlContent, postData, headings } = post;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    name: postData.data.title,
-    description: postData.data.description,
-  };
-
   return (
     <section>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generatePostJSONLD(postData.data as IPost)),
+        }}
       />
       <section className="text-center">
         <small>{formatDate(postData.data.date)}</small>
