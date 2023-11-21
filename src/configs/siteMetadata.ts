@@ -9,7 +9,7 @@ const siteMetadata = {
   headerTitle: "HF",
   description: "Hamed Farag's Personal Technical Space",
   language: "en-us",
-  siteUrl: "https://hamedfarag.dev",
+  siteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || "",
   siteLogo: "/hg_logo.png",
   socialBanner: "/social-banner.png",
   siteRepo: "https://github.com/hamed-farag/hamed-farag",

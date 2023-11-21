@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.0.4",
@@ -23,6 +24,7 @@
     "kbar": "0.1.0-beta.44",
     "mdast-util-to-string": "^4.0.0",
     "next": "14.0.2",
+    "next-sitemap": "^4.2.3",
     "next-themes": "^0.2.1",
     "react": "^18",
     "react-dom": "^18",
