@@ -1,7 +1,6 @@
 import fs from "fs";
 import matter from "gray-matter";
 
-import { remark } from "remark";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
@@ -66,12 +65,9 @@ export async function getPostContentById(id: string) {
     const postContent = fs.readFileSync(postFilePath[0], "utf-8");
     const postResult = matter(postContent);
 
-    const headingsContent = await remark()
-      .use(headingTree)
-      .process(postResult.content);
-
     const htmlContent = await unified()
       .use(remarkParse)
+      .use(headingTree)
       .use(remarkRehype)
       .use(rehypeHighlight)
       .use(rehypeFormat)
@@ -81,7 +77,7 @@ export async function getPostContentById(id: string) {
     return {
       postData: postResult,
       htmlContent: htmlContent,
-      headings: headingsContent.data.headings,
+      headings: htmlContent.data.headings,
     };
   }
 
