@@ -1,0 +1,85 @@
+---
+id: frontend-arch-p5
+title: Frontend Architecture - The Architecture (Part. 5)
+date: "09-11-2023"
+description: The Frontend Architecture Series
+tags: ["frontend", "architecture", "tutorial", "essentials"]
+---
+
+## 3. Constraints
+
+Software is a part of our life, and our life is a part of this world, and this world has constraints, For example, human can not fly like Superman, and that is why software application also faces some constraints, These constraints can drive shape and influence the architecture of a software system and that is why there is not a standard or guidelines for each type of software, like if you are planning to develop a finance application, you have to apply standard called (The Only Guidelines of how to implement and deliver a finance software applications), based on the constraints and what we are facing per environment we have to take different decisions based on the situation.
+
+We have different constraints in shape and size, let's take a look at them.
+
+### Time to deliver, Scope, and Budget constraints
+
+**Time and budget** are probably the constraints that most software developers are familiar with, and most of the time we usually ask about when to deliver this feature and whether can we buy this library or that framework or not
+
+> I have a funny story about a unique situation. I was once on a team called "the midnight team." To understand how we got there, let's go back a bit.
+> In one of my past projects, our project manager made a deal with a client. They agreed that our company would finish the project six months after we started it, which happened during a meeting between our project manager and the client's team. When our project manager came back to our company, they told our bosses that we got the project, but there was a small problem: we didn't have a team ready!
+> So, our bosses had to act fast. They gathered some developers from different parts of the company to create a team, which we called "the midnight team." These developers worked on the project after their normal work hours. No matter what challenges we faced or how late we worked, we were determined to finish the project in six months. Surprisingly, we did it, but we all felt a bit crazy by the end!
+
+For the **Scope constraint**, usually, the scope is defined during the discovery phase where the business analyst extracts all the business goals and requirements and learns about the business processes to determine the best functionality for solving a particular issue for both the business and its customer, this for the service projects (custom solution for a client), and for the product projects at least we have a list of features we need to implement and we can prioritize them by adding some tags like MVP, must-have, nice-to-have and so on, and then create a pipeline and after that we can start the sprints and etc.
+Of course, as the development process goes, and business goals change, the scope can change as well. However, if you have a manager who lacks maturity or doesn't have a technical background (or both), they might alter the project based on market or client demands without considering the original deadline. I've worked with some managers like this. They modify the scope but still expect us to deliver by the same deadline. They often abuse Agile methods to the extreme. In the end, upper management is wondering why the team couldn't meet the agreed-upon deadline!
+
+The **Budget constraints** may affect some aspects, One of them, we don't have a budget to buy a library or a framework that will accelerate the development process, we don't have a good budget for hiring good developers, we have only some local servers for deployments and also for testing the software application, and later on will deploy on the cloud before the delivery date!.
+
+### Technology constraints
+
+- I strongly dislike React! We should go with Angular instead. One of our clients insisted on this, and another client completely avoided open-source libraries with community support. They wanted us to use commercial libraries and software so we could get formal support in case of issues.
+  Additionally, some organizations have specific lists of approved technologies for building software. They do this for various reasons, like reducing the variety of technologies they need to manage, maintain, operate, and purchase licenses for.
+
+- **Integrating with some existing systems**
+
+> In the past, I worked on a product mainly designed for large organizations. One crucial aspect our clients were concerned about was how well our product could work with their existing systems, such as HR systems and knowledge base systems, etc. To address this vital requirement, we began modifying our product. We exposed certain APIs and developed a UI framework that allowed external teams to create custom widgets and pages.
+
+- **Target deployment platform**
+
+When it comes to Cloud versus On-premises, imagine this scenario: You're working on a frontend solution, and naturally, you're using some third-party libraries hosted on Content Delivery Networks (CDNs). Additionally, you're relying on an external service to get some information, like a weather forecasting service or a currency rate service.
+Now, here's the plot twist: One of your clients - and this is a real one with some huge government entities - has a strong distrust for cloud services. And they insist that you deploy this software on servers located within their own network (On-premises).
+
+> I faced this situation 3 times with 3 different products. Clients had their own internal network and one of them had his own cloud without internet access!, except for critical software and operating system updates. This posed several challenges.
+> For example, how to update your deployed software application periodically. Is it by using VPN access or by using a flash drive? Another challenge arises when dealing with third-party libraries - you have to download them separately and include them in your solution.
+> For the external services, we have two options, deprecate these features or make an exceptional policy through the firewall to enable access to them.
+
+- **Fear from the Unknown**
+
+Some organizations and even some people, and they are a lot, fear of latest technologies, libraries, or frameworks, The comfort zone here is controlling the situation, and fear of the unknown is the engine, they are used to working with certain technologies and frameworks and they don't want to take the risk for trying new things even if these things will make their life easier.
+
+> I remember when I began my career as a frontend engineer and first started working with React. This was back in 2016, and I was employed at a software company with nearly 300 developers. Interestingly, my team mate and I were the only ones using React, while the entire company primarily used Microsoft Technologies, Angular, and a few teams were working with Java technologies. We sort of felt like we were outcasting people.
+> Also, in 2013, I had some experience with a UI library called knockout.js. I recommended it to my team leader at the time, especially since we were creating a Proof of Concept (POC) for one of our clients. The POC involved a Mobile Web App, a listing, and two forms. My team leader, however, insisted on using asp.net web forms to build this POC, while I created my part, the page, with knockout.js. It was quite an unusual experience
+
+- **Internal intellectual property**
+
+When you need to find a library or framework to solve some problem you are facing, there is a high probability there is an open-source or commercial product out there that suits your needs. But this is not good enough for some people though, and it is not uncommon to find organizations with their own internal libraries, frameworks, and code generators that you must use, despite whether they actually work properly. Back in 2012, I used an internal code generator tool - used internally in my previous organization and built by senior developers and was like CodeSmith Generator - for generating some pages with CRUD operations from UI to the database, but I remember that the UI option was not working fine, and you need to alter some columns in the database, some copy/paste here and there.
+
+### People constraints
+
+One of the main constraint from my point of view is your capability of your work mate. For Example
+
+- How large is your development team?
+- What skills do they have?
+- How quickly can you scale your development team if needed?
+- Are you able to provide training, consulting, and specialists if needed?
+- If you are handing over your software after delivery, will the supporting team have the same skills as your development team or you will handle both sides?
+- Is there a mentor or a senior engineer you can consult in case you are using a new technology?
+
+There will be an overhead if you ask a React team to build an Angular project, so you need to take people into account whenever you are architecting a frontend project.
+
+### Organizational constraints
+
+There are sometimes other constraints that you will need to be aware of, including:
+
+- Is the software system part of a strategic implementation? The answer to this question can either add or remove constraints.
+- Organizational politics can sometimes prevent you from implementing the solution that you really want to.
+
+> I have something funny here to talk about, One of the products I was working on, was very successful, and we already have five clients using it. It was based on React and .Net Technologies. Due to some politics and top-management decisions, we should be a partner with a very well-known Enterprise company that developing an enterprise platform, The top management decided to close our successful product, terminated all contracts with the five clients, and re-built our product again from scratch based on this Enterprise platform and they offered to the five clients to upgrade to the new product but they should pay 20x (literally it was 20x without exaggeration), and of course, all clients rejected this "upgrade"!.
+
+### Final Word
+
+Generally, constraints usually seem "bad", but they are often imposed for a good reason. For example, large organizations want to limit the number of tools and technologies because they don't want to support and maintain all these technologies.
+
+You should know most of the constraints as early as you can because these constraints will impact your architecture directly and will make you take significant decisions. Also, the constraints are like the non-functional, some constraints are more important than others.
+
+In the end, constraints are usually obstacles that you need to work around but sometimes you can trade off against one other.

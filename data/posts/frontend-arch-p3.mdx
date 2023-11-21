@@ -1,0 +1,203 @@
+---
+id: frontend-arch-p3
+title: Frontend Architecture - The Architecture (Part. 3)
+date: "08-19-2023"
+description: The Frontend Architecture Series
+tags: ["frontend", "architecture", "tutorial", "essentials"]
+---
+
+## 2. Architectural Drivers
+
+Once we know what Frontend Architecture means, we must consider what we need when designing a frontend project. No matter the approach we take, whether it's traditional and planned or more flexible and adaptable, certain common factors influence the final Frontend Architecture. These factors guide how we structure and build the frontend part of a software project.
+
+Architectural drivers are important things that we must consider when designing a software system (Significant decisions). They have a big impact on how the software will be built. These drivers help shape and guide the design of the software's architecture. They basically tell us what we need to do and why we need to do it. When we create the software's architecture, we make sure it meets these important drivers. By doing that, we ensure that the software will work well and meet the goals we have set for it.
+
+### 1. Functional Requirements
+
+The technical functions that represent the main product features. These functions describe how the system behaves and what it should do.
+
+> For Example, we have web-based to-do list application as the product, and we'll focus on the frontend technical functions that represent its main features:
+
+1. **User Interface (UI)**:
+   The frontend should provide a user-friendly and visually appealing interface for users to interact with the to-do list application.
+   It should have a clear layout with sections for displaying tasks, adding new tasks, marking tasks as completed, and deleting tasks.
+2. **Task Display**:
+   The frontend should fetch and display the list of tasks from the backend server or local storage.
+   Each task should show relevant details such as title, due date, and status (completed or pending).
+3. **Add Task**:
+   The frontend should allow users to enter new tasks with titles and optional due dates.
+   It should validate the input and prevent users from adding empty tasks.
+4. **Task Completion**:
+   The frontend should provide a way for users to mark tasks as completed.
+   Completed tasks should be visually distinguished from pending tasks.
+5. **Task Deletion**:
+   The frontend should enable users to delete tasks they no longer need.
+   It should prompt users for confirmation before permanently removing a task.
+6. **Task Editing**:
+   The frontend could allow users to edit task details, such as updating the title or due date.
+   It should provide a smooth and intuitive editing experience.
+7. **Task Filtering and Sorting**:
+   The frontend could include options for users to filter tasks based on completion status (completed/pending) or due date.
+   It could also allow users to sort tasks based on different criteria, such as alphabetical order or due date.
+8. **Error Handling**:
+   The frontend should handle errors gracefully and display meaningful error messages if something goes wrong, such as failed server requests or validation errors.
+9. **Responsive Design**:
+   The frontend should be designed to work well on different devices and screen sizes, such as desktops, tablets, and mobile phones.
+
+### 2. Non-Functional Requirements (Quality Attributes)
+
+Non-Functional Requirements (NFRs), also known as Quality Attributes or quality concerns, are a set of criteria that describe how a software system should behave and perform rather than specifying specific functionalities or features. While functional requirements deal with what the system should do, non-functional requirements address how well it should do it. These requirements are essential for defining the overall quality, usability, and performance of a software application. NFRs help ensure that the system meets the desired levels of reliability, scalability, maintainability, security, and other crucial aspects.
+
+Here are some common Non-Functional Requirements as follow:
+
+#### 1. Performance
+
+Performance is about loading something fast, without lagging and without much time to load.
+We have two main thing we can talk about within this topic, **Rendering the Web Page** and **load data and files** (assets).
+
+##### Web Page Rendering
+
+If you are concerned with an application that targets low-performance machines, you should take care of rendering your website at a minimum cost.
+The Key here is the** Critical Rendering Path (CRP)**. CRP cares about converting the HTML, CSS, and JavaScript into pixels on the screen. And by optimizing the critical render path we can improve render performance.
+
+##### Load Data and Files
+
+Back again to the Performance definition - about loading something fast - usually we are talking about the response time or the latency.
+
+- Response Time: Response time refers to the time it takes for a system to respond to a user's action or request.
+- Latency: Latency refers to the delay or time lag between sending a request and receiving a response.
+
+> Lets explain it in simple example, Imagine there are 2 people who want to print something using a printer. The printer takes 10 seconds to print each paper.
+> The first person's paper gets printed right away, so he wait for 10 seconds. he don't have to wait before their paper starts printing.
+> The second person waits for 10 seconds for his turn and then his paper takes 10 seconds to print. So, they wait a total of 20 seconds (10 seconds for waiting and 10 seconds for printing).
+> So, We conclude that that Response Time = Latency + Process Time.
+
+Based on the above explanation we have a lot of areas we can enhance and optimize as follow
+
+1. **Optimize Images**: Use compressed and appropriately sized images to reduce load times without sacrificing quality. Consider using responsive images and modern formats like WebP.
+2. **Minimize HTTP Requests**: Reduce the number of external resources (CSS, JavaScript, fonts) to minimize the number of HTTP requests the browser needs to make.
+3. **Use CSS and JavaScript Minification**: Minify your CSS and JavaScript files to remove unnecessary whitespace and comments, reducing their file size and improving loading times.
+4. **Leverage Browser Caching**: Set proper cache headers for static assets to enable browser caching, allowing returning visitors to load the page faster.
+5. **Prioritize Above-the-Fold Content**: Load critical above-the-fold content first to provide users with a fast initial rendering experience while other assets load in the background.
+6. **Lazy Loading**: Implement lazy loading for images and other non-essential resources. This defers loading until the user scrolls to the content, saving bandwidth and improving performance.
+7. **Reduce Render-Blocking Resources**: Minimize the use of render-blocking CSS and JavaScript that can delay the rendering of the page content.
+8. **Use Content Delivery Networks (CDNs)**: Distribute assets across geographically distributed CDNs to reduce latency and ensure faster delivery to users around the world.
+9. **Server-Side Rendering (SSR) or Static Site Generation (SSG)**: Consider implementing SSR or SSG techniques for faster initial rendering and improved SEO.
+10. **Performance Audits and Monitoring**: Regularly perform performance audits using tools like Lighthouse or PageSpeed Insights to identify bottlenecks and monitor performance over time.
+11. **Progressive Web Apps (PWAs)**: Explore building PWAs to provide an app-like experience, including offline access and fast loading even in low network conditions.
+12. **Reduce Third-Party Dependencies**: Minimize the number of third-party scripts and services, as they can introduce additional HTTP requests and potential performance issues. 13.** Optimize Fonts**: Use web-safe fonts or consider loading fonts asynchronously to prevent font rendering delays.
+
+#### 2. Extensibility
+
+Extensibility refers to the ability of the codebase to be easily extended and modified without causing significant disruptions or requiring major rework. There are some principles regarding the extensibility as follows
+
+1. **Modular Architecture**: Design the frontend using modular components that can be added, removed, or replaced without affecting other parts of the application. This allows for easy integration of new features or changes.
+2. **Use of Design Patterns**: Implement design patterns such as the Module Pattern or Component-Based Architecture (like React components) that promote code reusability and clear separation of concerns. This makes it easier to introduce new functionality without impacting existing parts.
+3. **Well-Structured Code**: Write clean, well-documented, and maintainable code that adheres to best practices and coding standards. This helps other developers (or your future self) to understand and extend the codebase effectively.
+4. **Plugin System**: Consider implementing a plugin system that allows third-party developers to create and integrate extensions into your application. This can be especially useful if you're developing web applications that might need customizable features for different clients.
+5. **APIs and Interfaces**: Define clear APIs and interfaces for different modules or components. This helps establish a contract between different parts of the application and ensures that changes can be made without breaking existing functionality.
+6. **Testing and Testability**: Maintain a strong suite of automated tests that cover different aspects of the application. This ensures that new extensions or modifications don't introduce regressions and can be confidently integrated.
+7. **Version Control and Collaboration**: Use version control systems (e.g., Git) effectively to manage changes and collaborate with other team members. Proper branching and merging strategies can help keep the codebase extensible while managing feature development.
+8. **Documentation**: Document your codebase, including its architecture, design decisions, and guidelines for extending it. This helps new developers quickly understand how to work within the project's framework.
+
+#### 3. Scalability
+
+Scalability refers to the ability of the application's user interface to handle increased load and demand without compromising performance. Scalability ensures that your application can accommodate growing user bases and increased traffic while maintaining responsiveness and user experience.
+
+When designing for scalability, you might consider:
+
+1. **Performance Optimization**: Implement techniques such as lazy loading, code splitting, and caching to ensure that the application loads quickly and efficiently even as it grows in complexity.
+2. **Responsive Design**: Create layouts that work seamlessly across various screen sizes and devices to cater to a diverse user base.
+3. **Browser Compatibility**: Test your application across various browsers to ensure consistent performance and functionality.
+4. **Scalable Architecture**: Choose a modular and maintainable architecture (like component-based architecture in React) that allows for easy addition of new features and components.
+5. **Load Balancing**: If your project is part of a larger application ecosystem, ensure that the load is distributed evenly among servers to prevent bottlenecks.
+6. **Caching and CDN**: Utilize Content Delivery Networks (CDNs) to distribute static assets and cached content closer to users, reducing server load and improving performance.
+7. **Horizontal Scaling**: Design your application so that you can scale out horizontally by adding more frontend servers as the user base grows.
+8. **Optimized Assets**: Optimize images, fonts, and other assets to minimize loading times and bandwidth usage.
+9. **Real-time Updates**: If your application requires real-time updates (e.g., social media feeds), consider implementing efficient techniques like WebSocket connections.
+10. **Monitoring and Analytics**: Set up monitoring tools to track performance metrics, identify bottlenecks, and proactively address issues as the application scales.
+
+#### 4. Availability
+
+Availability is about the degree to which your software is operational and available to service the users. Maybe it is an infrastructure concern to publish or deploy the frontend application on a stable infrastructure but still, we have some concerns we should care about, for example:
+
+1. **Fault Tolerance**: Designing the frontend to gracefully handle errors, crashes, and other issues without causing a complete disruption to users' experience.
+2. **Caching**: Utilizing caching mechanisms to store and deliver frequently requested content, reducing the load on the backend and improving response times.
+3. **Monitoring and Alerting**: Implementing monitoring tools that track the health and performance of the frontend application and provide alerts to administrators in case of anomalies or outages.
+4. **Use Content Delivery Networks (CDNs)**: Distribute assets across geographically distributed CDNs to reduce latency and ensure faster delivery to users around the world.
+5. **Downtime Maintenance**: Planning and communicating scheduled maintenance windows to minimize the impact on users while performing necessary updates or maintenance tasks.
+6. **User Feedback and Support**: Providing channels for users to report availability issues and ensuring a responsive support system to address any concerns promptly.
+
+#### 5. Flexibility
+
+Flexibility is to enable your application to perform more than one task or perform that single task in a number of different ways.
+
+For Example, enable your application the ability for non-techincal people to modify the business rules used within the software.
+
+> For Example, Imagine you're developing a task management application using React. Users can create tasks, set deadlines, and assign priority levels. Flexibility in this context could involve allowing users to customize their task management experience in different ways:
+> In your application, you can offer users the flexibility to sort their tasks in multiple ways to suit their preferences. Here's how you could implement this:
+
+1. Due Date Sorting: Users can choose to sort tasks based on their due dates. This would help users prioritize tasks that are approaching their deadlines.
+2. Priority Sorting: Users can opt to sort tasks by priority, displaying the most critical tasks at the top of their list.
+3. Creation Date Sorting: Users can also sort tasks based on when they were created. This can be useful for reviewing recently added tasks.
+4. Custom Sorting: Provide an option for users to manually reorder their tasks by dragging and dropping them. This way, users can create their own customized task order.
+
+#### 6. Monitoring
+
+Monitoring is important as it concerns how your user interacts and accesses your entire application. For example, if your users can't make use of your website's features because of a UI error, then your application has failed to fulfill its purpose regardless of how performant it is. We can achieve that by integrating the application with platform-specific monitoring capabilities.
+We have several platforms we can integrate with, like Sentry, one of the most used tools that allows you to report rendering errors by wrapping your component tree within the Sentry error-reporting service.
+
+#### 7. Security
+
+Security is the degree to which the software protects information and data so that people, other products, or systems have data access appropriate to their types and levels of authorization.
+
+Here are some ways you can apply security measures:
+
+1. **Input Validation and Sanitization**: Ensure that user inputs are properly validated and sanitized to prevent common security vulnerabilities like Cross-Site Scripting (XSS) attacks. Implement client-side validation and use frameworks or libraries that offer built-in protection against such attacks.
+2. **Data Encryption**: When transmitting sensitive data between the client and the server, use encryption protocols like HTTPS to ensure that the data remains confidential and cannot be easily intercepted or tampered with.
+3. **Secure Coding Practices**: Follow secure coding practices, such as avoiding hardcoded secrets in your code, escaping user-generated content, and using libraries with a good security track record.
+4. **Regular Updates and Patching**: Keep your frontend libraries and frameworks up to date with the latest security patches. Vulnerabilities can be discovered over time, so staying current is crucial.
+5. **Secure Dependency Management**: Be cautious when including third-party dependencies in your project. Only use well-maintained and trusted libraries, and regularly audit them for vulnerabilities.
+6. **Error Handling**: Avoid exposing sensitive information in error messages that could potentially aid attackers. Provide generic error messages to users and log detailed error information securely on the server.
+7. **Secure Design Reviews**: Conduct regular security design reviews to identify potential vulnerabilities in your frontend architecture and codebase.
+
+#### 8. Maintainability
+
+Maintainability is a crucial aspect and it is hard to quantify, but we can guarantee somehow the maintainability by following some strategies:
+
+1. **Code Structure and Organization**:
+   - Follow a modular and component-based architecture, like React components. Divide your code into smaller, reusable components with clear responsibilities.
+   - Use meaningful names for files, folders, and components. This makes it easier for both you and other developers to understand the codebase.
+2. **Consistent Coding Standards**:
+   - Establish and enforce coding standards and guidelines for the project. This ensures a consistent coding style throughout the codebase, making it easier for developers to read and maintain.
+3. **Documentation**:
+   - Write thorough and up-to-date documentation for your codebase. This includes high-level architecture diagrams, component documentation, and inline comments.
+   - Document the purpose of each component, its props, and any expected behaviors. This helps new developers understand and modify the codebase more effectively.
+4. **Version Control**:
+   - Utilize version control systems like Git to track changes and collaborate with other developers. Follow a branching strategy (like Gitflow) to manage feature development, bug fixes, and releases.
+5. **Testing and Test Automation**:
+   - Implement a comprehensive testing strategy using tools like Jest and React Testing Library. Write unit tests, integration tests, and end-to-end tests to catch bugs early and prevent regressions.
+   - Set up automated testing pipelines to run tests on each code commit and before deploying to production.
+6. **Code Reviews**:
+   - Conduct regular code reviews to ensure code quality and maintainability. Code reviews provide opportunities to catch issues, share knowledge, and maintain consistent coding standards.
+7. **Refactoring**:
+   - Regularly revisit your codebase to identify areas that need refactoring. Refactoring helps eliminate technical debt, improve performance, and enhance maintainability.
+8. **Dependency Management**:
+   - Keep track of third-party libraries and dependencies used in the project. Regularly update them to the latest versions to benefit from bug fixes, security patches, and performance improvements.
+9. **Performance Optimization**:
+   - Optimize the performance of your frontend application. This includes minimizing the use of costly operations, optimizing network requests, and handling memory efficiently.
+10. **Error Handling and Logging**:
+    - Implement robust error handling mechanisms to gracefully handle unexpected situations. Use logging to capture errors and debugging information, which aids in diagnosing issues.
+11. **Design Patterns**:
+    - Familiarize yourself with design patterns relevant to frontend development, like MVC, MVVM, or Flux. These patterns can provide a structured approach to building maintainable applications.
+12. **Continuous Learning**:
+    - Stay updated with the latest frontend technologies, best practices, and tools. Continuous learning helps you adapt to changes and incorporate new techniques into your projects.
+
+#### 9. i18n & l10n
+
+How can you make your application work with different languages, including those that are written from right to left? This is called internationalization (i18n). And what about localization (l10n)? Localization means showing things like numbers, money, and dates in ways that make sense to the user's culture. When you put these together, it's called "Globalization".
+
+#### 10. Accessibility
+
+Accessibility usually refers to things like the W3C accessibility standards, which refer to designing and building digital products, such as websites and applications, in a way that ensures they can be used and navigated by people with disabilities.
+It's about creating a user experience that is inclusive and accommodating to individuals who may have visual, auditory, motor, or cognitive impairments. This involves using proper HTML semantics, providing alternative text for images, ensuring keyboard navigation, and incorporating ARIA roles and attributes to make your web applications usable by a diverse range of users, including those who rely on assistive technologies. By making your frontend projects accessible, you contribute to a more inclusive online environment and enhance the user experience for everyone.

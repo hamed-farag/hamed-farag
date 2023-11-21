@@ -1,0 +1,56 @@
+---
+id: frontend-arch-p6
+title: Frontend Architecture - The Architecture (Part. 6)
+date: "09-23-2023"
+description: The Frontend Architecture Series
+tags: ["frontend", "architecture", "tutorial", "essentials"]
+---
+
+## 4. Principles
+
+Okay, each one of us wants to establish a standard or utilize a pre-existing one to ensure consistency in the frontend solution. This standard should also facilitate a quick onboarding process for new team members, enabling them to understand it quickly.
+
+Creating standards and principles for your development team is a crucial step in ensuring consistency and efficiency in your projects. We have two pillars, development, and architecture, let's explore how we can build standards around each of them:
+
+### Development Principles
+
+The principle that many frontend engineers instantly think of relates to the way in which software should be developed
+
+- **Coding Guidelines**: Establish clear coding conventions and style guides for your team. This includes naming conventions, code formatting, and commenting standards. Tools like ESLint and Prettier can help enforce these guidelines.
+- **Style Guidelines**: The method by which your team approaches styling can encompass CSS, involve a pre-processor language, incorporate CSS-in-JS, or make use of a utility-first CSS library. Depending on your choice, it is imperative to carefully select the appropriate methodology, design an effective file structure, and determine whether to utilize existing reusable styles or craft a customized solution.
+- **Document your work**: How to document your work to communicate it to your teammates. You will create reusable components. helpers, utils, write comments for the complex parts, etc. All these parts you should care about documenting them in a proper way using basic documentation files and comments or using a powerful documentation tool.
+- **Logging and Monitoring**: How will you monitor your application to measure performance and to monitor for production bugs?
+- **Testing**: Define testing standards, including unit tests, integration tests, and end-to-end tests. Decide on testing frameworks and coverage targets.
+- **Version Control**: Define a version control strategy using Git. Set rules for branching, committing, and merging code. Consider using a branching model like Gitflow.
+- **Code Reviews**: Implement a process for peer code reviews to catch issues early and maintain code quality. Specify who should review the code and the criteria for approval.
+- **JS & UI Frameworks**: Which JavaScrip Framework you will use in your next project, would you like to use a ready-made UI framework, you have options and you have to choose one.
+- **CI/CD**: Establish automated build and deployment pipelines to ensure code is consistently built, tested, and deployed.
+- **Responsiveness**: Your application will be mobile-first or desktop-first? it will be better if you know this information from day one.
+- **Accessibility**: You should care about Semantic HTML and ARIA attributes from day one.
+- **CSR, SSR, SSG**: Considering the specific requirements of your project, you should decide whether to opt for Client-Side Rendering (CSR) or if there is a need to prioritize Search Engine Optimization (SEO), in which case Server-Side Rendering (SSR) or Static Site Generation (SSG) would be more suitable.
+- **Multiple Languages**: Should your project support more than one language? Make sure you do not write static
+  content directly into the code or into the HTML.
+- **Design System**: Do you have a centralized location for reusable components, guidelines, and well-defined standards? Having this is crucial for constructing a clean application.
+- **APIs**: One of the critical aspects to consider is establishing a robust foundation for consuming backend APIs in a standardized and efficient manner.
+- **State Management**: Do we truly need to adopt a state management library and use it in general, or is it necessary only to use it for sharing specific pieces of data? Determining whether to use it or not is a crucial decision.
+- **Default Configuration**: It's advisable to centralize all default and shared values and configurations; otherwise, it can become chaotic.
+
+### Architecture Principles
+
+There are also some principles that relate to how the frontend should be structured. For example
+
+- **Main Architecture (Micro-frontend vs. Monolithic)**: When comparing monolithic frontends and micro-frontends, there are several factors to consider. Scalability and modularity are critical for large projects, and micro-frontends are better suited for these types of projects. However, monolithic front ends are more uncomplicated and more straightforward to develop and maintain.
+- **MVC vs. CBA**: When React was published to the public in 2013, it came with the CBA (Component-Based Architecture), CBA is an approach where you build an application by creating self-contained and reusable components, with each component encapsulating its logic and UI. MVC (Model-View-Controller) is an architectural pattern where you separate an application into three main components: Model (data and logic), View (user interface), and Controller (handles user input and updates Model and View).
+  You can go with one of them based on your chosen framework or even you can combine them.
+- **Repo Type: Polyrepo vs. Monorepo**: Polyrepo architecture is a software development approach in which each project or component is housed in its own individual repository. This stands in contrast to Monorepo architecture, where all the source code for a project or a group of related projects resides within a single repository. Your choice between these approaches should be determined by factors such as the size of your frontend project, your business requirements, team size, deployment processes, and the need to share code. Each approach has its own set of advantages and disadvantages.
+- **Layering Strategy**: One of the most popular architectural patterns worth discussing is the Three-tier architecture. This architecture is a design pattern that separates applications into UI layers (client layers), application layers, and database layers. Each layer has a specific responsibility and communicates with the other layers through well-defined interfaces. This is the definition, but usually, I tweak this pattern and use it in a little different way:
+- **Database Layer (Data Layer)**: This layer is responsible for making API calls using promise-based HTTP Clients like Axios or Fetch. Regardless of the approach you choose, this is the sole location for API calls.
+- **Application Layer (Service Layer)**: After creating the function responsible for fetching data in the Data Layer, you should invoke this function in the Service Layer to either receive or send data. In this layer, you may execute business logic, modify the data's structure before sending or after receiving it using Transformer functions.
+- **Transformer Layer (Normalization or Mapping Layer)**: This is an optional layer that contains functions responsible for altering the data's structure. For example, you can use this layer to change date formats, adjust property names in received objects, or reshape the data you intend to send to the data layer.
+- **UI Layer**: This layer typically comprises UI components, containers, pages, and layouts. Additionally, it should interact with the Service Layer solely to retrieve data for binding and rendering purposes.
+
+![Image description](/posts/frontend-arch-p6/layers.png)
+
+- **Placement of business logic**: As mentioned above, we should place the business logic in the Service layer or, any other place, but with one condition, to be a centralized place and not to be a part of something else (Part of a Component for example).
+- **Reusable Component (Dump Component)**: Use ready-made components to build your application or build these components from scratch based on the need and to be well-documented and not have a side-effect.
+- **Feature-First vs. Type-First vs. Container(Page)-First File Structure**: How you can organize your file, there are several approaches for organizing your files inside your frontend project. Choose one or combine more than one, organize your file, and stick with it.

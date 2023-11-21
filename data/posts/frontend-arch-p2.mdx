@@ -1,0 +1,123 @@
+---
+id: frontend-arch-p2
+title: Frontend Architecture - The Architecture (Part. 2)
+date: "08-17-2023"
+description: The Frontend Architecture Series
+tags: ["frontend", "architecture", "tutorial", "essentials"]
+---
+
+## Architecture Vs Design
+
+### What is the difference between Architecture and Design?
+
+Most people think that the two words are the same or lead to the same thing.
+But there is a trick here. When I share a problem with different developers, they think differently and each one of them has a valid solution for my problem, and this is normal. Each one has his own experience and based on that; he offers a solution.
+
+[**Grady Booch**](https://en.wikipedia.org/wiki/Grady_Booch) says,
+
+> All architecture is design but not all design is architecture.
+
+And this makes sense because creating a solution and "architecting" is essentially a design exercise. It is about filtering the options that you have and making decisions.
+
+And also, regarding this point, **Grady Booch** says,
+
+> Architecture represents the significant design decisions that shape a system, where significance is measured by the cost of change.
+
+What is that mean?
+The Significant decisions are "architecture" and anything else is "design". I know it is still not clear enough the distinction between "architecture" and the "design", but we have some examples that may help us to understand the difference.
+
+- **Frameworks **and **languages** (here it will be JS or TS), are "architectural" decision.
+- Choosing the suitable **File Structure** is "architectural" not just "design" decision.
+- Http Manager - the centralize block that helps us to consume APIs - is "design" decision not "architectural".
+- Styling is "architectural" decision, CSS, SASS, LESS, CSS-in-JS or CSS utility library.
+- **Micro-frontend** or **Monolith** Solution is "architectural" decision.
+- Documentation tool is "architectural" decision.
+- Passing Data through layers is "architectural" decision.
+
+I think you have now an image of how to differentiate the "architectural" or "design" decision when you have to take a decision to solve a problem.
+But in the end, we can say that Architectural decisions are those that you cannot reverse without some degree of effort, in other words, they are the things that you would find hard to refactor in an afternoon.
+
+### Why Software Architecture important in general?
+
+Let's ask some questions and based on you answer you will know,
+
+- Does your application have a well-defined structure (File Structure, Design Pattern, etc.)?
+- Is everybody in your team implementing features in a consistent way?
+- Is there a consistent level of quality across the codebase?
+- Do your team members share the same vision for how the application will be built?
+- Does everybody on your team have the necessary amount of technical guidance?
+- Is there an appropriate amount of technical guidance and leadership?
+
+If your answer is **no** for any point, and already delivered some applications, I think there will be a re-writing process that will be happening or already happening. Or it might be you already delivered an application for a client, and you will not support it again or not doing any changes in the future, so it is fine to not care about some points already mentioned above.
+
+The technical guidance or leadership is very important at any level (code level and above it) because most software projects and products start with the best of intentions, and it is easy for them to veer off the track.
+
+Personally, I worked on some projects without anyone caring about the architecture, just someone caring about it in the early phase of the project, adding the structure and the technology, then disappearing. Here it is, some of the problems I list in points.
+
+- File Structure not predictable.
+- Many methods to consume APIs (Axios, fetch).
+- Heavy usage of redux for every single component.
+- A cocktail of CSS and LESS styles.
+- Two different libraries for handling dates and times.
+- "Any" as a type is used everywhere.
+- Sensitive keys pushed to the repository (.env file).
+- Different components with the same logic and functionalities.
+- Zero Documentation.
+- Very huge files (some files reached +1000 lines of code).
+- Unbelievable Git flow, deploying code into an environment then creating PR with these changes!
+
+So, without technical leadership, many codebases also end up looking like the stereotypical "big ball of mud" or "spaghetti code". And no one want to work with these codebases.
+
+Most of these problems are relatively easy to solve with the application of some good technical leadership, resulting in a team that therefore understands and thinks about the software architecture and even ask some questions that will affect the project in general. In summary, this can provide:
+
+- A clear vision and roadmap for the team to follow.
+- Technical leadership and better coordination.
+- Encouragement to talk to people in order to ask questions relating to significant decisions, non-functional requirements, constraints, and other cross cutting concerns.
+- Standards and guidelines, leading to a well-structured codebase.
+- A set of firm foundation for the project being built.
+- A structure with which to communicate the solution at different levels of abstraction to different audiences.
+
+> Let's consider the architecture of an e-commerce website as an example for the last previous point. The different levels of abstraction and the audiences they cater to might be:
+
+1.  High-Level Abstraction: For non-technical stakeholders (e.g., business executives, investors):
+
+- The frontend of the e-commerce website is the user interface that customers interact with when browsing and purchasing products.
+- It provides a visually appealing and user-friendly design, creating a positive user experience.
+- The architecture emphasizes how the frontend contributes to increasing customer engagement and conversion rates.
+
+2.  Medium-Level Abstraction: For project managers and design team leads:
+
+- The frontend architecture follows a component-based design approach, where different UI elements are encapsulated into reusable components.
+- It uses popular frontend frameworks like React, Angular, or Vue.js, allowing efficient development and maintenance.
+- The architecture includes details about responsive design principles, ensuring optimal performance on various devices.
+
+3.  Low-Level Abstraction: For frontend developers and technical team members:
+
+- The frontend employs a state management library (e.g., Redux) to manage the application's state and data flow.
+- It uses RESTful APIs to communicate with the backend and fetch product data, user information, and other relevant data.
+- The architecture discusses the implementation of client-side routing to enable smooth navigation between different pages.
+
+4.  Developer Toolkit: For developers with a focus on implementation details:
+
+- The frontend codebase is structured following best practices, such as organizing files by feature or module.
+- It employs build tools like Webpack or Parcel to bundle and optimize the code for production deployment.
+- The architecture highlights the use of testing frameworks (e.g., Jest or Cypress) to ensure code quality and robustness.
+
+### So, what do you think, does every software project need software Architect?
+
+The short answer is "**yes**", Why? because every software team should look at a number of factors in order to assess how much software architecture thinking, a degree of which manifests itself as up-front design, is necessary.
+
+> I have experience working on various frontend projects. However, we didn't have proper technical design or architectural meetings to plan the projects. Instead, we simply used a familiar framework that the team already knew, so we could save time on learning new things and quickly set up the file structure. Unfortunately, this approach led to some challenges. We faced difficulties in communicating with each other about new components introduced by team members. Additionally, we lacked clear guidelines for documentation and a structured process for code reviewing. These important aspects were overlooked, causing some issues along the way.
+> Also, I believe you noticed that, in backend development, where planning and scalability are key, software architects are highly valued. They are invited onto a project long before development begins and they have discussions with clients about architectural needs (functional, non-functional requirements, etc.)
+> Where is the frontend time? We were being asked to do all our work piece by piece, as an afterthought.
+
+There are two approaches to handling up-front design meetings.
+
+1. Too many up-front design meetings with the team trying to answer all of the questions and solve the problems before writing a single line of code.
+2. The Opposite, is too few up-front design meetings.
+
+- From my point of view, we can go with this approach, but for every big problem, we have to set up a meeting with the team members to solve it in a proper way and all team members agree on one solution, also a proper communication way should be setup from day one, so by the time, we can build a solid solution, may it, not the best solution, but at least there is consistency, clear file structure, and not a spaghetti code.
+
+[Dave Thomas](<https://en.wikipedia.org/wiki/David_A._Thomas_(software_developer)>) once said:
+
+> Big design up-front is dump, but doing no design-up-front is even dumber.

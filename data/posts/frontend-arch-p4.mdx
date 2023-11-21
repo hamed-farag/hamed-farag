@@ -1,0 +1,141 @@
+---
+id: frontend-arch-p4
+title: Frontend Architecture - The Architecture (Part. 4)
+date: "08-27-2023"
+description: The Frontend Architecture Series
+tags: ["frontend", "architecture", "tutorial", "essentials"]
+---
+
+## 2. Architectural Drivers (Part 2)
+
+### 2. Non-Functional Requirements (Quality Attributes)
+
+#### 11. Usability
+
+Usability is all about how easy it is for people to use a website or app and get the results they want. Think of it like this: when someone uses a platform, it should work well, be efficient, and make them happy.
+
+For example, let's say you are building a website using React, like a travel blog where you showcase your landscape photography. Usability in this context means that visitors to your website should be able to easily navigate through your posts, see your pictures, and find the information they're looking for without getting frustrated.
+
+Now, the technical side of usability involves making your website accessible to everyone, including those with disabilities. You can do this by using things like assistive technology, which helps people who use screen readers or other tools to access your site. Also, it's important to provide text descriptions for images and any multimedia content you have. This way, even if someone can't see the images, they'll still understand what's going on.
+
+#### 12. Responsiveness
+
+Responsiveness can indeed refer to both aspects in the context of web development.
+
+- Responsive Web Design: It's about making websites that work well on different devices like phones, tablets, and computers. So when you open a website on your phone, it looks good and works smoothly.
+- Quick and Smooth: It also means that when you use a website, like clicking buttons or typing things, it should respond quickly without any delays. Imagine using an app that feels really fast and doesn't make you wait, and so on.
+
+We've already covered ways to make your app run smoothly and perform better in general. Now, let's talk about Responsive Web Design.
+
+Responsive Web Design (RWD) is a web design approach to make web pages render well on all screen sizes and resolutions while ensuring good usability. It is the way to design for a multi-device web.
+
+Around 10 years ago, you might have come across this method while using Facebook on your phone's browser. Back then, web developers used to make a separate website for small screens. These sites usually started with m. or mobile. in the domain. So, as a web developer, you had to take care of two websites - the main one for desktop computers and another for small devices like phones.
+
+Things changed when **Ethan Marcotte** published an article on [Responsive Web Design](https://alistapart.com/article/responsive-web-design/). This article illuminated the entire industry by building upon existing disciplines and concepts. He introduced these principles to guide the creation of websites that could adapt to the user's device size and shape themselves according to the viewport.
+
+Responsive Web Design was not some new or emerging technology, but it just is collection of tools and techniques as follow:
+
+- **Fluid grids**: Use percentage-based widths rather than fixed pixel dimensions.
+- **Flexible images**: image to be 100%-width to fill the container, and the container will adapt it with the viewport.
+- **Media queries**: specify different styles for different viewport sizes.
+
+Before Ethan wrote his article about responsive web design (RWD), the methods he talked about were already present in web browsers for many years. However, Ethan's explanation of RWD made the solution that everyone was urgently seeking very clear and understandable.
+
+#### 13. Compatibility
+
+In this context (Frontend Architecture) we will focus on the Browser Compatibility.
+
+Browser compatibility is the ability of a website or web application to function across different web browsers and operating systems. Moreover, having a cross-browser-compatible website ensures you’re providing a consistent and optimal user experience across different browsers. Users should be able to access and interact with a website or web application regardless of the browser they prefer.
+
+> I remember back when I worked as a .Net developer. I had a client who insisted that their web application had to work perfectly on Internet Explorer 8 and 9. It was quite a tough task. But nowadays, Internet Explorer is no longer used because it couldn't keep up with the latest web standards and caused compatibility issues. Getting rid of it was definitely one of the best decisions in the field of web development.
+
+But now, browser compatibility has become easier to handle in recent years due to several factors:
+
+1. **Standardization**: The development and adoption of web standards by major browser vendors have improved consistency across different browsers. Organizations like the World Wide Web Consortium (W3C) help create and maintain these standards, ensuring that browser behavior aligns more closely.
+
+2. **Modern Browsers**: Modern browsers are built with better compliance to web standards, which reduces the need for complex workarounds or browser-specific code.
+
+3. **Polyfills and Transpilers**: Tools like Babel and polyfills help bridge the gap between older and newer browser versions by enabling the use of new features in older browsers.
+
+4. **Developer Tools**: Modern browsers offer comprehensive developer tools that help identify and fix compatibility issues more efficiently.
+
+5. **Testing Tools**: There are various testing tools available that simulate different browsers and platforms, making it easier to catch compatibility problems during development.
+
+6. **Community Resources**: The web development community actively shares best practices, guides, and solutions for browser compatibility challenges, making it easier for developers to find help when needed.
+
+7. **Component Libraries and Frameworks**: Frameworks like React offer abstractions that help manage browser inconsistencies, enabling developers to focus on building features rather than worrying about compatibility.
+
+8. **Feature Detection**: Developers can use feature detection techniques to determine whether a certain browser supports a specific feature before implementing it, reducing the likelihood of compatibility issues.
+
+#### 14. Testability
+
+Testability refers to how easily developers and others can test the application.
+
+> I've personally encountered codebases where the design didn't prioritize making it easy to test, especially when it comes to React-based components. A lot of developers tend to build these components as one big piece to handle many business needs, instead of breaking them into smaller parts that can be tested more easily. For Example, Creating a Table component that lists data by fetching it from an external resource (API), and also contains a form to add a new item in the table and to be synced with the backend through another API. We can break this puffy component by creating a component for listing, component for the form, and service functions for each API so that we can create some unit testing for all of them without much pain.
+
+So, to achieve testability, It's a good idea to make sure that a big part of your frontend code is tested – aiming for around 70% to 80% coverage is ideal. These tests are meant to check individual parts, like components and functions, all on their own. This helps ensure everything works well.
+
+#### 15. Reliability
+
+Reliability refers to the quality of being trustworthy and consistent over time. It often pertains to the ability of a system, product, or process to consistently perform its intended functions without failures or errors.
+
+Sometimes, we call this MTBF/MTTF, which stands for Mean Time Between/To Failures. It's about how consistent software behaves. When software doesn't do what we expect, it becomes unreliable.
+
+A common way to check reliability is by counting software problems (bugs) and comparing them to the amount of code.
+
+To make software better and more reliable, the key is to test it a lot. So, software that's easy to test is usually more dependable than software that's harder to test.
+
+#### 16. Disaster Recovery
+
+What steps would you take if access to your files (assets) was restricted in certain locations, or if you experienced data loss due to a hard disk failure or server issues? How would you go about developing a disaster recovery plan to minimize potential risks that could arise at any moment?
+
+> A while ago, we faced a strange problem. Some third-party libraries we used in our project, which we get from a certain place (CDN Provider), were suddenly not working in a certain country. We couldn't change where we got these third-party libraries from right then. So, we fixed this problem by changing the addresses of these libraries (pointing to a custom proxy server) in our frontend project, and we used this proxy server to route these URLs to the CDN provider again!
+
+One way to prevent your project from failing due to unexpected errors or new updates is to have a backup plan. This means having a plan to go back to a stable version of your project if something goes wrong.
+
+There are different ways to do this. One method is to use versioning and create labels (tags) for each update. This way, if there's a problem with the latest update, you can go back to the previous stable version of your project.
+
+It's also important to store your code in a safe place. You can use a cloud service like GitHub or BitBucket to keep your code safe. It's a good idea to have a clear process for adding your code to these services, like creating different branches for different features. This helps prevent loss of code in case of server failures or other problems.
+
+> I have a story to share: In a previous company, we used a tool called TFS (Team Foundation Server) to store our code before using Git. TFS was hosted on our own servers. Once, one of the servers had a hard disk failure, and we lost the source code of one of our projects. We had to gather the latest code from developers' machines, manually combine it, and found out that six days of work was lost. We had to redo everything from scratch! This situation taught us the importance of proper code storage and backup plans.
+
+### Working with Non-fucntional requirements
+
+After listing a set of quality attributes that could be relevant to a frontend project, what should I pay attention to? Should I aim to incorporate all of them into my next project? Are these attributes equally important?
+
+Firstly, it's important to note that these quality attributes don't hold the same level of importance. Some might be more suitable than others based on your work environment and the nature of the frontend project you're working on. To begin with, familiarize yourself with the prevalent quality attributes in your field. Prioritize those when you begin on creating a new system or making changes to an existing one.
+
+Non-functional requirements (Quality Attributes) can be a bit challenging, as they differ in nature from functional requirements. When you're collecting requirements, your client typically provides a wish-list of what they want the software system to accomplish. There are established methods for capturing this information, such as user stories, use cases, traditional requirement specifications, acceptance criteria, and more. But, this is not the case with Quality attributes though.
+
+There are three phases to get the actual non-functional requirements from the client
+
+- Capture
+- Filter & Refine
+- Challenge
+
+#### Capture
+
+Usually, clients give a lot of requests for what they want a software system to do. But they often forget to mention things about Quality Attributes, like wanting the system to load pages in less than 2 seconds, which is about performance. You have to ask about these Quality Attributes to know what they want. But it can be tricky. For example, if you ask about how easy it should be to use the system, they might just say "make it as easy as possible" and not give you more details. So, you need to ask the right questions
+
+> Throughout my career, there was only one case where someone directly asked for a non-functional requirement. This request was related to performance. The requirement was quite demanding: "Ensure that all pages of the system load in less than one second!" This was a challenging task since the project, built on a pre-existing product, naturally had performance issues and loaded pages rather slowly.
+
+#### Refine
+
+Back again to ask the right questions, these questions must be tricky enough to get the non-functional requirements or you might be lucky enough to receive this information within the functional requirements. Once you receive the these non-functional requirements, you have to discuss them with the client to make sure that the client understand these requirements and also to set the expectations.
+For Example, the client may access to support the accessibility and that is it. So it is a wide requirement and we need to ask some question to refine it
+
+- What are the categories of users with disabilities that need to be considered to ensure accessibility support?
+- What are the recommended screen resolutions that a system should be designed to support?
+- Do you have existing accessibility guidelines?
+- Can we prioritize accessibility features?
+- Can we include accessibility in QA testing?
+
+Consequently, we now have a foundation for initiating discussions. Should you be able to assign specific measures to the non-functional aspects, you can then formulate acceptance criteria and assess them in an objective manner.
+
+#### Challenge
+
+The "Trade-Off" is the secret key, imagine the following scenario, you are asking the client about a specific feature, and without any hesitation, his answer will be "Yes"! so one by one every user stories will be important and will be hard for the team to set the priority for each one. In the end, everything will be very important and should be included in the product in the first release!
+
+Indeed, the concept of "Trade-Off" holds significance here. For example, when a client requests a particular feature, after your assessment and team deliberation, the feature might come with a cost of X. However, there's a possibility to provide a simpler version in phases, reducing the cost to X/2. Upon presenting this option to the client, they might agree to proceed with this approach.
+
+In our domain, nearly everything can be achieved, but each choice involves a trade-off. By explaining these trade-offs, we can determine the optimal solution for a given situation.
