@@ -1,4 +1,10 @@
-# Hala👋, I'm Hamed Farag
+# Hala! It's me, Hamed M. Alaa Farag.
+
+I have been working with development since 2010. Started out and worked for almost 6 years as a .NET developer, but I found that my passion is building front-end stuff since 2016.
+
+Nowadays, I am a full-time Lead Frontend Engineer @ **WakeCap** developing and maintaining products based on IoT technologies.
+
+Fun fact about me, I am a color-blind person 😁.
 
 ```ts
 const hamed = {

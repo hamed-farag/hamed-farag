@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 
 import { Header } from "@components/Header";
@@ -8,6 +7,7 @@ import { ThemeProvider } from "@components/ThemeProvider";
 import { Separator } from "@components/ui/Separator";
 
 import { cn } from "@lib/utils/tailwindUtils";
+import { generateSiteMetadata, siteMetadata } from "@configs/siteMetadata";
 
 import "@styles/hljs-tokyo-night.css";
 import "@styles/globals.css";
@@ -19,10 +19,7 @@ export const fontSans = FontSans({
   variable: "--font-sans",
 });
 
-export const metadata: Metadata = {
-  title: "hamedfarag.dev",
-  description: "Hamed Farag's Personal Website",
-};
+export const metadata = generateSiteMetadata();
 
 export default function RootLayout({
   children,
@@ -30,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang={siteMetadata.language}>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",

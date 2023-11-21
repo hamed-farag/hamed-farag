@@ -11,6 +11,7 @@ import { PostMetadata } from "@components/PostMetadata";
 import { getPostsById, getPosts, getPostContentById } from "@services/post";
 
 import { formatDate } from "@lib/utils/date";
+import { generatePostMetadata } from "@configs/siteMetadata";
 
 type Props = {
   params: { id: string };
@@ -20,9 +21,9 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPostsById(params.id);
 
-  return {
-    title: post?.title,
-  };
+  if (!post) return {};
+
+  return generatePostMetadata(post);
 }
 
 export async function generateStaticParams() {

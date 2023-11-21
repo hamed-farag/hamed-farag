@@ -21,7 +21,7 @@ export async function Footer() {
         <Link target="_blank" href={user?.linkedIn || "#"}>
           <LinkedInLogoIcon className="w-6 h-6 transition-all hover:scale-105" />
         </Link>
-        <Link target="_blank" href={user?.x || "#"}>
+        <Link target="_blank" href={user?.twitter || "#"}>
           <TwitterLogoIcon className="w-6 h-6 transition-all hover:scale-105" />
         </Link>
       </section>

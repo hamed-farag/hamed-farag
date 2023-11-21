@@ -3,7 +3,7 @@ export interface IUser {
   jobTitle: string;
   linkedIn: string;
   github: string;
-  x: string;
+  twitter: string;
   avatar: string;
   content: string;
 }

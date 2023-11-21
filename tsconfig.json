@@ -25,7 +25,8 @@
       "@styles/*": ["./src/styles/*"],
       "@services/*": ["./src/services/*"],
       "@interfaces/*": ["./src/interfaces/*"],
-      "@components/*": ["./src/components/*"]
+      "@components/*": ["./src/components/*"],
+      "@configs/*": ["./src/configs/*"]
     }
   },
   "include": [

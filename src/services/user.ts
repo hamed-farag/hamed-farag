@@ -7,6 +7,8 @@ import rehypeFormat from "rehype-format";
 import rehypeStringify from "rehype-stringify";
 import rehypeHighlight from "rehype-highlight";
 
+import { siteMetadata } from "@configs/siteMetadata";
+
 import { getFilesByName } from "@lib/utils/directory";
 
 import { IUser } from "@interfaces/user";
@@ -32,12 +34,12 @@ export async function getUser() {
     .process(matterResults.content);
 
   const user: IUser = {
-    name: matterResults.data.name,
-    jobTitle: matterResults.data.jobTitle,
-    avatar: matterResults.data.avatar,
-    github: matterResults.data.github,
-    linkedIn: matterResults.data.linkedIn,
-    x: matterResults.data.x,
+    name: siteMetadata.author,
+    jobTitle: siteMetadata.jobTitle,
+    avatar: siteMetadata.authorAvatar,
+    github: siteMetadata.github,
+    linkedIn: siteMetadata.linkedin,
+    twitter: siteMetadata.twitter,
     content: String(htmlContent),
   };
 
