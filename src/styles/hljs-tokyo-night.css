@@ -1,4 +1,5 @@
-.hljs {
+.hljs,
+code {
   background: #d5d6db;
   color: #565a6e;
 }
@@ -74,7 +75,8 @@
 
 /* DARK THEME */
 .dark {
-  .hljs {
+  .hljs,
+  code {
     background: #1a1b26;
     color: #9aa5ce;
   }

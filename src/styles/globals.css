@@ -88,6 +88,13 @@
   p {
     @apply font-normal font-normal my-2;
   }
+  pre code {
+    @apply rounded-xl border w-full p-4 inline-block whitespace-pre overflow-x-auto text-start;
+  }
+
+  code:not(pre code) {
+    @apply py-0.5 px-1 rounded-sm;
+  }
 
   .mdx {
     p {
@@ -99,8 +106,8 @@
     blockquote {
       @apply border-l-4 ps-4;
     }
-    code {
-      @apply rounded-xl border w-full p-4 inline-block whitespace-pre overflow-x-auto text-start;
+    a {
+      @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600;
     }
   }
 }
