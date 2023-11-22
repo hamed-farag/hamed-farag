@@ -10,8 +10,8 @@ export async function AboutCard() {
   if (!user) throw new Error("about.mdx not found");
 
   return (
-    <Card className="p-6 w-full md:w-3/4 lg:1/2 mx-auto">
-      <section className="flex flex-col md:flex-row gap-5 text-center md:text-start">
+    <Card className="p-6 w-ful">
+      <section className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <article>
           <Avatar className="h-32 w-32 mx-auto mb-3">
             <AvatarImage src={user.avatar} alt={user.name} />
@@ -24,8 +24,8 @@ export async function AboutCard() {
             </span>
           </article>
         </article>
-        <section
-          className="grow mdx"
+        <article
+          className="w-full lg:col-span-3 text-center lg:text-start mdx"
           dangerouslySetInnerHTML={{ __html: user.content }}
         />
       </section>
