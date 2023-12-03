@@ -1,5 +1,6 @@
 import { Card } from "@components/ui/Card";
 
+import { SocialIcons } from "@components/SocialIcons";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar";
 
 import { getUser } from "@services/user";
@@ -10,7 +11,7 @@ export async function AboutCard() {
   if (!user) throw new Error("about.mdx not found");
 
   return (
-    <Card className="p-6 w-ful">
+    <Card className="p-6 w-full">
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <article>
           <Avatar className="h-32 w-32 mx-auto mb-3">
@@ -23,6 +24,7 @@ export async function AboutCard() {
               {user.jobTitle}
             </span>
           </article>
+          <SocialIcons user={user} />
         </article>
         <article
           className="w-full lg:col-span-3 text-center lg:text-start mdx"
