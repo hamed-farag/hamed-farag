@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { Separator } from "@components/ui/Separator";
 import { TOC } from "@components/TOC";
 import { PostMetadata } from "@components/PostMetadata";
+import { Comments } from "@components/Comments";
 
 import { IPost } from "@interfaces/post";
 import { getPostsById, getPosts, getPostContentById } from "@services/post";
@@ -78,6 +79,8 @@ export default async function PostPage({ params }: Props) {
             className="mdx"
             dangerouslySetInnerHTML={{ __html: String(htmlContent) }}
           />
+          <Separator />
+          <Comments />
         </article>
       </section>
     </section>
