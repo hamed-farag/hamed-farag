@@ -76,6 +76,11 @@ export function Header() {
                     Blog
                   </NavigationMenuLink>
                 </Link>
+                <Link href="/episodes" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Backtick Podcast
+                  </NavigationMenuLink>
+                </Link>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
