@@ -1,4 +1,6 @@
 import { Inter as FontSans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Header } from "@components/Header";
 import { Footer } from "@components/Footer";
@@ -45,6 +47,8 @@ export default function RootLayout({
           <Separator />
           <Footer />
         </ThemeProvider>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
