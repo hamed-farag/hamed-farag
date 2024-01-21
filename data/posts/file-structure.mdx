@@ -1,7 +1,7 @@
 ---
 id: file-structure
 title: The File Structure Dilemma
-date: "01-20-2024"
+date: "01-21-2024"
 description: How to organize you files?
 tags: ["frontend", "organizing", "file-structure"]
 ---
@@ -110,4 +110,26 @@ These folder names and their usage can be adapted as needed. Depending on the sp
 
 ## Rare (Extrem) File Structure
 
+The most complex file structure I'll discuss is for exceptionally large projects, often managed by multiple teams, each focusing on a distinct business segment. This setup is known as a micro front-end architecture.
+
+Previously, I wrote an article about [Micro-Frontend](/posts/one-year-microfontend), explaining that this concept involves different teams handling separate parts of a product, from the front-end to the database. These distinct segments are then integrated under a container or shell to form a cohesive application. In the context of front-end development, each team might adopt different file structures, such as a focus on pages and layouts or adopting a feature-first or module-first approach. The choice of structure depends on the project's scale and the specific business area each team is responsible for.
+
+Another scenario I covered in previous article involves managing a large project through a monorepo, which presents its unique file structure challenges. In a monorepo setup, there's typically a root folder named 'packages'. Within 'packages', you find various subfolders for different segments like 'helpers', 'utilities', 'CRM', 'project management', 'UI', and 'components'. The division of these packages is flexible, depending on the project's needs, and each package essentially functions as a standalone project. For example, expanding the 'CRM' folder under 'packages' reveals a complete project setup, with its components, hooks, styles, and other elements. If extracted from the monorepo, it should be able to operate independently.
+
+In some cases, a monorepo might not be structured as a micro front-end but simply as a collection of packages. These packages could include reusable components, shared styles, or distinct projects. Each package, while conforming to the overarching monorepo structure, follows its internal organization. This could range from a basic setup with components and containers to more elaborate structures incorporating features or modules. For instance, a package named 'project management' might contain a 'features' folder, managing all aspects related to project management within that package.
+
+In summary, the file structure in a micro front-end or a monorepo is multifaceted, catering to the complexity and scale of large projects. Each package or segment within this setup is organized in a way that allows it to function both as part of the larger whole and as an independent entity, ensuring modularity and flexibility in the project's architecture.
+
+![Packages](/posts/file-structure/packages.png)
+
 ## Outro
+
+There is no universally accepted school of thought or definitive catalog dictating file structure in project development. Instead, the organization of files is largely influenced by factors such as the size and scope of the team, the business objectives, and the project's anticipated lifespan. This variability underscores the importance of collaboration between the front-end lead or senior front-end developers and the business and architectural teams. Such engagement is crucial for understanding the project's vision, pipeline, and end goals, which could range from a few months to several years.
+
+The involvement of the front-end team from the outset is essential. It allows them to align their approach with the broader objectives, influencing key aspects like the file structure. Foreknowledge of the project's trajectory – whether it's adding features over four years or just one – is vital for designing a scalable and adaptable structure from day one. However, it's important to recognize that no structure is permanent. Flexibility and periodic adjustments are necessary, though frequent overhauls should be avoided to prevent disruptions.
+
+The goal is to establish a file structure that is robust enough to last for several years, anticipating significant feature expansions. This proactive approach is preferable to a reactive one, where the structure becomes cumbersome and intertwined, necessitating major restructuring. As the project evolves, various factors, such as performance enhancements, team expansion, or shifting business requirements, may necessitate revisiting and modifying the file structure.
+
+It's crucial to understand that a file structure is not static. It evolves, potentially changing every six months or even every three months, based on numerous variables: team dynamics, business goals, feature complexity, and team expansion. These factors dictate how the file structure should be adapted or divided to create a conducive environment for efficient work and future extensions.
+
+In summary, while there is no one-size-fits-all approach to file structuring in project development, the key lies in maintaining a balance between flexibility and foresight. The structure should be adaptable to accommodate changes yet thoughtfully planned to sustain the project's growth and evolution over time.
