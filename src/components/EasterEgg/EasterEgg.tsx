@@ -82,7 +82,7 @@ export function EasterEgg() {
           return e.key.toLowerCase();
         }
 
-        if (trimmed === secretWord) {
+        if (trimmed && trimmed..toLowerCase() === secretWord) {
           showMessage();
           return ""; // Reset after success
         }
