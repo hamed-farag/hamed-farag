@@ -5,6 +5,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Header } from "@components/Header";
 import { Footer } from "@components/Footer";
 import { ThemeProvider } from "@components/ThemeProvider";
+import { Toaster } from "@components/ui/sonner";
+import { EasterEgg } from "@components/EasterEgg/EasterEgg";
 
 import { Separator } from "@components/ui/Separator";
 
@@ -49,6 +51,8 @@ export default function RootLayout({
         </ThemeProvider>
         <SpeedInsights />
         <Analytics />
+        <Toaster />
+        <EasterEgg />
       </body>
     </html>
   );

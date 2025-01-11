@@ -68,10 +68,12 @@ export async function getPostContentById(id: string) {
     const htmlContent = await unified()
       .use(remarkParse)
       .use(headingTree)
-      .use(remarkRehype)
+      .use(remarkRehype, {
+        allowDangerousHtml: true,
+      })
       .use(rehypeHighlight)
       .use(rehypeFormat)
-      .use(rehypeStringify)
+      .use(rehypeStringify, { allowDangerousHtml: true })
       .process(postResult.content);
 
     return {

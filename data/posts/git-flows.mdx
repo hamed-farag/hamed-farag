@@ -1,0 +1,120 @@
+---
+id: git-flows
+title: Git Swinging Between Flows
+date: "01-12-2025"
+description: Evolution of Git flow strategies!
+tags: ["frontend", "git-flows", "software-lifeycle"]
+---
+
+## Introduction
+
+Managing the software development lifecycle is a multifaceted challenge, and the choice of Git flow strategy can significantly impact the efficiency and reliability of the process. In this article, we delve into three prominent Git flow approaches: sequential, customized, and trunk-based development flows. Each strategy comes with its own set of characteristics, challenges, and benefits, making it essential to understand their nuances to select the right fit for your project.
+
+At its core, Git is a distributed version control system that tracks changes in files and enables collaborative work among developers. Originally created in 2005 by Linus Torvalds to manage the Linux kernel’s development, Git has since become a cornerstone of modern software development. Its design emphasizes speed, data integrity, and support for distributed, non-linear workflows—allowing developers to work on thousands of parallel branches independently.
+
+Git’s decentralized nature ensures that every repository is a self-sufficient archive of project history, complete with full version-tracking capabilities, regardless of network access or a central server. This flexibility, combined with its open-source foundation under the GPL-2.0-only license, has made Git the tool of choice for millions of developers worldwide.
+
+Fun fact: the name “Git” is British slang for an “unpleasant person,” a tongue-in-cheek nod from its creator.
+
+## History
+
+When I joined my current company two years ago, the frontend team had a flexible and fast-paced approach to code management. They frequently used cherry-picking to handle deployments and created branches for individual features and hotfixes. While this approach enabled rapid releases, it often lacked clear documentation and consistency. The absence of a standardized process made it difficult for team members to maintain order and avoid errors. This experience highlighted the critical need for a well-documented and structured workflow to ensure sustainable and efficient development.
+
+Currently, we have two teams working collaboratively on the same monorepo codebase. Each team manages its own features, release schedules, and specific responsibilities. Despite these independent workflows, both teams contribute to building a unified product, emphasizing the importance of coordination and alignment within a shared codebase.
+
+## The Three Flows
+
+### **Sequential Git Flow**
+
+Git flow is a structured branching strategy used in software development to manage version control and streamline the development lifecycle. It organizes work into main branches (master for production-ready code and develop for active development), feature branches for new functionalities, bug fix branches for addressing issues, and hotfix branches for urgent production fixes. 
+
+This approach emphasizes a clear separation of code states, enabling teams to work on multiple features or fixes simultaneously while ensuring stability and traceability through defined processes for merging and promoting changes across environments.
+
+In our team, we have adopted a customized Git flow to align with our deployment environments. 
+
+We use four main branches: develop for ongoing **development**, **testing** for integrating and validating changes, **staging** as a replica of production for final checks, and **master** for stable, production-ready code. 
+
+Feature branches (**ftr/feature-name**) are created from develop for new functionality, while bug fix branches (**bgfx/bug-name**) are created from testing to address issues identified during quality assurance. 
+Hotfix branches **(htfx/hotfix-name)** are used to resolve critical production or staging bugs, merging changes back into the relevant branches to ensure synchronization. 
+This flow ensures a systematic progression of changes from development to production, reducing risks and maintaining code quality. But we faced some challenges:
+
+- Difficulty in releasing specific features from each team
+- Requirement to wait for all features to be completed and verified before merging to production
+- Potential for conflicts and stability issues in the testing and staging environments
+<br/>
+<br/>
+
+> **From the very beginning**, we adopted this custom Git flow as our primary branching strategy, implementing it consistently across the team to manage our codebase. 
+Initially, the flow worked well, providing a structured framework for handling features, bug fixes, and releases. 
+However, as the project evolved and the number of features being developed simultaneously grew, we encountered a significant challenge related to releasing stable features. 
+Specifically, the process of isolating features that were ready for deployment from those still under development became cumbersome. 
+To address this, we resorted to temporary workarounds such as commenting out incomplete code, removing partially implemented features, or manually excluding certain changes. 
+These ad hoc solutions disrupted the workflow, increased the risk of errors, and often led to inefficiencies in maintaining code quality and stability. 
+This experience highlighted the need for a more refined approach to feature management within the flow, particularly for isolating and releasing production-ready changes without compromising ongoing development.
+
+### **Customized Flow**
+
+The custom flow introduces a tailored approach to managing code for a monorepo, supporting multiple teams working concurrently on the same codebase. 
+
+This strategy features two primary branches: **master** for production-ready code and **testing** for validating new features. Feature branches (**ftr/feature-name**) are created directly from master or testing, depending on the situation, and undergo a strict lifecycle involving development, testing, and merging. To ensure stability, feature branches are rebased interactively to consolidate changes into a single commit before merging. 
+Additionally, a temporary release branch (**release/***) consolidates ready-to-deploy features for staging and production.
+
+This custom flow places significant emphasis on accountability, as developers are responsible for their feature branches throughout their lifecycle. It also prioritizes conflict management by introducing intermediate branches when necessary. Reusable components, helpers, and utilities are managed separately with their own branching and testing workflows (**reuse/*** branches), ensuring modularity and maintainability.
+
+#### Comparison with Traditional Git Flow
+
+While the traditional Git flow emphasizes a multi-environment branching system (develop, testing, staging, master), this custom flow simplifies the hierarchy by focusing on master and testing branches, relying on temporary branches (**release/***) for staging purposes.
+
+Benefits of the Custom Flow:
+- **Simplification**: By reducing the number of main branches, the custom flow minimizes branching complexity and focuses on clear integration points.
+- **Enhanced Modularity**: Dedicated workflows for reusable components encourage clean, reusable code and better documentation.
+- **Flexibility for Teams**: This flow is particularly suited for multiple teams working on a shared codebase, with explicit handling of dependencies and conflicts through intermediate branches.
+- **Stronger Accountability**: Developers maintain responsibility for their branches from creation to production, promoting ownership and code quality.
+- **Optimized for Automation**: Integration with pipelines (e.g., Storybook updates, automated deployments) ensures smooth processes and consistency.
+
+In contrast, the traditional Git flow is more suitable for larger, less dynamic environments where long-term feature branches and strict environment separation are prioritized. However, the custom flow excels in agile, collaborative settings where modularity, rapid iteration, and streamlined workflows are essential.
+<br/>
+<br/>
+
+> The challenges we faced with this custom flow were compounded by our decision to use the rebase strategy instead of the standard merge approach. While rebasing helps maintain a cleaner commit history, it introduced significant complexities during the merging process. Conflicts became frequent and time-consuming, especially when dealing with multiple developers working on overlapping areas of the codebase. This issue was further intensified by the occasional need to cherry-pick specific commits, which often created additional layers of dependency and inconsistencies between branches. The combination of rebasing, cherry-picking, and resolving conflicts required considerable effort and coordination, resulting in a noticeable increase in time spent on integration tasks rather than on actual development. These issues highlighted the trade-offs of prioritizing a cleaner history over smoother collaboration and emphasized the need for better conflict resolution strategies within the flow.
+
+### **Trunk-Based Development Flow**
+
+Due to the significant time and resource inefficiencies in our custom workflow, I began exploring whether there might be a more effective way to manage the codebase. I discussed my concerns and ideas with my team and extended the conversation to Reddit, where I received extensive feedback and valuable insights from the community.
+
+> The document discusses Git workflows for managing feature deployments in a monorepo shared by two teams. The current setup follows a GitFlow-like model with four branches (develop, testing, stage, and master), but it struggles with selectively deploying features to production. Suggested improvements include adopting trunk-based development with tagged commits and optional release branches for fixes or using feature flags to enable or disable features without modifying the main codebase. The discussion highlights GitFlow’s limitations for selective deployments and stresses the need for simplicity and adaptability. The choice of workflow depends on the technical proficiency of the product team and the complexity of the project.
+[Reddit Ref](https://www.reddit.com/r/git/comments/1fab9g5/what_is_the_most_suitable_git_workflow_for_two/)
+
+
+To achieve a more efficient and streamlined workflow, the team at my current company transitioned to trunk-based development. This approach centers on a single main branch, where developers create short-lived feature branches that are quickly merged back into the main branch upon completion.
+
+Advantages of Trunk-Based Development:
+- Simpler and more user-friendly compared to the previous custom workflow.
+- Minimizes conflicts and enhances developer productivity.
+- Enables the use of feature flags or toggles for managing feature releases.
+- Aligns with industry best practices and established recommendations.
+
+**But this come with some some responsibilities**, Developers should **commit small**, **incremental changes frequently** to the main branch and ensure each commit triggers **automated tests** to maintain code stability. **Feature flags** should be used to manage incomplete features, allowing safe merging without exposing unfinished work. Feature branches, if needed, should be short-lived to minimize conflicts. A robust suite of **automated tests**, along with regular code reviews, ensures code quality and adherence to standards. **Effective communication and collaboration** help align the team and avoid duplication of work. The trunk must remain in a releasable state at all times to support continuous deployment. Developers should **cultivate a continuous integration culture**, integrating work frequently and validating it through automated builds, while regularly reviewing and retiring outdated feature toggles to maintain a clean codebase.
+
+Conclusion:
+
+## Conclusion
+
+The evolution of our Git workflow—from sequential to customized, and finally to trunk-based development—reflects a common journey many development teams experience. Each approach taught valuable lessons about the balance between structure and flexibility, the importance of clear processes, and the need for efficient collaboration.
+
+Trunk-based development, combined with feature flags and robust automation, has proven to be the most effective solution for our specific needs. It simplifies our branching strategy while maintaining the ability to control feature releases independently. However, it's important to note that no single workflow is universally superior—the best choice depends on various factors including team size, project complexity, release frequency, and organizational requirements.
+
+Key takeaways from our journey:
+- Simple workflows often lead to better team productivity
+- Automation and testing are crucial for maintaining code quality
+- Feature flags provide more flexible deployment options than complex branching
+- Clear documentation and team alignment are essential for any workflow
+- Regular evaluation and adaptation of processes ensure continued effectiveness
+
+As development practices continue to evolve, the most successful teams will be those who remain adaptable and willing to refine their workflows based on practical experience and changing needs.
+
+## Git Workflows Guidelines
+
+- [Git Flow](/posts/git-flows/seq-git-flow.pdf)
+- [Custom Flow](/posts/git-flows/customized-flow.pdf)
+- [Trunk-Based Development Flow](/posts/git-flows/trunk-based-dev.pdf)
