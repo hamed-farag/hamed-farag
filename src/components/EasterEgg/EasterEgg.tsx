@@ -32,7 +32,7 @@ export function EasterEgg() {
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
   const [typedKeys, setTypedKeys] = useState("");
-  const secretWord = "maizain";
+  const secretWord = "maizein";
 
   function showMessage() {
     toast.custom((t) => (
