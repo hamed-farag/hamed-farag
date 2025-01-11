@@ -95,11 +95,13 @@ export function EasterEgg() {
     // Add global event listeners
     window.addEventListener("click", handleGlobalClick);
     window.addEventListener("keypress", handleKeyPress);
+    window.addEventListener("touchstart", handleTouch);
 
     // Cleanup listeners on component unmount
     return () => {
       window.removeEventListener("click", handleGlobalClick);
       window.removeEventListener("keypress", handleKeyPress);
+      window.removeEventListener("touchstart", handleTouch);
     };
   }, [lastClickTime]);
 
