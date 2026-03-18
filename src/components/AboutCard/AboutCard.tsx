@@ -23,7 +23,7 @@ export async function AboutCard() {
                 className="absolute -inset-2 rounded-full opacity-60 blur-lg transition-opacity duration-500 group-hover:opacity-100"
                 style={{ background: "var(--gradient-primary)" }}
               />
-              <Avatar className="h-32 w-32 relative ring-4 ring-background">
+              <Avatar className="h-32 w-32 relative">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="font-display text-2xl">
                   {user.name.charAt(0)}
