@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -15,10 +15,10 @@ export default function NotFound() {
         <p>
           <Link
             href="/"
-            className="group block text-gray-500 dark:text-gray-400"
+            className="group block text-muted-foreground hover:text-primary transition-colors"
           >
             <small>
-              <ArrowLeftIcon className="inline-block  transition-all group-hover:-translate-x-1" />{" "}
+              <ArrowLeft className="inline-block h-4 w-4 transition-all group-hover:-translate-x-1" />{" "}
               Back to homepage
             </small>
           </Link>

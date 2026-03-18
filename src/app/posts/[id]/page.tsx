@@ -1,5 +1,5 @@
 import { RedirectType, redirect } from "next/navigation";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { ArrowLeft } from "lucide-react";
 
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -47,39 +47,50 @@ export default async function PostPage({ params }: Props) {
   const { htmlContent, postData, headings } = post;
 
   return (
-    <section>
+    <section className="animate-reveal">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generatePostJSONLD(postData.data as IPost)),
         }}
       />
-      <section className="text-center">
-        <small>{formatDate(postData.data.date)}</small>
-        <h1>{postData.data.title}</h1>
-        <h3>{postData.data.description}</h3>
+      <section className="text-center mb-10">
+        <span
+          className="text-xs font-display font-bold tracking-wider uppercase block mb-4"
+          style={{ color: "var(--color-secondary)" }}
+        >
+          {formatDate(postData.data.date)}
+        </span>
+        <h1 className="font-display text-4xl md:text-5xl leading-tight mb-4">
+          {postData.data.title}
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto my-0">
+          {postData.data.description}
+        </p>
       </section>
-      <Separator />
-      <section className="grid grid-cols-12 lg:gap-10">
-        <aside className="hidden lg:block lg:col-span-3">
-          <TOC data={headings as Array<any>} />
-          <Separator />
-          <PostMetadata postMetadata={postData.data} />
-          <Separator />
-          <Link
-            href="/posts"
-            className="group block text-gray-500 dark:text-gray-400"
-          >
-            <ArrowLeftIcon className="inline-block  transition-all group-hover:-translate-x-1" />{" "}
-            Back to the blog
-          </Link>
+      <div className="w-24 h-1 mx-auto rounded-full mb-10" style={{ background: "var(--gradient-primary)" }} />
+      <section className="grid grid-cols-12 lg:gap-12">
+        <aside className="hidden lg:block lg:col-span-3 animate-reveal-delay-1">
+          <div className="sticky top-28 space-y-6">
+            <TOC data={headings as Array<any>} />
+            <Separator className="opacity-20" />
+            <PostMetadata postMetadata={postData.data} />
+            <Separator className="opacity-20" />
+            <Link
+              href="/posts"
+              className="group flex items-center gap-2 text-sm font-display font-semibold text-muted-foreground hover:text-primary transition-colors duration-300"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform duration-500 group-hover:-translate-x-2" />
+              Back to the blog
+            </Link>
+          </div>
         </aside>
-        <article className="col-span-12 lg:col-span-9">
+        <article className="col-span-12 lg:col-span-9 animate-reveal-delay-2">
           <div
             className="mdx"
             dangerouslySetInnerHTML={{ __html: String(htmlContent) }}
           />
-          <Separator />
+          <div className="w-16 h-1 rounded-full my-10" style={{ background: "var(--gradient-primary)" }} />
           <Comments />
         </article>
       </section>

@@ -2,83 +2,82 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
-import {
-  ChevronUpIcon,
-  MagnifyingGlassIcon,
-  HomeIcon,
-} from "@radix-ui/react-icons";
+import { ChevronUp, Search, Home, BookOpen, Sparkles } from "lucide-react";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { ThemeToggle } from "@components/ThemeToggle";
 import { SearchProvider, SearchButton } from "@components/Search";
 
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@components/ui/NavigationMenu";
-
-import { Button } from "@components/ui/Button";
-
 import "./header.css";
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [{ y }, scrollTo] = useWindowScroll();
   const yAxis = y || 0;
-  const yPositionForHeader = 50;
-  const yPositionForGoUpButton = 100;
-
-  const renderGoUp = () => {
-    if (yAxis > yPositionForGoUpButton) {
-      return (
-        <Button
-          variant="outline"
-          size="icon"
-          className="fixed right-5 bottom-5"
-          onClick={() => scrollTo({ left: 0, top: 0, behavior: "smooth" })}
-        >
-          <ChevronUpIcon className="h-4 w-4" />
-        </Button>
-      );
-    }
-
-    return null;
-  };
+  const isScrolled = yAxis > 60;
 
   return (
     <>
       <header
-        className={`header bg-background ${
-          yAxis > yPositionForHeader ? "h-12" : "h-24"
+        className={`header-island ${
+          isScrolled ? "header-collapsed" : "header-expanded"
         }`}
       >
-        <Link href="/">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="island-btn group"
+          title="Home"
+        >
           <Image
             src="/hf-logo.svg"
             alt="logo"
-            className="dark:invert hover:cursor-pointer"
-            width={30}
-            height={24}
+            className="dark:invert transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110"
+            width={20}
+            height={16}
             priority
           />
         </Link>
-        <section className="flex gap-3">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link href="/posts" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Blog
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+
+        {isScrolled && <div className="island-dot" />}
+
+        {/* Navigation */}
+        <nav className="flex items-center gap-1">
+          <Link
+            href="/"
+            className={`nav-pill ${pathname === "/" ? "nav-pill-active" : ""}`}
+          >
+            {isScrolled ? (
+              <Home className="h-4 w-4" />
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                Home
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/posts"
+            className={`nav-pill ${pathname.startsWith("/posts") ? "nav-pill-active" : ""}`}
+          >
+            {isScrolled ? (
+              <BookOpen className="h-4 w-4" />
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <BookOpen className="h-3.5 w-3.5" />
+                Blog
+              </span>
+            )}
+          </Link>
+        </nav>
+
+        {isScrolled && <div className="island-dot" />}
+
+        {/* Actions */}
+        <div className="flex items-center gap-0.5">
           <SearchProvider
             searchConfig={{
               kbarConfig: {
@@ -90,20 +89,33 @@ export function Header() {
                     keywords: "back",
                     section: "Navigation",
                     perform: () => router.push("/"),
-                    icon: <HomeIcon />,
+                    icon: <Home className="h-4 w-4" />,
                   },
                 ],
               },
             }}
           >
             <SearchButton>
-              <MagnifyingGlassIcon />
+              <span className="flex items-center">
+                <Search className="h-4 w-4" />
+                {!isScrolled && <span className="kbd-hint">⌘K</span>}
+              </span>
             </SearchButton>
           </SearchProvider>
           <ThemeToggle />
-        </section>
+        </div>
       </header>
-      {renderGoUp()}
+
+      {/* Scroll to top */}
+      {yAxis > 200 && (
+        <button
+          className="go-up-btn"
+          onClick={() => scrollTo({ left: 0, top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+        >
+          <ChevronUp className="h-4 w-4" />
+        </button>
+      )}
     </>
   );
 }

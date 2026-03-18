@@ -14,12 +14,13 @@ const config: Config = {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1100px",
       },
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        sans: ["var(--font-body)", ...fontFamily.sans],
+        display: ["var(--font-display)", ...fontFamily.sans],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -60,19 +61,44 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "1rem",
+        "3xl": "1.5rem",
       },
       keyframes: {
         morph: {
-          "0%": {
-            borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-          },
-          "50%": {
-            borderRadius: "30% 60% 70% 40% / 50% 60% 30% 60%",
-          },
-          "100%": {
-            borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-          },
+          "0%": { borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" },
+          "50%": { borderRadius: "30% 60% 70% 40% / 50% 60% 30% 60%" },
+          "100%": { borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" },
         },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-down": {
+          "0%": { opacity: "0", transform: "translateY(-20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-in": {
+          "0%": { opacity: "0", transform: "scale(0.9)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "25%": { transform: "rotate(-3deg)" },
+          "75%": { transform: "rotate(3deg)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+      },
+      animation: {
+        morph: "morph 8s ease-in-out infinite",
+        "slide-up": "slide-up 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "slide-down": "slide-down 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "scale-in": "scale-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        wiggle: "wiggle 1s ease-in-out",
+        float: "float 6s ease-in-out infinite",
       },
     },
   },

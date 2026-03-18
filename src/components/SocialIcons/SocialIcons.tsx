@@ -1,9 +1,5 @@
 import Link from "next/link";
-import {
-  GitHubLogoIcon,
-  LinkedInLogoIcon,
-  TwitterLogoIcon,
-} from "@radix-ui/react-icons";
+import { Github, Linkedin, Twitter } from "lucide-react";
 
 import { IUser } from "@/interfaces/user";
 
@@ -15,15 +11,27 @@ export function SocialIcons(props: TSocialIconsProps) {
   const { user } = props;
 
   return (
-    <section className="flex justify-center space-x-4 mb-4 text-gray-500 dark:text-gray-400">
-      <Link target="_blank" href={user?.github || "#"}>
-        <GitHubLogoIcon className="w-6 h-6 transition-all hover:scale-105" />
+    <section className="flex justify-center space-x-5 mb-4">
+      <Link
+        target="_blank"
+        href={user?.github || "#"}
+        className="text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
+      >
+        <Github className="w-5 h-5" />
       </Link>
-      <Link target="_blank" href={user?.linkedIn || "#"}>
-        <LinkedInLogoIcon className="w-6 h-6 transition-all hover:scale-105" />
+      <Link
+        target="_blank"
+        href={user?.linkedIn || "#"}
+        className="text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
+      >
+        <Linkedin className="w-5 h-5" />
       </Link>
-      <Link target="_blank" href={user?.twitter || "#"}>
-        <TwitterLogoIcon className="w-6 h-6 transition-all hover:scale-105" />
+      <Link
+        target="_blank"
+        href={user?.twitter || "#"}
+        className="text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
+      >
+        <Twitter className="w-5 h-5" />
       </Link>
     </section>
   );

@@ -1,10 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { Button } from "@components/ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,21 +17,20 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+        <button className="island-btn relative" aria-label="Toggle theme">
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all duration-700 dark:-rotate-180 dark:scale-0 text-amber-500" />
+          <Moon className="absolute h-4 w-4 rotate-180 scale-0 transition-all duration-700 dark:rotate-0 dark:scale-100 text-blue-300" />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
+      <DropdownMenuContent align="end" className="glass-strong rounded-xl mt-2">
+        <DropdownMenuItem onClick={() => setTheme("light")} className="font-display font-semibold text-sm cursor-pointer rounded-lg gap-2">
+          <Sun className="h-4 w-4 text-amber-500" /> Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
+        <DropdownMenuItem onClick={() => setTheme("dark")} className="font-display font-semibold text-sm cursor-pointer rounded-lg gap-2">
+          <Moon className="h-4 w-4 text-blue-400" /> Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+        <DropdownMenuItem onClick={() => setTheme("system")} className="font-display font-semibold text-sm cursor-pointer rounded-lg gap-2">
+          <Monitor className="h-4 w-4 text-muted-foreground" /> System
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

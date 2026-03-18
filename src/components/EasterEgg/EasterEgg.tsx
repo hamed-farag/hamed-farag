@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {Cross1Icon } from "@radix-ui/react-icons";
+import { X } from "lucide-react";
 
 import { Button } from "@components/ui/Button";
 
@@ -40,7 +40,7 @@ export function EasterEgg() {
         <h3 className="text-rose-900 font-bold mb-2">A Secret Message to Mai 💌</h3>
         <p className="text-rose-800 text-wrap">{loveMessages[getRandomMessageIndex()]}</p>
         <Button variant="link" size="icon" onClick={() => toast.dismiss(t)} className="absolute top-1 right-1">
-          <Cross1Icon className="w-4 h-4 text-red-700" />
+          <X className="w-4 h-4 text-red-700" />
         </Button>
       </div>
     ));

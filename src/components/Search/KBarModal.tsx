@@ -8,7 +8,7 @@ import {
   Action,
   useRegisterActions,
 } from "kbar";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Search } from "lucide-react";
 
 import { Card } from "@components/ui/Card";
 
@@ -30,7 +30,7 @@ export const KBarModal = ({
           <Card>
             <div className="flex items-center space-x-4 p-4">
               <span className="block w-5">
-                <MagnifyingGlassIcon />
+                <Search className="h-4 w-4" />
               </span>
               <KBarSearch className="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-none dark:text-gray-200 dark:placeholder-gray-500" />
               <kbd className="inline-block whitespace-nowrap rounded border px-1.5 align-middle font-medium leading-4 tracking-wide text-xs text-gray-400 border-gray-400">
