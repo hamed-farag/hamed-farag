@@ -14,8 +14,10 @@ import { getPostsById, getPosts, getPostContentById } from "@services/post";
 
 import { formatDate } from "@lib/utils/date";
 import {
+  siteMetadata,
   generatePostMetadata,
   generatePostJSONLD,
+  generateBreadcrumbJSONLD,
 } from "@configs/siteMetadata";
 
 type Props = {
@@ -52,6 +54,21 @@ export default async function PostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generatePostJSONLD(postData.data as IPost)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateBreadcrumbJSONLD([
+              { name: "Home", url: siteMetadata.siteUrl },
+              { name: "Blog", url: `${siteMetadata.siteUrl}/posts` },
+              {
+                name: postData.data.title,
+                url: `${siteMetadata.siteUrl}/posts/${postData.data.id}`,
+              },
+            ])
+          ),
         }}
       />
       <section className="text-center mb-10">

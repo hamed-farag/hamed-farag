@@ -5,12 +5,13 @@ import { siteMetadata } from "@configs/siteMetadata";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: siteMetadata.title,
-    short_name: siteMetadata.title,
+    short_name: "HF",
     description: siteMetadata.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#fff",
-    theme_color: "#fff",
+    background_color: "#0a0a0a",
+    theme_color: "#0a0a0a",
+    categories: ["blog", "technology", "education"],
     icons: [
       {
         src: "/favicon.ico",

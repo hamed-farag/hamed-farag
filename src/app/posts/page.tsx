@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Calendar, Hash, Layers } from "lucide-react";
+import type { Metadata } from "next";
 
 import { EmptyCard } from "@components/EmptyCard";
 import { Badge } from "@components/ui/Badge";
@@ -7,8 +8,11 @@ import { Badge } from "@components/ui/Badge";
 import { getPosts } from "@services/post";
 import { sortPostsByDate, filterPosts, calculateTagCount } from "@lib/utils/post";
 import { formatDate } from "@lib/utils/date";
+import { generatePostsPageMetadata } from "@configs/siteMetadata";
 
 import { IPost, ISearchParams } from "@interfaces/post";
+
+export const metadata: Metadata = generatePostsPageMetadata();
 
 export default function PostsPage({
   searchParams,
