@@ -72,6 +72,33 @@ export function Header() {
               </span>
             )}
           </Link>
+          <a
+            href="https://hamedafarag.github.io/claudeck/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="nav-pill"
+          >
+            {isScrolled ? (
+              <Image
+                src="https://hamedafarag.github.io/claudeck/images/whaly.png"
+                alt="Claudeck"
+                width={16}
+                height={16}
+                className="h-4 w-4"
+              />
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Image
+                  src="https://hamedafarag.github.io/claudeck/images/whaly.png"
+                  alt="Claudeck"
+                  width={14}
+                  height={14}
+                  className="h-3.5 w-3.5"
+                />
+                Claudeck
+              </span>
+            )}
+          </a>
         </nav>
 
         {isScrolled && <div className="island-dot" />}

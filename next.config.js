@@ -1,5 +1,12 @@
 const nextConfig = {
-  // Optionally, add any other Next.js config below,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "hamedafarag.github.io",
+      },
+    ],
+  },
 };
 
 // Merge MDX config with Next.js config

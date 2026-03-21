@@ -9,6 +9,9 @@ import {
   Mail,
   MapPin,
   Code2,
+  Coffee,
+  Home,
+  BookOpen,
 } from "lucide-react";
 
 import { WaveDivider } from "@components/WaveDivider";
@@ -24,8 +27,8 @@ export async function Footer() {
   const currentYear = new Date().getFullYear();
 
   const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Blog", href: "/posts" },
+    { label: "Home", href: "/", icon: Home },
+    { label: "Blog", href: "/posts", icon: BookOpen },
   ];
 
   const socialLinks = [
@@ -95,12 +98,13 @@ export async function Footer() {
                 Navigation
               </h4>
               <ul className="space-y-2.5 list-none m-0 p-0">
-                {navLinks.map(({ label, href }) => (
+                {navLinks.map(({ label, href, icon: Icon }) => (
                   <li key={label} className="m-0 p-0">
                     <Link
                       href={href}
                       className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                     >
+                      <Icon className="w-3.5 h-3.5" />
                       {label}
                       <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 translate-x-0.5 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0" />
                     </Link>
@@ -113,6 +117,17 @@ export async function Footer() {
                   >
                     <Mail className="w-3.5 h-3.5" />
                     Contact
+                  </Link>
+                </li>
+                <li className="m-0 p-0">
+                  <Link
+                    href="https://ko-fi.com/hamedfarag"
+                    target="_blank"
+                    className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    <Coffee className="w-3.5 h-3.5" />
+                    Support Me
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 translate-x-0.5 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0" />
                   </Link>
                 </li>
               </ul>
