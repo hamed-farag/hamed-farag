@@ -1,0 +1,493 @@
+---
+id: single-spa-workarounds
+title: "Micro-Frontends, One Year On: The Workarounds That Made Single-SPA Reliable for Us"
+date: "21-05-2026"
+description: "Nine workarounds we built around Single-SPA in production: the .NET shell, the envelope, the regex dispatch, and what the framework doesn't tell you."
+tags: ["single-spa", "microfrontend", "react", "architecture", "monorepo", "frontend", "systemjs"]
+---
+
+A year ago, [I wrote about our first year with micro-frontends](/posts/one-year-microfontend). It was a frank retrospective: the win was framework autonomy and independent deploys, the cost was 20 GB of RAM during local dev, 15–20 minute deploy cycles, and a monorepo that became its own coordination tax. The closing line was the honest one — _if I could choose again, I would think carefully about using Microfrontend or not._
+
+This article is the follow-up the previous one didn't write: **what we actually built around Single-SPA to make it work.** Not the architecture diagram. The workarounds. The dead code that's not really dead. The regexes we wish we didn't need. The .NET app no Single-SPA tutorial mentions. The browser-side singletons we use as message buses. The dev experience we documented and the parts we didn't.
+
+If you're evaluating Single-SPA in 2026, this is the article I wish I'd had a year ago.
+
+---
+
+## Where we left off
+
+The platform is a Single-SPA monorepo with seven in-repo apps and five shared packages. On top of that sit roughly ten standalone repositories for newer features, loaded at runtime via SystemJS import maps. Shared dependencies — React 18.2, ReactDOM, axios, react-bootstrap, single-spa 5.9.5 — are served from CDN and externalized in every webpack config. The architecture is textbook.
+
+The reality, a year in, is that the textbook stops where the workarounds start.
+
+---
+
+## The shell isn't where you think it is
+
+If you read our frontend repo you'd conclude the shell is whatever directory has `single-spa` in its `package.json`. That's where Single-SPA gets configured. That's where `start()` is called. There's even a webpack entry that, until recently, was producing an `index.ejs` HTML template.
+
+That HTML template is dead code. The real shell — the HTML the browser actually receives, in every environment — is rendered by an ASP.NET MVC application, in a Razor view. The frontend repo ships JavaScript modules. The .NET host ships the page that loads them.
+
+That's the unlock. Once you see this, every other workaround in this article makes sense.
+
+Here is what the Razor view actually does, in order:
+
+1. Runs the OIDC handshake and sets auth cookies server-side.
+2. Calls the Identity API to pre-fetch the user's orgs, projects, available tools, and module-level permissions.
+3. Fetches a **runtime config** from an internal endpoint — that response includes the SystemJS import map and the entry-point module URL for the shell.
+4. Renders the page with the import map and the pre-fetched data both inlined.
+
+Two consequences matter:
+
+- **Micro-app version bumps don't redeploy the shell.** The import map is data, not code. New version of a feature app? Update the runtime config endpoint. The next page render picks it up.
+- **The first paint already knows who you are and what you can do.** No spinners over "loading your account." That data is in the HTML.
+
+The Single-SPA documentation tells you to put your shell in a webpack project. We do, but only for the JavaScript. The HTML is owned by the backend. This is the single biggest decision we made, and the one Single-SPA tutorials don't prepare you for.
+
+---
+
+## Workaround 1: The regex dispatch
+
+Single-SPA's routing is built on activity functions: a predicate per app that returns true when the app should be mounted. With `single-spa-layout`, you can write those declaratively as `<route path="...">` elements. Both APIs assume routes don't overlap meaningfully.
+
+Ours overlap. One app is the default catch-all for `/project/:id/*`. Another app owns `/project/:id/site/*`. Without intervention, both mount on `/project/abc-123/site/view` — and the catch-all's router then 404s because the path doesn't exist in its tree.
+
+What we wanted was an `exclude` rule on the catch-all's activity function. Single-SPA doesn't have one. The comment block at the top of our routing file documents that exact wish:
+
+```
+// WE NEED FROM SINGLE-SPA TO SUPPORT ATTRIBUTE CALLED EXCLUDE FOR EXAMPLE,
+// AND TO BE ARRAY OF STRING
+// SO, WE ARE USING WORKAROUND TO ACHIEVE THIS
+```
+
+The workaround is a 250-line `registerRoute(flags)` function. One UUID-aware regex per micro-app, ordered specific-first, with the catch-all as a negative-lookahead fallback:
+
+```ts
+// EVERYTHING ELSE IS THE DEFAULT APP, TILL WE HAVE FOURTH APP .....
+if (/^\/project\/[UUID]\/(?!site).+$/i.test(window.location.pathname)) {
+  return `<application name="@org/default-app"></application>`;
+}
+```
+
+It works. It also costs us:
+
+- **Every new micro-app needs a shell redeploy.** Even though the bundle is loaded dynamically, the regex stanza isn't.
+- **The file scales linearly with the catalogue.** We're at 17 stanzas. Adding the 30th will be the same shape as adding the 18th.
+- **Public URLs needed a parallel function.** A separate `registerPublicRoute()` does the same thing for unauthenticated paths that bypass the nav shell.
+
+The friction is small per change. It's the accumulation that bites.
+
+---
+
+## Workaround 2: Shared dependencies live in the import map
+
+If every micro-app bundled its own React, we'd ship multiple Reacts to the browser, hooks would silently break across boundaries, and the payload would balloon. The solution is in two parts:
+
+**Layer one**, the import map in the Razor view, declares the shared libraries:
+
+```html
+<script type="systemjs-importmap">
+  {
+    "imports": {
+      "react": "https://cdn.../react@18.2.0/...",
+      "react-dom": "https://cdn.../react-dom@18.2.0/...",
+      "react-bootstrap": "https://cdn.../react-bootstrap@2.8.0/...",
+      "axios": "https://cdn.../axios@1.5.0/...",
+      "single-spa": "https://cdn.../single-spa@5.9.5/..."
+    }
+  }
+</script>
+```
+
+**Layer two**, every micro-app's webpack config marks those plus our internal shared libraries (`helpers`, `components`) as `externals`. They're not bundled into the app. They're expected to come from the import map at runtime.
+
+The mechanism is elegant when it works. The cost is procedural: adding a new shared dependency requires touching the import map (a backend repository) **and** marking it external in every consumer's webpack config. Miss one of either and you get a runtime crash. Our git history shows it happening — a third-party SDK was added to the import map and reverted four days later because the rollout wasn't atomic.
+
+There's a related quirk in one of our apps' webpack configs:
+
+```js
+resolve: {
+  alias: {
+    /* force prod React in dev */
+  }
+}
+```
+
+This exists because `import-map-overrides` (more on it later) can swap in a local development bundle whose React-mode disagrees with the shell. The alias forces production React in dev so the modes line up. A workaround within a workaround.
+
+---
+
+## Workaround 3: CORS, everywhere
+
+Every micro-app's `devServer` block has these headers:
+
+```js
+"Access-Control-Allow-Origin": "*"
+"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+```
+
+The reason is mundane and load-bearing: locally, the shell runs at `:4000`, but it pulls each app's bundle from a different port — apps live on `:4003`, `:4007`, `:4009`, `:4010`, libraries on `:4006` and `:4008`, and so on. SystemJS does cross-origin fetches. Without wildcard CORS the shell can't load any micro-app.
+
+It's a one-liner per webpack config. It's also nontrivial to discover the first time you build a new app from scratch. New micro-app, first day, every request fails — and the answer isn't "your code is broken," it's "your dev server doesn't allow cross-origin requests from a port you didn't even know mattered."
+
+Worth being explicit: this is dev-only. In production, every bundle lives on the same CloudFront domain. But that means the _production_ network model and the _development_ network model are different in a way the docs don't surface. Two mental models, one codebase.
+
+---
+
+## Workaround 4: The bootstrap chain
+
+The shell's bootstrap entry doesn't call Single-SPA's `start()` until five things have happened:
+
+1. Server-rendered user data (the envelope, more soon) is parsed.
+2. Mixpanel / Sentry / Hotjar are initialized if conditions allow.
+3. `initializeAbility()` resolves user permissions from the Identity API.
+4. LaunchDarkly flags resolve (`await initializeFeatureFlags(...)`).
+5. `buildFrontendLayout()` computes the layout config with those flags in hand.
+
+Only then are `constructRoutes / constructApplications / registerApplication / start` invoked. A splash screen painted before any of this covers the gap.
+
+Naïve Single-SPA bootstraps register apps synchronously and let them race the user data. We tried that. The catch-all app would mount, fire a permission-gated query before permissions had loaded, 401, retry, 401 again, and present a permission-denied page to a user who in fact had permission. The fix was to push everything async-first and to guard the user from seeing intermediate states with the splash.
+
+A small shave we made later: LaunchDarkly is initialized with `bootstrap: "localStorage"`. Flags from the previous session are used immediately; LD's network call updates them in the background. Without this, every page load adds a hard wait on a remote LD call before `start()` can fire. Net effect: the splash disappears in under a second on a warm session.
+
+A small honest note: if LaunchDarkly's CDN is down, our try/catch returns the default flag set rather than blocking. Flag-gated routes silently disappear during LD outages. Failure mode chosen deliberately. The user sees a working product with fewer features instead of a blank screen.
+
+---
+
+## Workaround 5: Feature flags as route gates (and the window-global flag bus)
+
+Three of our micro-apps are gated by LaunchDarkly flags directly inside the route dispatcher:
+
+```ts
+if (flags.isFeatureAEnabled && /feature-a/.test(path)) return ...;
+if (flags.isFeatureBEnabled && /feature-b/.test(path)) return ...;
+if (flags.isFeatureCEnabled && /feature-c/.test(path)) return ...;
+```
+
+We can merge new micro-apps to main without exposing them. The same flags decide whether the sidebar icon renders. When we needed to roll back a feature app recently, the revert was a one-file change.
+
+One of those flags gets an extra layer: `client.variation("ft-enable-feature-a", false) && ALLOWED_ORG_IDS.has(data.organizationId)`. The org allowlist is a hardcoded `Set` in shared helpers — meaning a new org requires a frontend deploy. Belt-and-braces, deliberately. LaunchDarkly is the soft kill-switch; the allowlist is the hard one. Useful when compliance requires a guarantee that no flag misconfiguration can leak the feature.
+
+Once the flags are resolved, we put them on the window:
+
+```ts
+declare global {
+  interface Window {
+    __FEATURE_FLAGS__?: FeatureFlags;
+  }
+}
+
+export function setFeatureFlags(flags: FeatureFlags): void {
+  window.__FEATURE_FLAGS__ = flags;
+}
+
+export function getFeatureFlags(): FeatureFlags {
+  return window.__FEATURE_FLAGS__ ?? DEFAULT_FEATURE_FLAGS;
+}
+```
+
+This pattern is everywhere in micro-frontend codebases and almost never explained as a deliberate choice. The reason we use `window` instead of a module-level `let` is `import-map-overrides`. In local dev, two copies of the helpers library can sneak into memory if you override one but not the other; module-level state breaks. The window is the only truly global escape hatch the runtime guarantees. Naming the global `__FEATURE_FLAGS__` and writing it through a setter is the cheapest way to say "this is shared mutable state, on purpose."
+
+LaunchDarkly itself is bundled into the shell — not externalized. Only the shell evaluates flags. Every micro-app reads them via `getFeatureFlags()`. Single source of truth, single LD client instance. The natural micro-frontend instinct would be "each app does its own LD init"; we explicitly didn't, because that means N clients × N flag evaluations × N analytics events.
+
+---
+
+## Workaround 6: The envelope
+
+There is a comment in one of our shared-helpers utilities that explains the most important pattern in this codebase better than any paragraph I could write:
+
+```ts
+// THE SECRET HERE IS THE BACKEND TEAM INJECT SOME DATA IN A HIDDEN INPUT FROM
+// THE SERVER SIDE
+// SO, DUE TO THIS WAY WE ARE 100% SURE THAT DATA WILL BE AVAILABLE BEFORE
+// RENDERING THE FRONTEND APP
+// SO, FROM OUR SIDE WE ARE GET THE DATA IN COMPONENTDIDMOUNT
+// (useEffect without dependencies)
+const userDataJSON = document.getElementById("zarf") as HTMLInputElement;
+// "zarf" means `envelop` in arabic :D
+```
+
+_Zarf_ is Arabic for envelope. The .NET host pre-fetches the user, organizations, projects, available tools, and module permissions during the Razor render, serializes each one to JSON, and drops them into hidden inputs in the body:
+
+```html
+<input type="hidden" id="zarf"                  value="@ViewData["userInfo"]" />
+<input type="hidden" id="zarf_organizations"    value="@ViewData["organizations"]" />
+<input type="hidden" id="zarf_projects"         value="@ViewData["projects"]" />
+<input type="hidden" id="zarf_tools"            value="@ViewData["tools"]" />
+<input type="hidden" id="zarf_user_modules"     value="@ViewData["userModulesPermissions"]" />
+```
+
+The SPA opens the envelope on bootstrap. There are no spinners over "loading your account." That data was always there, sitting in the DOM, before a single byte of JavaScript executed.
+
+This isn't SSR. We don't render React on the server. We ship the _data_ server-side and let the SPA mount as usual. SSR's win — no extra round-trips — without SSR's costs — no isomorphic React, no streaming, no hydration mismatches. Server-rendered context, client-rendered UI.
+
+What's in the envelope, and why each is in there:
+
+| Input                 | Why it can't wait for JS                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| `#zarf` (user)        | Mixpanel and Sentry need the user before React mounts, or the first events go anonymous. |
+| `#zarf_organizations` | The nav's org switcher renders synchronously; nav is the first app to mount.             |
+| `#zarf_projects`      | The redirection engine (next section) decides where to go from this.                     |
+| `#zarf_tools`         | The sidebar icons render immediately — no flash of empty sidebar.                        |
+| `#zarf_user_modules`  | Permission-gated routes need a synchronous answer before mounting.                       |
+
+The cost lives in the host. Pre-loading does `Task.WaitAll(...)` on four parallel HTTP calls before rendering. If Identity is slow, the whole page is slow — and there's no streaming, so the user sees nothing, not even a splash. We've traded "many fast JS fetches" for "one fat server fetch." On a warm cache, the trade is excellent. On a cold cache or a degraded Identity, it's worse than client-side. We accept that.
+
+---
+
+## Workaround 7: The redirection engine
+
+A sixty-line module sits in the shell that can short-circuit the entire bootstrap. The file's TODO header is the most honest documentation in the repo:
+
+```ts
+// - GET TOOLS FROM THE ZARF, NOT THE API (FOR A FASTER SOLUTION) [DEPRECATED]
+// - HOW TO HANDLE 404, 500, AND OTHER ERROR CASES
+// - TRY NOT TO LAND ON THE 404 PAGE (THIS HAPPENS BECAUSE THE DEFAULT APP 404s)
+//   // SINCE IT IS THE CATCH-ALL MICRO-APP
+// - DECIDE WHEN TO RUN THE REDIRECTION LOGIC
+// - THIS LOGIC SHOULD ONLY RUN FOR THE "PORTAL" APPLICATION
+// - RETEST ALL SCENARIOS
+```
+
+The bolded line — _TRY NOT TO LAND ON THE 404 PAGE (THIS HAPPENS BECAUSE THE DEFAULT APP 404s)_ — is the workaround in one sentence. The default app is registered as the catch-all in our regex dispatch. A user landing on `/` mounts the default app, which then 404s inside its own router because there's no project context. The redirect engine exists _to compensate for the catch-all._ It's a Single-SPA limitation laundered through the envelope.
+
+The flow:
+
+1. Read user and projects from the envelope.
+2. Inspect the URL — if there's no module path, pick a sensible default.
+3. If the URL has a `projectId` that's a valid UUID, use it; otherwise grab the first project the user owns.
+4. Hard-navigate to `/project/<id>/dashboard` via `window.open(url, "_self")`.
+
+That last step matters. We use a full reload, not Single-SPA's `navigateToUrl`, because the .NET host needs to re-render with the new path so the envelope gets refilled with that project's context, tools, and permissions. A SPA-level navigation wouldn't refill the envelope. The redirect is, in effect, asking the _server_ to re-stamp the page.
+
+The redirection engine is the first consumer of the envelope, and it uses the envelope to decide whether to throw the rest of the bootstrap away. There's also a charming one-liner that survived to production:
+
+```ts
+// onLoadingOff(); // USELESS :D
+```
+
+I'm keeping it. It explains more about the codebase than the comment intends to.
+
+---
+
+## Workaround 8: The errors we don't tell Sentry about
+
+Our Sentry init is short. The filter list is the load-bearing part:
+
+```ts
+const isCanceledRequest =
+  exception.type === "CanceledError" || exception.value?.includes("canceled");
+// WE NEED TO SUPPORT RETRY MECHANISM
+const isUnAuthorizedException =
+  exception.type === "AxiosError" || exception.value?.includes("status code 401");
+
+if (isCanceledRequest || isUnAuthorizedException) {
+  return null; // drop the event
+}
+```
+
+Two categories of error never make it to the dashboard. Both are micro-frontend-shaped:
+
+**Canceled requests** are normal when Single-SPA unmounts an app mid-flight. Every in-progress fetch in one app throws `CanceledError` the moment the user navigates to another. Without this filter, every cross-app navigation spammed Sentry.
+
+**401s are silenced globally**, with the candid TODO right above. Translation: until we have proper token refresh, we're hiding the symptom. This is the kind of pragmatic debt micro-frontends accrue because no single app owns the HTTP layer. The auth flow lives in the .NET host; the cookies are set there; the SPA reads them; nobody in the SPA owns the retry semantics, so we drop the noise.
+
+The cost is paid in dev: auth bugs locally don't surface as Sentry events. You see a "request failed" toast with no stack trace, no breadcrumb, no clean repro. Engineers re-enable Sentry locally to find what's broken. It's a feature for prod, a bug for dev, and we live with the asymmetry.
+
+---
+
+## Workaround 9: Cross-app coordination through SystemJS singletons
+
+Our two shared library packages ship as SystemJS modules alongside the micro-apps, but they're not Single-SPA apps. They expose no `bootstrap/mount/unmount` lifecycle. They're libraries. We use `webpack-config-single-spa-ts` / `webpack-config-single-spa-react-ts` not because they're apps, but because that's the easiest way to produce a SystemJS-compatible library bundle.
+
+The trick is load-bearing. SystemJS de-duplicates module loads by URL, so the shared library bundles are **runtime singletons** across all seventeen-plus micro-apps. Every import of the helpers library returns the same instance. That singleton-ness is what makes the next three patterns possible.
+
+**Permissions as a Zustand store inside the components library.** The Ability context lives in the shared components package, wrapped in a redux-style reducer that the comments cheerfully label "MINI REDUX PATTERN." The shell calls `setAbilityPermissionsAction(permissions)` once; every `<Ability.Can module="X" action="Y">` in every micro-app reads from the same store. It works only because the components library is one instance in memory. If a standalone repo bundles the components library locally — which is what some of our newer apps do — that micro-app gets its own Zustand store, and the permissions set by the shell aren't visible to it. **This is the silent cost of bundling shared libs locally that nobody puts in the trade-off doc.**
+
+**i18n initializes at module-import time.** `i18n.use(initReactI18next).init({...})` runs when the components library is imported. Whichever micro-app imports first triggers it. The comment is the cleanest admission of a side-effecting module's fragility I've seen in production code:
+
+```ts
+// HOW TO USE:
+// label={t(`server|translation.proj:view`)}
+// LIMITATION: NOT WORKING IN routes.tsx, because it loaded before this file
+```
+
+In a single-app world, side effects at module scope work. In a micro-frontend world, the meaning of "first" depends on the import map traversal order, which isn't stable. We chose convenience and ate the limitation.
+
+**`QueryProvider` defaults to `cacheTime: 0` and a per-mount QueryClient.** `cacheTime: 0` is the tell. Normally you'd set it to several minutes. Setting it to zero means as soon as a query has no observers, it's GC'd. Combined with `useState(() => new QueryClient(...))`, each provider mount gets a fresh client. Why? Because when Single-SPA unmounts an app, you don't want its React Query cache to live on in memory — and you definitely don't want a stale `["projects"]` from one app showing up in another. The defaults exist to **defend the boundary between micro-apps.** No React Query tutorial would recommend this for a normal app. In micro-frontend land it's correct.
+
+There's also a contradiction worth naming. Inside the monorepo, we rely on the SystemJS singleton model for shared state. Newer apps in standalone repos bundle the same libraries locally and rebuild that state from scratch. Both are pragmatic. They're also incompatible with each other. The day a standalone-repo app needs to talk to the shell's Ability state, someone will have to invent a new pattern. We haven't yet. We will.
+
+---
+
+## What it actually feels like to work in this stack
+
+Architecture diagrams are tidy. The day-to-day isn't.
+
+### The first thirty minutes
+
+A new contributor clones the repo. `pnpm install` runs for three-to-six minutes and produces 12 GB of `node_modules`, distributed across thirteen nested workspace directories. They copy `.env.example` to `.env`, set roughly a dozen variables, and run the default app's start script. That single script spins up **eight webpack dev servers in parallel**: the shell, the nav, the default app, plus all five shared libraries.
+
+They open `http://localhost:4000`. Nothing happens.
+
+They missed the .NET host. Or they missed the `import-map-overrides` step. Or they have a wrong CDN URL in `.env` and the shell loads but `getServerUserData()` returns null and the redirect engine bails. The first successful render is five to ten minutes in, and only if everything aligns.
+
+The minimum viable mental model on day one is: monorepo, eight dev servers, .NET host, SystemJS import map, runtime config endpoint, LaunchDarkly, OIDC. That's a lot of moving parts before writing a line of code.
+
+### The three dev modes (and the one we actually use)
+
+Standalone repos run in two visible modes:
+
+`start:standalone` runs the app on its own. No shell, no nav, no envelope, no auth. Fast, isolated, and a fantasy world where the platform doesn't exist. `getServerUserData()` returns `null`. Permission-gated UI either no-ops or crashes.
+
+`start:micro` hot-reloads the app into the **deployed test portal** via `import-map-overrides`:
+
+```js
+localStorage.setItem("import-map-override:@org/some-app", "http://localhost:4009/some-app.js");
+location.reload();
+```
+
+Real shell, real auth, real envelope. Closest to prod. Depends on test environment being healthy. The localStorage incantation is per-browser, per-app, and every "did you clear the override?" debugging session is two minutes of confusion.
+
+But the mode engineers actually use is **the third one**, and it's the one nobody documents prominently. Every shell — dev and prod — ships with `<import-map-overrides-full>`, a custom element from the `import-map-overrides` library that registers a floating overlay. Setting `localStorage.devtools = true` and reloading makes the overlay appear. From there, swapping a deployed micro-app for a local build is a button click. The programmatic equivalent is `importMapOverrides.enableUI()`. This is the load-bearing piece of DX between "I'm working on my app" and "I'm seeing my work in the real shell." It gets the least mention in onboarding.
+
+That same overlay element ships to production. The denylist meta tag exists as commented-out boilerplate in our HTML and has never been activated. Anyone with a valid prod session and access to DevTools can type `localStorage.devtools = true` and serve their own JS bundle into the real user's session. We trust the network boundary to keep non-employees out. That is a values trade-off we made implicitly. I'm going to be honest about it here, because the article would be dishonest without it: an attacker who gets a session cookie can run arbitrary JavaScript on our domain by adding an override. The fix is one uncommented line. We haven't shipped it because the convenience for engineers exceeds the perceived risk. That trade-off should at least be explicit.
+
+### The triage tree
+
+A "splash screen never resolves" report can live in seven layers:
+
+1. The .NET host (OIDC config, sync HTTP hung on Identity).
+2. The runtime config endpoint (stale import map, points to a broken JS bundle).
+3. The SystemJS module load (CDN 404, CORS, version mismatch).
+4. The shell bootstrap (LD timeout, ability rejection).
+5. The redirection engine (envelope malformed, no projects, regex didn't match).
+6. The regex dispatch (URL doesn't match any micro-app).
+7. The micro-app itself.
+
+A new hire who only knows React will look at layer 7 for three days before someone tells them about layer 2. Documenting the triage path is the single highest-leverage DX improvement we've never written.
+
+### Adding a new micro-app
+
+Walk a new contributor through adding a new feature app:
+
+1. Register a regex stanza in the shell's routing file, ordered before the catch-all.
+2. Add the app's URL to `.env.example` and to CI environment variables across all four environments.
+3. Update the **runtime config endpoint** — different repo, different team — to include the new entry.
+4. Add a LaunchDarkly flag if rollout is gated.
+5. Optionally: add a sidenav icon, register a permission module in Identity, add an i18n bundle.
+
+Six places. Three repositories. Two teams. No tool prevents you from forgetting step 3. The first time anyone shipped a new micro-app in this codebase, they hit "module not found in SystemJS" at runtime — and that error message tells you nothing about the runtime config endpoint being the source of truth.
+
+### The other taxes
+
+- **Branch names are validated by a Husky hook.** Must start with one of a small set of prefixes, must contain a Jira ticket from one of several allowed projects, must use hyphens. A new contributor types `git commit` for the first time, hook rejects, thirty seconds of "is git broken?"
+- **Three CSS frameworks coexist.** Tailwind 3.4 (with mandatory `tw-` prefix to avoid collisions), Bootstrap 5.3, FontAwesome Pro, plus CSS Modules per component. A styling decision starts with "which framework am I in." Our internal docs include a "When to Use What" table. _That table existing is a DX confession._
+- **The lockfile is shared across twelve-plus packages.** A bump in one app and a bump in a shared library, merged the same day, conflict. The standard fix — delete, reinstall, recommit — costs five minutes per conflict and runs every install hook. The standalone-repo split is the strongest argument we have for _not_ sharing a lockfile.
+- **Source maps in prod are sometimes uploaded, sometimes not.** Recent CI commits have flip-flopped: one removed `.map` files from S3 uploads to save bandwidth; another four days later put them back because production stack traces became unreadable. A production stack trace might be human-readable or might be `t.a is not a function`. You don't know until the bug fires.
+- **Versioning runs through an internal API.** Every deploy hits an internal version-management service twice. Service down means deploys blocked. Single-SPA doesn't ship a version coordination layer. Every org invents one.
+
+### What Single-SPA's tooling doesn't help with
+
+The framework gives you `single-spa-react`, route activity functions, and a SystemJS app preset. It doesn't give you:
+
+- A way to run all your micro-apps from one command (we rolled `run-p start:*`).
+- A dev-mode shell that fakes auth and the envelope (we don't have one).
+- A way to declare "app A depends on lib B" so the import map enforces load order (we rely on implicit traversal).
+- A way to test a micro-app inside a realistic shell without a deployed environment (the override overlay).
+- A migration path for a shared library evolving alongside the apps that consume it (we have two scopes for the same library and a half-broken story for which apps see which version).
+
+Every gap above is documented as a workaround in this article. Naming them as DX gaps, not just architectural choices, is the honest thing to do. The reader on the other side of this article — possibly evaluating micro-frontends for their own org — should leave knowing the daily cost, not just the architectural neatness.
+
+---
+
+## From one monorepo to one monorepo plus eight repos
+
+The architecture is now hybrid, and the arc is worth telling because it answers the question every reader wants to ask: _would you do it the same way again?_
+
+### Why monorepo first
+
+Real reasons, in the order they mattered:
+
+- **Atomic cross-cutting changes.** One PR updates the shell, the nav, a shared component, and a feature app together. The lockfile reflects exactly what's deployed.
+- **Shared packages live next to consumers.** Refactoring a hook in the shared helpers types-checks against every micro-app in the same TS run.
+- **One ESLint, one Prettier, one Jest, one Husky.** A new contributor learns the conventions once.
+- **A single start script orchestrates eight dev servers** via `run-p`. Onboarding is `pnpm install && pnpm run start`.
+
+These are real wins. They're also the reason the install is 12 GB.
+
+### Where it broke
+
+- **Install cost.** Cold `pnpm install` is multi-minute.
+- **Build cost.** `build:all` is sequential by design: shared libraries first, then their dependents, then the apps. CI runs with low concurrency. One file changed in the shared helpers rebuilds twelve packages.
+- **Devserver RAM.** Eight webpack dev servers in parallel is the official setup. On a 16 GB laptop, it's not sustainable once apps grow past ~20 MB each.
+- **Lockfile coordination.** Already covered.
+
+### Why new apps live in their own repos
+
+Apps written in the last year live in standalone repositories. They consume our shared libraries as **npm-versioned dependencies**, not via the SystemJS singleton. They have their own CI, their own lockfile, their own tooling autonomy — one of them added Storybook; another added Playwright. The shell loads them via import map URLs from the runtime config endpoint.
+
+One of those repos has a webpack comment that, more than any architecture doc, explains the inflection point. Paraphrased: _we want the shared helpers to be bundled with each micro frontend rather than shared via the SystemJS import map._
+
+That team turned off the `orgPackagesAsExternal` setting. They explicitly chose to **duplicate the helpers bundle into their app** rather than depend on the SystemJS singleton. Three benefits and one cost:
+
+1. Independent upgrade clock. Helpers ships a breaking change? Doesn't matter — your bundled version is frozen.
+2. Independent CI. No monorepo lockfile thrash.
+3. Independent deploy cadence. Ship without coordinating with the platform team.
+4. **You lose access to the cross-app state** the singleton enabled. The Ability Zustand store, the `window.__FEATURE_FLAGS__` bus — those are now redundantly re-implemented. We haven't hit the consequence yet. We will.
+
+### The hybrid
+
+In the monorepo today: the platform plumbing — shell, nav, default app, the original feature apps, plus the five shared packages. The things that _must_ change together.
+
+Out of the monorepo: every feature app added in the last year. Loaded via SystemJS import map URLs pointing to CloudFront. Gated by LaunchDarkly. Registered in the shell's routing file by adding a regex stanza.
+
+The takeaway nobody put in a slide deck:
+
+> **Single-SPA didn't make monorepo-vs-multirepo a one-time decision. The import map is the seam. Anything reachable through it doesn't need to live next to the shell. We use the monorepo for the things that change together, and ship everything else from its own repo.**
+
+That's the rule. It took a year to figure out.
+
+---
+
+## A note about the maintainer
+
+Before the wishlist, the part of this story I didn't know when I started writing.
+
+[Single-SPA issue #1361](https://github.com/single-spa/single-spa/issues/1361), "Why does this project feel abandoned? (Part 2 — Checking in for 2026)," was opened in February 2026. The OP noted that v7.0 development had paused after September 2025, that the last core-logic merge to `main` was late 2024, that the Slack invitation links were broken. No maintainer had replied. It is Part 2 because Part 1 also went unanswered.
+
+On 3 March 2026, [a commenter in that thread](https://github.com/single-spa/single-spa/issues/1361#issuecomment-3991093643) explained why:
+
+> _Single-spa's creator, Joel Denning, sadly passed away last November. This understandably may have affected the project's recent activity. Rest in peace._
+
+Joel was the original author of single-spa. He also authored `single-spa-layout`, the `webpack-config-single-spa-*` presets, and `import-map-overrides` — the four packages this entire article has been describing our use of. He carried the practical surface of micro-frontend tooling on his own, for years, and many of us — including me — built production architectures on top of his work without ever sending him a thank-you note.
+
+The corollary is unsentimental and worth saying clearly: the ecosystem doesn't have a successor. There is no v2 in the pipeline. The wishlist below is not a roadmap request — it's a description of the gaps for anyone who picks the work up, or for anyone deciding whether to start building on the framework today.
+
+---
+
+## What we'd ask of Single-SPA, if anyone is listening
+
+The list, for the record:
+
+1. **First-class `exclude` semantics on activity rules.** The regex dispatch in the shell's routing file exists only because there's no clean way to say "the catch-all catches everything except these other apps."
+2. **A runtime-config import map as a documented pattern.** We built ours in .NET. Every org with multiple micro-app teams will end up doing this. It deserves a chapter in the official docs.
+3. **Bootstrap-ordering primitives.** A way to say "don't `start()` until these N async things resolve" without rolling your own promise chain.
+4. **A documented "host my shell server-side" pattern.** Everyone large does this. The framework should acknowledge it.
+5. **A migration path for a shared library evolving alongside the apps that consume it.** We have two scopes for the same library and a half-broken story for which apps see which version.
+
+These are real engineering problems. They are not going to be solved by waiting.
+
+---
+
+## Closing
+
+The workarounds in this article — the .NET shell, the envelope, the regex dispatch, the cross-app singleton state, the floating override overlay — aren't transitional patches anymore. They are the architecture. We were already heading toward that conclusion before March 2026; the news of Joel's passing made it final.
+
+That doesn't make the original choice wrong. Single-SPA's worldview — independent micro-apps, sharable React via import map, lifecycle hooks for mount/unmount — still pays for itself for us. We ship features independently. Teams pick their own React Query and form library. New micro-apps land in their own repos and don't touch the platform.
+
+But the gap between what the framework provides and what production needs is bigger than the framework's surface area would suggest. We filled the gap with C#, with hand-rolled regex, with a window global, with a Zustand store labelled "MINI REDUX PATTERN," with a sidebar of dev-tool comments, and with one Razor view that quietly does more work than any single page in our frontend. None of that was the framework's fault. All of it was the cost of running the framework at production scale.
+
+If I were starting over today — knowing what I now know about both the architecture and the upstream situation — I'd think harder than I did the first time. Micro-frontends still make sense for some org shapes. Single-SPA is still a coherent design. But you'd be adopting a frozen framework, building the orchestration around it yourself, and committing to maintain it indefinitely without expecting upstream help. For some teams, that's fine. For most teams asking "should we use micro-frontends?", the right answer is probably: not yet, and probably not this way.
+
+A year ago I wrote that I'd think carefully about choosing micro-frontends again. I still would. The answer might still be yes for the right project. It just isn't a casual yes anymore — and now, sadly, it can't be.
