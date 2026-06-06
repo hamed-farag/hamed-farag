@@ -1,0 +1,445 @@
+---
+id: ontology-1
+title: "The Ontology, Explained Like You're New Here"
+date: "06-06-2026"
+description: "A beginner-friendly guide to ontologies for software engineers — from a list of words to the contract that powers UIs, SDKs, and AI agents. Built up with everyday examples, diagrams, and dialogs."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*If you've heard senior engineers throw around the word "ontology" and nodded along while quietly panicking — this one's for you. No philosophy degree required. We'll build the idea up from a list of words to the thing that powers AI agents, using examples you already understand.*
+
+---
+
+## Start with a lost dog
+
+Imagine you find a dog in the street. It has a little tag. You want to get it home.
+
+What do you actually need to know? The dog's name, sure. But really you need to know **who owns it** — and that's a *relationship*, not just a fact about the dog.
+
+Hold that thought. That gap — between *knowing words* and *knowing how things connect* — is the entire idea of an ontology. Let's climb to it one step at a time.
+
+> **👩‍💻 Mai (junior):** Okay but isn't "ontology" just a fancy word for a database schema?
+>
+> **👨‍🏫 Hamed (mentor):** That's the most common first guess, and it's close enough to be dangerous. A schema says *what columns a table has*. An ontology says what *things exist in your business, how they relate, and what you're allowed to do to them* — and then a bunch of other systems build on top of that single description. Stick with me, the difference becomes obvious.
+
+---
+
+## The ladder: words → groups → meaning
+
+There are three rungs, and each one knows a little more than the one below.
+
+<svg width="100%" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The ladder from vocabulary to taxonomy to ontology" style="max-width:640px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="16" width="560" height="72" rx="10" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <rect x="40" y="16" width="6" height="72" rx="3" fill="#8A93A1"/>
+    <text x="64" y="42" font-size="16" font-weight="600" fill="#1F2733">1 · VOCABULARY</text>
+    <text x="64" y="61" font-size="13" fill="#5B6675">just a list of words</text>
+    <text x="64" y="79" font-size="12" font-family="ui-monospace, monospace" fill="#8A93A1">Dog · Owner · Tag</text>
+    <line x1="320" y1="88" x2="320" y2="110" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar1)"/>
+    <rect x="40" y="112" width="560" height="72" rx="10" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <rect x="40" y="112" width="6" height="72" rx="3" fill="#1F9AA8"/>
+    <text x="64" y="138" font-size="16" font-weight="600" fill="#1F2733">2 · TAXONOMY</text>
+    <text x="64" y="157" font-size="13" fill="#5B6675">adds hierarchy: “is a kind of”</text>
+    <text x="64" y="175" font-size="12" font-family="ui-monospace, monospace" fill="#8A93A1">Dog is-a Animal</text>
+    <line x1="320" y1="184" x2="320" y2="206" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar1)"/>
+    <rect x="40" y="208" width="560" height="76" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <rect x="40" y="208" width="6" height="76" rx="3" fill="#6B5FD0"/>
+    <text x="64" y="234" font-size="16" font-weight="600" fill="#1F2733">3 · ONTOLOGY</text>
+    <text x="64" y="253" font-size="13" fill="#5B6675">adds relationships + properties + rules</text>
+    <text x="64" y="272" font-size="12" font-family="ui-monospace, monospace" fill="#6B5FD0">Owner owns Dog · every Dog needs 1 Owner</text>
+  </g>
+</svg>
+
+- **Vocabulary** is just naming things. `Dog`. `Owner`. `Tag`. A glossary.
+- **Taxonomy** adds *grouping*. "A Dog is a kind of Animal. A Cat is a kind of Animal." Now you have a tree.
+- **Ontology** adds the part that matters: **how things actually connect, and the rules.** "An Owner *owns* a Dog. A Dog *wears* a Tag. Every Dog must have exactly one Owner."
+
+That last rung is the magic. Once your software knows "a Dog *has* an Owner," it can **reason**: scan the tag → find the owner → get the dog home. The words alone couldn't do that. The *relationships* could.
+
+> **👩‍💻 Mai:** So an ontology is basically... a map of how stuff connects?
+>
+> **👨‍🏫 Hamed:** Exactly. A map of the things in your system and the arrows between them. Now let's draw a real one.
+
+---
+
+## A real example: a tiny online shop
+
+Forget dogs. Here's an ontology any web dev will recognize — an online store:
+
+<svg width="100%" viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A small online-shop ontology" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="40" width="170" height="64" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="125" y="68" font-size="15" font-weight="600" fill="#1F2733" text-anchor="middle">Customer</text>
+    <text x="125" y="88" font-size="12" fill="#5B6675" text-anchor="middle" font-style="italic">name, email</text>
+    <rect x="255" y="40" width="170" height="64" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="340" y="68" font-size="15" font-weight="600" fill="#1F2733" text-anchor="middle">Order</text>
+    <text x="340" y="88" font-size="12" fill="#5B6675" text-anchor="middle" font-style="italic">date, total</text>
+    <rect x="470" y="40" width="170" height="64" rx="10" fill="#F6F8FB" stroke="#1F9AA8"/>
+    <text x="555" y="68" font-size="15" font-weight="600" fill="#1F2733" text-anchor="middle">Product</text>
+    <text x="555" y="88" font-size="12" fill="#5B6675" text-anchor="middle" font-style="italic">title, price</text>
+    <rect x="255" y="230" width="170" height="64" rx="10" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="340" y="258" font-size="15" font-weight="600" fill="#1F2733" text-anchor="middle">Address</text>
+    <text x="340" y="278" font-size="12" fill="#5B6675" text-anchor="middle" font-style="italic">street, city</text>
+    <rect x="470" y="230" width="170" height="64" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="555" y="258" font-size="15" font-weight="600" fill="#1F2733" text-anchor="middle">Category</text>
+    <text x="555" y="278" font-size="12" fill="#5B6675" text-anchor="middle" font-style="italic">name</text>
+    <line x1="210" y1="72" x2="253" y2="72" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <text x="231" y="64" font-size="11" fill="#5B6675" text-anchor="middle">places</text>
+    <line x1="425" y1="72" x2="468" y2="72" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <text x="446" y="64" font-size="11" fill="#5B6675" text-anchor="middle">contains</text>
+    <line x1="340" y1="104" x2="340" y2="228" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <text x="388" y="170" font-size="11" fill="#5B6675" text-anchor="middle">ships to</text>
+    <line x1="555" y1="104" x2="555" y2="228" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <text x="604" y="170" font-size="11" fill="#5B6675" text-anchor="middle">belongs to</text>
+  </g>
+</svg>
+
+Read the arrows out loud and you get plain English: *"A Customer places an Order. An Order contains Products. An Order ships to an Address. A Product belongs to a Category."*
+
+That's the whole vocabulary of an ontology:
+
+- **Boxes** = the *things* (we call them **objects** or **object types**).
+- **Italic text inside** = their **properties** (attributes).
+- **Arrows** = the **relationships** (called **links**).
+- Add a couple of **rules** on top — "an Order must contain at least one Product" — and you have a complete little ontology.
+
+If you've ever drawn an ER diagram, you're 70% of the way there. The ontology just doesn't stop at "what tables exist" — it keeps going into *behavior* and *permissions*, which we'll get to.
+
+Two everyday comparisons that make it stick:
+
+- A **LEGO instruction booklet** lists every piece (objects), what each looks like (properties), and exactly how they snap together (links + rules). That booklet is an ontology for your LEGO set.
+- A **recipe** names the ingredients, their amounts, and the steps connecting them. An ontology for a dish.
+
+---
+
+## "Okay, but where does the *data* come from?"
+
+Here's where beginners get confused, so let's be concrete. Your real data is *messy*. It's spread across databases, spreadsheets, half-broken CSV exports, and APIs. Columns have names like `cust_id` and `full_nm`. Nothing agrees with anything.
+
+The ontology doesn't magically clean that up. Two separate jobs happen:
+
+<svg width="100%" viewBox="0 0 680 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Raw sources cleaned then mapped to ontology objects" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="30" y="35" width="190" height="60" rx="10" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <text x="125" y="62" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Raw sources</text>
+    <text x="125" y="81" font-size="11" fill="#5B6675" text-anchor="middle" font-style="italic">messy tables, APIs, CSVs</text>
+    <rect x="245" y="35" width="190" height="60" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="340" y="62" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Cleaning step</text>
+    <text x="340" y="81" font-size="11" fill="#5B6675" text-anchor="middle" font-style="italic">fix, rename, join</text>
+    <rect x="460" y="35" width="190" height="60" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="555" y="62" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Ontology objects</text>
+    <text x="555" y="81" font-size="11" fill="#5B6675" text-anchor="middle" font-style="italic">Customer, Order</text>
+    <line x1="220" y1="65" x2="243" y2="65" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar3)"/>
+    <line x1="435" y1="65" x2="458" y2="65" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar3)"/>
+  </g>
+</svg>
+
+**Job 1 — clean the data.** A pipeline tool — the data-transformation step — takes raw inputs and transforms them: rename columns, drop junk rows, join tables together. The output is a tidy, reliable dataset. This is just ETL — the "T" (transform) you've probably already done in SQL or pandas.
+
+**Job 2 — map the clean data to objects.** Now you declare: *"this clean table **is** a Customer."* You point at three things:
+
+1. The **primary key** — which column uniquely identifies one Customer.
+2. The **property mappings** — `cust_id → id`, `full_nm → name`.
+3. The **link rules** — the `order_ref` column isn't just text, it's a *relationship* to an Order.
+
+<svg width="100%" viewBox="0 0 600 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapping raw columns to clean object properties" style="max-width:600px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <text x="140" y="38" font-size="12" fill="#5B6675" text-anchor="middle">customers.csv (raw)</text>
+    <text x="460" y="38" font-size="12" fill="#5B6675" text-anchor="middle">Customer (object)</text>
+    <rect x="40" y="50" width="200" height="150" rx="10" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <line x1="40" y1="100" x2="240" y2="100" stroke="#E4E9F0"/>
+    <line x1="40" y1="150" x2="240" y2="150" stroke="#E4E9F0"/>
+    <text x="64" y="82" font-size="13" font-family="ui-monospace, monospace" fill="#1F2733">cust_id</text>
+    <text x="64" y="132" font-size="13" font-family="ui-monospace, monospace" fill="#1F2733">full_nm</text>
+    <text x="64" y="182" font-size="13" font-family="ui-monospace, monospace" fill="#1F2733">email_addr</text>
+    <rect x="360" y="50" width="200" height="150" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <line x1="360" y1="100" x2="560" y2="100" stroke="#E0DCF4"/>
+    <line x1="360" y1="150" x2="560" y2="150" stroke="#E0DCF4"/>
+    <text x="384" y="82" font-size="13" font-family="ui-monospace, monospace" fill="#1F2733">id</text>
+    <rect x="470" y="68" width="74" height="20" rx="10" fill="#6B5FD0"/>
+    <text x="507" y="82" font-size="11" fill="#FFFFFF" text-anchor="middle">primary key</text>
+    <text x="384" y="132" font-size="13" font-family="ui-monospace, monospace" fill="#1F2733">name</text>
+    <text x="384" y="182" font-size="13" font-family="ui-monospace, monospace" fill="#1F2733">email</text>
+    <line x1="240" y1="75" x2="360" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar4)"/>
+    <line x1="240" y1="125" x2="360" y2="125" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar4)"/>
+    <line x1="240" y1="175" x2="360" y2="175" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar4)"/>
+  </g>
+</svg>
+
+> **👩‍💻 Mai:** Wait — so does this *copy* all my customer rows into the ontology?
+>
+> **👨‍🏫 Hamed:** Great question, and the answer surprises everyone: **mostly no.** The mapping is a *rule*, not a copy. It's a pointer that says "interpret this dataset as Customers." Your actual rows stay where they live.
+
+---
+
+## So where is "Customer" actually stored?
+
+This is the question that breaks people's mental model, so let's nail it. A single Customer object is **assembled** from a few different places, each doing one job:
+
+<svg width="100%" viewBox="0 0 680 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One Customer object assembled from four stores" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="230" y="20" width="220" height="56" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="340" y="46" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">ONE Customer object</text>
+    <text x="340" y="65" font-size="11" fill="#5B6675" text-anchor="middle" font-style="italic">assembled from all four</text>
+    <line x1="300" y1="76" x2="120" y2="158" stroke="#8A93A1" stroke-width="1.4" marker-end="url(#ar5)"/>
+    <line x1="325" y1="76" x2="270" y2="158" stroke="#8A93A1" stroke-width="1.4" marker-end="url(#ar5)"/>
+    <line x1="355" y1="76" x2="410" y2="158" stroke="#8A93A1" stroke-width="1.4" marker-end="url(#ar5)"/>
+    <line x1="380" y1="76" x2="560" y2="158" stroke="#8A93A1" stroke-width="1.4" marker-end="url(#ar5)"/>
+    <rect x="40" y="160" width="150" height="150" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="115" y="190" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Definitions</text>
+    <text x="115" y="208" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">&amp; rules</text>
+    <text x="115" y="234" font-size="10.5" fill="#5B6675" text-anchor="middle">what a Customer IS</text>
+    <text x="115" y="266" font-size="10.5" fill="#6B5FD0" text-anchor="middle" font-weight="600">lives in</text>
+    <text x="115" y="281" font-size="10.5" fill="#6B5FD0" text-anchor="middle" font-weight="600">the ontology</text>
+    <text x="115" y="298" font-size="10" fill="#8A93A1" text-anchor="middle">tiny metadata</text>
+    <rect x="200" y="160" width="150" height="150" rx="10" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <text x="275" y="190" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Source values</text>
+    <text x="275" y="218" font-size="10.5" fill="#5B6675" text-anchor="middle">your actual</text>
+    <text x="275" y="233" font-size="10.5" fill="#5B6675" text-anchor="middle">million rows</text>
+    <text x="275" y="266" font-size="10.5" fill="#1F2733" text-anchor="middle" font-weight="600">stay in your</text>
+    <text x="275" y="281" font-size="10.5" fill="#1F2733" text-anchor="middle" font-weight="600">DB / warehouse</text>
+    <rect x="360" y="160" width="150" height="150" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="435" y="190" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Serving index</text>
+    <text x="435" y="218" font-size="10.5" fill="#5B6675" text-anchor="middle">read-optimized</text>
+    <text x="435" y="233" font-size="10.5" fill="#5B6675" text-anchor="middle">copy</text>
+    <text x="435" y="266" font-size="10.5" fill="#1F9AA8" text-anchor="middle" font-weight="600">for fast search</text>
+    <rect x="520" y="160" width="150" height="150" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="595" y="190" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Writeback store</text>
+    <text x="595" y="218" font-size="10.5" fill="#5B6675" text-anchor="middle">edits &amp;</text>
+    <text x="595" y="233" font-size="10.5" fill="#5B6675" text-anchor="middle">new objects</text>
+    <text x="595" y="266" font-size="10.5" fill="#C8861E" text-anchor="middle" font-weight="600">layered on top</text>
+  </g>
+</svg>
+
+- The **definitions and rules** ("a Customer has id/name/email, keyed on id, linked to Order") are the *only* thing that genuinely lives **inside the ontology**. And they're tiny — it's metadata, measured in kilobytes, not terabytes. This is the "single source of truth."
+- The **actual values** don't move. Your million rows stay in the database/warehouse they already lived in. The ontology just *points at them*.
+- For speed, there's a **serving index** — a derived, read-optimized copy so "show me all customers in Hong Kong with an open order" is instant.
+- When someone *changes* something, the edit can't go back into a read-only source export, so it lands in a separate **writeback store**, layered on top.
+
+> **👩‍💻 Mai:** So there *is* a new database — just for the definitions?
+>
+> **👨‍🏫 Hamed:** Yes — but picture a **catalog of definitions**, not a copy of your data. It stores "a Customer looks like *this*," not your customers. Often it's literally version-controlled files (JSON/YAML/TypeScript) in a Git repo, so you get diffs and rollback for free. The *meaning* lives there; the *data* lives where it always did.
+
+*(Heads-up: smaller systems sometimes skip the fancy "point at the source" approach and just copy everything into one new store — a table, a document DB, or a graph database like Neo4j. Simpler, and totally fine until your data gets huge or changes constantly. Architecture is about trade-offs, not rules.)*
+
+---
+
+## Nouns are boring without verbs
+
+Everything so far is **nouns** — things that *exist*. Customer, Order, the links between them. Useful, but static. A real system needs **verbs** — things you can *do*.
+
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Semantic nouns versus kinetic verbs" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="35" width="270" height="80" rx="12" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="175" y="66" font-size="13" font-weight="700" fill="#6B5FD0" text-anchor="middle" letter-spacing="1">SEMANTIC — THE NOUNS</text>
+    <text x="175" y="89" font-size="13" fill="#1F2733" text-anchor="middle">Objects · Links · Properties</text>
+    <text x="175" y="106" font-size="11" fill="#5B6675" text-anchor="middle" font-style="italic">what exists</text>
+    <rect x="370" y="35" width="270" height="80" rx="12" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="505" y="66" font-size="13" font-weight="700" fill="#C8861E" text-anchor="middle" letter-spacing="1">KINETIC — THE VERBS</text>
+    <text x="505" y="89" font-size="13" fill="#1F2733" text-anchor="middle">Actions · Functions</text>
+    <text x="505" y="106" font-size="11" fill="#5B6675" text-anchor="middle" font-style="italic">how change happens</text>
+    <line x1="310" y1="75" x2="368" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar6)"/>
+  </g>
+</svg>
+
+Two kinds of verb matter:
+
+- **Functions** *compute* things. "Given this Order, what's its risk score?" A function reads objects, follows links, calculates, and returns an answer. It **doesn't change anything** — think of it as a pure calculation. *(Rule of thumb: if the answer only depends on raw columns, do it in the cleaning pipeline instead. Save functions for logic that needs the live object graph.)*
+- **Actions** *commit* changes — safely. "Cancel this order." An action is a named operation with validation rules and an audit trail. It's the *only* sanctioned way to write, which is what keeps the data trustworthy.
+
+So: a function can *figure out* the risk score; an action *writes down* "this order is cancelled" with the rules enforced and a record of who did it. Functions think; actions do.
+
+---
+
+## Automations: the system's reflexes
+
+Functions and actions are things that *can* happen. An **automation** makes them happen *on their own* when a condition is met. It's just `condition → effect`:
+
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Automation: condition triggers an effect" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar7" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="20" y="30" width="210" height="90" rx="11" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="125" y="56" font-size="13" font-weight="700" fill="#2F77C7" text-anchor="middle">CONDITION</text>
+    <text x="125" y="78" font-size="11.5" fill="#1F2733" text-anchor="middle">⏰ scheduled (“every Monday”)</text>
+    <text x="125" y="98" font-size="11.5" fill="#1F2733" text-anchor="middle">👀 event (“new high-pri alert”)</text>
+    <rect x="255" y="30" width="170" height="90" rx="11" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="340" y="70" font-size="13" font-weight="700" fill="#6B5FD0" text-anchor="middle">AUTOMATION</text>
+    <text x="340" y="92" font-size="11.5" fill="#1F2733" text-anchor="middle">watches, then fires</text>
+    <rect x="450" y="30" width="210" height="90" rx="11" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="555" y="56" font-size="13" font-weight="700" fill="#D2553B" text-anchor="middle">EFFECT</text>
+    <text x="555" y="78" font-size="11.5" fill="#1F2733" text-anchor="middle">run action · run function</text>
+    <text x="555" y="98" font-size="11.5" fill="#1F2733" text-anchor="middle">call webhook · notify someone</text>
+    <line x1="230" y1="75" x2="253" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar7)"/>
+    <line x1="425" y1="75" x2="448" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar7)"/>
+  </g>
+</svg>
+
+Let's trace one all the way through — the same way you'd debug a request. **Scenario:** a high-priority alert comes in and the system handles it without a human lifting a finger.
+
+<svg width="100%" viewBox="0 0 560 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An alert automation traced end to end" style="max-width:560px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="90" y="16" width="380" height="62" rx="11" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="280" y="42" font-size="13" font-weight="700" fill="#2F77C7" text-anchor="middle">🔔 TRIGGER</text>
+    <text x="280" y="63" font-size="12" fill="#1F2733" text-anchor="middle">new Alert, priority = high</text>
+    <line x1="280" y1="78" x2="280" y2="102" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar8)"/>
+    <rect x="90" y="104" width="380" height="62" rx="11" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="280" y="130" font-size="13" font-weight="700" fill="#1F9AA8" text-anchor="middle">🧮 FUNCTION</text>
+    <text x="280" y="151" font-size="12" fill="#1F2733" text-anchor="middle">read linked asset + history → risk score</text>
+    <line x1="280" y1="166" x2="280" y2="190" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar8)"/>
+    <rect x="90" y="192" width="380" height="62" rx="11" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="280" y="218" font-size="13" font-weight="700" fill="#C8861E" text-anchor="middle">✍️ ACTION</text>
+    <text x="280" y="239" font-size="12" fill="#1F2733" text-anchor="middle">assign owner, set status (auto OR staged)</text>
+    <line x1="280" y1="254" x2="280" y2="278" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar8)"/>
+    <rect x="90" y="280" width="380" height="62" rx="11" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="280" y="306" font-size="13" font-weight="700" fill="#D2553B" text-anchor="middle">🌐 WEBHOOK</text>
+    <text x="280" y="327" font-size="12" fill="#1F2733" text-anchor="middle">notify external ticketing system</text>
+    <line x1="280" y1="342" x2="280" y2="366" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar8)"/>
+    <rect x="90" y="368" width="380" height="62" rx="11" fill="#EEF7F1" stroke="#2E9E6B"/>
+    <text x="280" y="394" font-size="13" font-weight="700" fill="#2E9E6B" text-anchor="middle">✅ RESULT</text>
+    <text x="280" y="415" font-size="12" fill="#1F2733" text-anchor="middle">graph updated · every step audit-logged</text>
+  </g>
+</svg>
+
+1. **Trigger** — an automation is watching all Alerts. A new one with `priority = high` matches the condition. No polling you have to write; it reacts to the data changing.
+2. **Function** — it computes a risk score using *live* context (the alert's linked asset, recent history). Nothing written yet.
+3. **Action** — score is high, so it assigns an owner and sets the status. Because it's an *action*, it's validated and recorded — and critically, it can be **applied automatically or staged for a human to approve first.**
+4. **Webhook** — it pings your external ticketing tool so nobody has to copy-paste.
+5. **Result** — the data reflects reality, and every step is logged.
+
+> **👩‍💻 Mai:** That "stage for review" bit — is that how you let an AI agent do stuff without it going rogue?
+>
+> **👨‍🏫 Hamed:** Precisely. The agent *proposes* the change; a human clicks approve before it commits. That one toggle is the difference between "terrifying" and "shippable." Which brings us to the most underrated part...
+
+---
+
+## Security: why letting an agent act is actually safe
+
+Here's the part that separates a toy from a real platform. Security isn't a wall around the outside — it's computed **fresh on every single request**, by stacking gates.
+
+<svg width="100%" viewBox="0 0 620 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Security access decision computed gate by gate" style="max-width:620px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar9" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="90" y="16" width="440" height="62" rx="11" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="310" y="42" font-size="13" font-weight="700" fill="#2F77C7" text-anchor="middle">REQUEST</text>
+    <text x="310" y="63" font-size="12" fill="#1F2733" text-anchor="middle">identity: which groups + markings you hold</text>
+    <line x1="310" y1="78" x2="310" y2="102" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar9)"/>
+    <rect x="90" y="104" width="440" height="62" rx="11" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="310" y="130" font-size="13" font-weight="700" fill="#D2553B" text-anchor="middle">GATE 1 · object type</text>
+    <text x="310" y="151" font-size="12" fill="#1F2733" text-anchor="middle">can you even see this kind of thing?</text>
+    <line x1="310" y1="166" x2="310" y2="190" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar9)"/>
+    <rect x="90" y="192" width="440" height="62" rx="11" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="310" y="218" font-size="13" font-weight="700" fill="#D2553B" text-anchor="middle">GATE 2 · row-level</text>
+    <text x="310" y="239" font-size="12" fill="#1F2733" text-anchor="middle">WHICH instances? (only my branch’s customers)</text>
+    <line x1="310" y1="254" x2="310" y2="278" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar9)"/>
+    <rect x="90" y="280" width="440" height="62" rx="11" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="310" y="306" font-size="13" font-weight="700" fill="#D2553B" text-anchor="middle">GATE 3 · column-level</text>
+    <text x="310" y="327" font-size="12" fill="#1F2733" text-anchor="middle">WHICH properties? (PII hidden unless cleared)</text>
+    <line x1="310" y1="342" x2="310" y2="366" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar9)"/>
+    <rect x="90" y="368" width="440" height="62" rx="11" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="310" y="394" font-size="13" font-weight="700" fill="#1F9AA8" text-anchor="middle">CELL-LEVEL SLICE</text>
+    <text x="310" y="415" font-size="12" fill="#1F2733" text-anchor="middle">only what you’re allowed to see</text>
+  </g>
+</svg>
+
+Picture an airline's `Passenger` object with fields like Flight, Seat, Name, Address, Phone. Three people run the *exact same query* and get *three different results*:
+
+- An ops user with no special clearance: sees ordinary passengers' flights and seats, but **contact details are masked** and **VIP passengers don't appear at all.**
+- A support agent with the "PII" clearance: also sees names and phone numbers.
+- The VIP desk with both clearances: sees everything.
+
+Same data. Same query. Different slices — decided at runtime by *what each person holds.* That's **cell-level security** (rows × columns).
+
+Two things make this genuinely powerful:
+
+- **Security tags travel with the data.** Mark a column sensitive at the raw source, and that marking rides along through the cleaning pipeline and is inherited by the objects built from it. You don't re-secure it at every layer.
+- **Agents play by the exact same rules.** An AI agent runs *as an identity* and hits the same three gates. It literally **cannot see or act on data its user isn't cleared for.** Remember our alert automation? It could only read the asset history and write the status because *its* identity was permissioned for those objects.
+
+> **👩‍💻 Mai:** Ohhh. So "let an agent run actions" isn't a leap of faith — it's just... a user with permissions.
+>
+> **👨‍🏫 Hamed:** Now you get it. The agent isn't *outside* the rules. It's a fast, tireless coworker who's subject to the same access control as everyone else.
+
+---
+
+## Bonus: the trace tool (lineage)
+
+One more concept you'll hear: **lineage**. It's the recorded history of *how a piece of data came to be* — the chain from raw source, through every transform, to the final object.
+
+<svg width="100%" viewBox="0 0 760 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lineage chain from raw source to object" style="max-width:760px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar10" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="20" y="35" width="120" height="44" rx="9" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <text x="80" y="62" font-size="12.5" fill="#1F2733" text-anchor="middle">raw source</text>
+    <rect x="180" y="35" width="120" height="44" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="240" y="62" font-size="12.5" fill="#1F2733" text-anchor="middle">clean</text>
+    <rect x="340" y="35" width="120" height="44" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="400" y="62" font-size="12.5" fill="#1F2733" text-anchor="middle">join</text>
+    <rect x="500" y="35" width="120" height="44" rx="9" fill="#EEF7F1" stroke="#2E9E6B"/>
+    <text x="560" y="62" font-size="12.5" fill="#1F2733" text-anchor="middle">dataset</text>
+    <rect x="660" y="35" width="120" height="44" rx="9" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="720" y="62" font-size="12.5" fill="#1F2733" text-anchor="middle">object</text>
+    <line x1="140" y1="57" x2="178" y2="57" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar10)"/>
+    <line x1="300" y1="57" x2="338" y2="57" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar10)"/>
+    <line x1="460" y1="57" x2="498" y2="57" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar10)"/>
+    <line x1="620" y1="57" x2="658" y2="57" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar10)"/>
+  </g>
+</svg>
+
+Walk **backward** up that chain to find where a number came from (great for "why is this dashboard wrong?"). Walk **forward** to see everything that depends on a source (great for "what will I break if I change this?"). Because every step is versioned, you can trace any value to its exact origin. It's a family tree for your data.
+
+---
+
+## Putting it all together
+
+<svg width="100%" viewBox="0 0 720 580" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The whole ontology architecture end to end" style="max-width:720px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="ar11" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="210" y="20" width="300" height="50" rx="10" fill="#F6F8FB" stroke="#D6DDE7"/>
+    <text x="360" y="50" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Raw sources</text>
+    <line x1="360" y1="70" x2="360" y2="90" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <text x="378" y="84" font-size="11" fill="#5B6675">clean</text>
+    <rect x="210" y="92" width="300" height="50" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="360" y="122" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Pipeline (transform)</text>
+    <line x1="360" y1="142" x2="360" y2="162" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <text x="378" y="156" font-size="11" fill="#5B6675">build</text>
+    <rect x="210" y="164" width="300" height="50" rx="10" fill="#EEF7F1" stroke="#2E9E6B"/>
+    <text x="360" y="194" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Backing dataset (versioned)</text>
+    <line x1="360" y1="214" x2="360" y2="234" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <text x="378" y="228" font-size="11" fill="#5B6675">mapped: a rule, not a copy</text>
+    <rect x="140" y="236" width="440" height="66" rx="12" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="360" y="264" font-size="15" font-weight="700" fill="#6B5FD0" text-anchor="middle">THE ONTOLOGY</text>
+    <text x="360" y="286" font-size="11.5" fill="#1F2733" text-anchor="middle">objects · links · actions · functions · rules · security</text>
+    <line x1="320" y1="302" x2="280" y2="368" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <text x="250" y="338" font-size="11" fill="#5B6675" text-anchor="end">reads</text>
+    <line x1="400" y1="302" x2="440" y2="368" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <text x="470" y="338" font-size="11" fill="#5B6675">writes</text>
+    <rect x="190" y="370" width="160" height="50" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="270" y="400" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">serving index</text>
+    <rect x="370" y="370" width="160" height="50" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="450" y="400" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">writeback</text>
+    <line x1="270" y1="420" x2="280" y2="468" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <line x1="450" y1="420" x2="440" y2="468" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#ar11)"/>
+    <rect x="110" y="470" width="500" height="86" rx="12" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="360" y="494" font-size="11" font-weight="700" fill="#2F77C7" text-anchor="middle" letter-spacing="1">CONSUMERS — ALL BUILD ON THE ONE CONTRACT</text>
+    <rect x="130" y="504" width="145" height="40" rx="9" fill="#FFFFFF" stroke="#C7D2E0"/>
+    <text x="202" y="529" font-size="12.5" fill="#1F2733" text-anchor="middle">UI app</text>
+    <rect x="288" y="504" width="145" height="40" rx="9" fill="#FFFFFF" stroke="#C7D2E0"/>
+    <text x="360" y="529" font-size="12.5" fill="#1F2733" text-anchor="middle">generated SDK</text>
+    <rect x="446" y="504" width="145" height="40" rx="9" fill="#FFFFFF" stroke="#C7D2E0"/>
+    <text x="518" y="529" font-size="12.5" fill="#1F2733" text-anchor="middle">AI agent</text>
+  </g>
+</svg>
+
+The whole story in one breath: raw data stays where it lives → a pipeline cleans it into a versioned dataset → a mapping turns that into objects and links → the ontology holds the definitions, rules, verbs, and permissions → an index makes reads fast and a writeback layer holds edits → and three kinds of consumer (a UI, a typed SDK, an AI agent) all build against that **one** shared contract.
+
+**The single idea worth tattooing on your brain:**
+
+> Define your domain *once* — as a typed, rule-bound, governed model — and let humans, code, and AI agents all speak the same language. Change a rule in one place, and the UI button, the SDK, and the agent all instantly obey it.
+
+That's it. That's an ontology. Not philosophy — just the discipline of describing your world *once*, properly, so everything else can stop arguing about what a "Customer" is.

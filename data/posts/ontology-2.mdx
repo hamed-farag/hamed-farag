@@ -1,0 +1,261 @@
+---
+id: ontology-2
+title: "The Ontology, Going Deeper: Reuse, SDKs, and Agents"
+date: "06-06-2026"
+description: "Part 2 of the beginner's guide to ontologies. Once you've got objects, links, and actions, four ideas make the model DRY and shippable: shared properties and interfaces for reuse, and a generated SDK plus MCP for letting code and AI agents build on it."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*This is part 2. In [part 1](#) we built the ontology up from a list of words to a governed contract with objects, links, actions, and security. This time we go past the basics into the four ideas that make it actually pleasant to build on: two for keeping your model **DRY** (shared properties, interfaces) and two for **consuming** it (a generated SDK, and MCP for agents). Same plan as before — everyday examples, diagrams, and the occasional Mai-and-Hamed dialog.*
+
+---
+
+## Recap in one breath
+
+An ontology is one shared, typed, rule-bound model of your domain. **Objects** are the things, **properties** are their fields, **links** are the relationships, **actions** are the governed writes, and **security** is enforced fresh on every request. Got it? Good. Now: how do you avoid repeating yourself when you model it, and how do you let real apps and AI agents build on it?
+
+> **👩‍💻 Mai (junior):** Last time you said an ontology is "DRY." But if I've got fifty object types that all have a "created date," am I really typing that out fifty times?
+>
+> **👨‍🏫 Hamed (mentor):** No — and that's exactly where we start. There are two levels of reuse. Let's take the small one first.
+
+---
+
+## 1. Shared properties — define a field once
+
+A **shared property** is the simplest reuse tool: one property definition you attach to many object types. Instead of defining `start date` separately on `Employee` and `Contractor` (and watching the two definitions drift — different display names, types, descriptions), you define it *once* and use it on both.
+
+<svg width="100%" viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One shared property definition reused by two object types" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="gar1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="240" y="24" width="200" height="54" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="340" y="48" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">start date</text>
+    <text x="340" y="67" font-size="11.5" fill="#5B6675" text-anchor="middle">one shared definition</text>
+    <rect x="80" y="150" width="210" height="66" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="185" y="178" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Employee</text>
+    <text x="185" y="198" font-size="11.5" fill="#5B6675" text-anchor="middle">start date: 2019-03-01</text>
+    <rect x="390" y="150" width="210" height="66" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="495" y="178" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Contractor</text>
+    <text x="495" y="198" font-size="11.5" fill="#5B6675" text-anchor="middle">start date: 2024-11-15</text>
+    <line x1="320" y1="78" x2="195" y2="148" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar1)"/>
+    <line x1="360" y1="78" x2="495" y2="148" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar1)"/>
+    <text x="340" y="238" font-size="12" fill="#5B6675" text-anchor="middle">Metadata is shared (one definition) — but the values stay completely separate.</text>
+  </g>
+</svg>
+
+Read that caption twice, because it's the part people trip on: **the definition is shared, the data is not.** Employee start dates and Contractor start dates never mix. You're sharing the *shape and description* — not the values. Update the description once, and both object types see it.
+
+It's the ontology equivalent of pulling a repeated type into a shared module:
+
+```ts
+// Instead of redefining the same field everywhere…
+type Employee   = { startDate: Date /* defined here */ };
+type Contractor = { startDate: Date /* …and again here */ };
+
+// …define it once and reuse the definition:
+type StartDate = Date;              // the shared property
+type Employee   = { startDate: StartDate };
+type Contractor = { startDate: StartDate };
+```
+
+A couple of practical notes: you can convert an existing property into a shared one, the property's API name stays the same (so you don't break downstream code), and while it's attached, the inherited metadata is locked — that's the whole point, central management — but you can detach later.
+
+> **👩‍💻 Mai:** Okay, that's just sharing a field. But what if a bunch of object types aren't just sharing one field — they're basically the *same kind of thing*?
+>
+> **👨‍🏫 Hamed:** Now you're asking for the big one. That's an interface.
+
+---
+
+## 2. Interfaces — polymorphism for your domain
+
+If a shared property is reusing a *field*, an **interface** is reusing a whole *shape and its capabilities*. It's an abstract type that says "anything that is a Facility has a Name and a Location" — and then concrete object types **implement** it.
+
+<svg width="100%" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A Facility interface implemented by Airport, Plant, and Hangar, with app code targeting the interface" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="gar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="40" width="170" height="56" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="125" y="66" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Your app</text>
+    <text x="125" y="84" font-size="11.5" fill="#5B6675" text-anchor="middle">e.g. map component</text>
+    <rect x="255" y="40" width="190" height="56" rx="10" fill="#F4F2FC" stroke="#6B5FD0" stroke-dasharray="6 4"/>
+    <text x="350" y="66" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Facility (interface)</text>
+    <text x="350" y="84" font-size="11.5" fill="#5B6675" text-anchor="middle">Name · Location</text>
+    <line x1="210" y1="68" x2="253" y2="68" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar2)"/>
+    <text x="232" y="58" font-size="11" fill="#5B6675" text-anchor="middle">targets</text>
+    <rect x="40" y="200" width="180" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="130" y="226" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Airport</text>
+    <text x="130" y="244" font-size="11.5" fill="#5B6675" text-anchor="middle">+ runways</text>
+    <rect x="250" y="200" width="180" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="340" y="226" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Plant</text>
+    <text x="340" y="244" font-size="11.5" fill="#5B6675" text-anchor="middle">manufacturing</text>
+    <rect x="460" y="200" width="180" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="550" y="226" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Hangar</text>
+    <text x="550" y="244" font-size="11.5" fill="#5B6675" text-anchor="middle">maintenance</text>
+    <line x1="130" y1="200" x2="312" y2="98" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar2)"/>
+    <line x1="340" y1="200" x2="350" y2="98" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar2)"/>
+    <line x1="550" y1="200" x2="388" y2="98" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar2)"/>
+    <text x="445" y="150" font-size="11" fill="#5B6675" text-anchor="middle">implements</text>
+    <text x="340" y="288" font-size="12" fill="#5B6675" text-anchor="middle">Add a 4th implementer next year — the app keeps working with zero changes.</text>
+  </g>
+</svg>
+
+The interface is **abstract**: it isn't backed by any dataset and can't be instantiated on its own — you always make a concrete `Airport` or `Plant`. But once they implement `Facility`, your application can treat them all *as* Facilities.
+
+If you've ever written `implements` in Java/TypeScript, this is the same instinct, applied to your data model:
+
+```ts
+// Without an interface — you must touch this for every new type:
+function renderPin(obj: Airport | Plant | Hangar) { /* ... */ }
+
+// With an interface — write once, against the abstraction:
+function renderPin(facility: Facility) {
+  map.drop(facility.location, facility.name);
+}
+// Airport, Plant, Hangar all work.
+// Add "Warehouse" later (it just implements Facility) → renderPin is untouched.
+```
+
+That last line is the whole payoff, and it has a name from OOP: the **open/closed principle** — open for extension, closed for modification. Your map component targets the `Facility` interface; any new locatable thing that implements it shows up on the map for free, no code change. This is exactly the `ILocatable` / `IAssignable` pattern: define the capability once, and every object that has it becomes interchangeable to the code that cares about that capability.
+
+> **👩‍💻 Mai:** So shared properties = reuse one field, interfaces = reuse a whole shape *and* get polymorphism?
+>
+> **👨‍🏫 Hamed:** Exactly. And they compose — an interface's properties can themselves be shared properties. Now: we've made the model clean. How does an actual app *use* it?
+
+---
+
+## 3. The generated SDK — your ontology, as typed code
+
+Here's the satisfying part. You don't hand-write an API client. The platform **generates an SDK directly from your ontology**. You pick which objects, actions, and functions you want, and it produces typed packages for TypeScript, Python, and Java.
+
+<svg width="100%" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The ontology generates a typed SDK consumed by apps in several languages" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="gar3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="255" y="24" width="170" height="56" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="340" y="50" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Ontology</text>
+    <text x="340" y="68" font-size="11" fill="#5B6675" text-anchor="middle">objects · actions · functions</text>
+    <line x1="340" y1="80" x2="340" y2="116" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar3)"/>
+    <text x="358" y="102" font-size="11" fill="#5B6675">generate</text>
+    <rect x="255" y="118" width="170" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="340" y="144" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Generated SDK</text>
+    <text x="340" y="162" font-size="11.5" fill="#5B6675" text-anchor="middle">typed bindings + docs</text>
+    <rect x="40" y="210" width="180" height="50" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="130" y="240" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">TypeScript / React</text>
+    <rect x="250" y="210" width="180" height="50" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="340" y="240" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Python job</text>
+    <rect x="460" y="210" width="180" height="50" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="550" y="240" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Java service</text>
+    <line x1="340" y1="174" x2="135" y2="208" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar3)"/>
+    <line x1="340" y1="174" x2="340" y2="208" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar3)"/>
+    <line x1="340" y1="174" x2="545" y2="208" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar3)"/>
+    <text x="340" y="288" font-size="12" fill="#5B6675" text-anchor="middle">Same contract, idiomatic in each language — and security is enforced automatically.</text>
+  </g>
+</svg>
+
+What you get back is the ontology, but as autocompleted code. Three things show up:
+
+```python
+# OBJECTS — query with typed filters
+results = client.ontology.objects.Restaurant.where(
+    Restaurant.object_type.name == "Cafe Roma"
+)
+
+# ACTIONS — generated from your action types; fill params, apply, get valid/invalid back
+client.ontology.actions.cancel_order(order=order_id, reason="duplicate")
+
+# FUNCTIONS — call ontology functions like any method
+score = client.ontology.queries.risk_score(order=order_id)
+```
+
+Three reasons this is more than a typed REST wrapper:
+
+It's **end-to-end typed.** Your editor knows every property name and every action parameter. Change an action in the ontology, regenerate, and your code's types change with it — a typo becomes a compile error instead of a 3 a.m. page.
+
+**Security comes along for free.** The SDK calls run through the platform, so the same per-request gates from part 1 (can you see this type? these rows? these columns?) apply automatically. You don't reimplement permissions in the app — the app simply can't fetch what the user isn't cleared for. The app token is even scoped to just the entities you selected.
+
+And it's **multi-language.** A React frontend, a Python pipeline, and a JVM backend can all build against the *same* ontology with bindings that feel native to each. (Think of the ontology as your backend, and the SDK as a backend SDK that regenerates itself whenever the backend's shape changes.)
+
+> **👩‍💻 Mai:** Wait — so the interface thing works here too? If I type my code against `Facility`, the SDK lets me query all the implementers at once?
+>
+> **👨‍🏫 Hamed:** Yep. The polymorphism flows all the way into your app code. One query, every Facility. Which leaves one consumer we haven't covered — the one everyone's excited about.
+
+---
+
+## 4. MCP — letting AI agents use the ontology safely
+
+The newest consumer isn't a human writing code — it's an AI agent. Your ontology can expose itself as an **MCP server** — taking its objects, actions, and query functions and surfacing them as **tools an agent can call** (MCP, the Model Context Protocol, is an open standard built for exactly this). Agents connect as clients, discover the tools, and use them to read objects, run actions, and query data.
+
+<svg width="100%" viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An AI agent reaches the ontology through MCP tools, passing the same security gate as humans" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="gar4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="25" y="60" width="150" height="64" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="100" y="88" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">AI agent</text>
+    <text x="100" y="107" font-size="11" fill="#5B6675" text-anchor="middle">external agents</text>
+    <rect x="195" y="60" width="170" height="64" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="280" y="88" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">MCP server</text>
+    <text x="280" y="107" font-size="11" fill="#5B6675" text-anchor="middle">read · act · query</text>
+    <rect x="385" y="60" width="120" height="64" rx="10" fill="#FBF1EE" stroke="#D2553B"/>
+    <text x="445" y="88" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">Security gate</text>
+    <text x="445" y="107" font-size="11" fill="#5B6675" text-anchor="middle">runtime check</text>
+    <rect x="525" y="60" width="140" height="64" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="595" y="88" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">Ontology</text>
+    <text x="595" y="107" font-size="11" fill="#5B6675" text-anchor="middle">objects, actions</text>
+    <line x1="175" y1="92" x2="193" y2="92" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar4)"/>
+    <line x1="365" y1="92" x2="383" y2="92" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar4)"/>
+    <line x1="505" y1="92" x2="523" y2="92" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#gar4)"/>
+    <text x="345" y="160" font-size="12" fill="#5B6675" text-anchor="middle">The agent acts as an identity. Scopes limit which actions it may call.</text>
+  </g>
+</svg>
+
+Notice the third box. This is the bit that makes "let an AI agent run actions" sane rather than terrifying — and it's the direct payoff of the security model from part 1. **The same gates that govern humans govern the agent.** The agent acts as an identity, hits the same row/column/cell checks, and application scopes restrict which actions it's even allowed to call. It can't read or act on anything its user isn't cleared for. That's what makes it safe to point an external agent at *production* data.
+
+Two touches that show how much thought went into agent ergonomics:
+
+You write the tool's instructions once, in the ontology. Each action has an "agent tool description" — basically the docstring the agent reads to decide when and how to use that tool. Author it once; every agent benefits.
+
+And tools compose into little playbooks. For example, a "get-or-create-task" skill can tell the agent: *first* search for an existing task, and *only* create one if nothing matches — so the agent doesn't spawn duplicates. Domain logic for agents lives next to the ontology, not buried in prompts.
+
+> **👩‍💻 Mai:** So is there just one MCP, or could there be two kinds?
+>
+> **👨‍🏫 Hamed:** Two — and they sit on opposite sides of the build/run line.
+
+You'll likely build two MCP surfaces, on opposite sides of the build/run line:
+
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A runtime MCP uses the ontology while a builder MCP builds it" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="30" width="280" height="90" rx="11" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="180" y="60" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Runtime MCP</text>
+    <text x="180" y="83" font-size="12" fill="#5B6675" text-anchor="middle">USE it — production data</text>
+    <text x="180" y="103" font-size="12" fill="#5B6675" text-anchor="middle">read objects, run actions</text>
+    <rect x="360" y="30" width="280" height="90" rx="11" fill="#F1EFE8" stroke="#888780"/>
+    <text x="500" y="60" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Builder MCP</text>
+    <text x="500" y="83" font-size="12" fill="#5B6675" text-anchor="middle">BUILD it — in your IDE</text>
+    <text x="500" y="103" font-size="12" fill="#5B6675" text-anchor="middle">design &amp; edit ontology types</text>
+  </g>
+</svg>
+
+**A runtime MCP** is for the agent that *operates* your business — it touches real data and runs real actions, all governed. **A builder MCP** is for the agent (or you, in your IDE) that *builds* the platform — tools to design and modify ontology types and apps, but it can't write production ontology data. One runs the factory; the other helps you build it.
+
+---
+
+## How the four fit together
+
+```
+              MODELING (keep it DRY)          CONSUMING (build on it)
+            ┌───────────────────────┐      ┌───────────────────────┐
+            │  Shared properties    │      │  Generated SDK        │
+            │  reuse a field        │      │  typed code for devs  │
+            │                       │      │                       │
+            │  Interfaces           │      │  MCP tools            │
+            │  reuse a shape +      │      │  governed tools for   │
+            │  get polymorphism     │      │  AI agents            │
+            └───────────────────────┘      └───────────────────────┘
+                         ▲                            ▲
+                         └────────  one ontology  ────┘
+                              (typed · governed · single source)
+```
+
+Two are about *defining* the model well — **shared properties** reuse a field, **interfaces** reuse a whole shape and hand you polymorphism so your code and your model both stay open to extension. Two are about *building on* the model — a **generated SDK** surfaces it as typed code for human developers, and **MCP tools** surface it as governed tools for AI agents. Both consumers lean on the same backbone: one typed contract, with security enforced at runtime no matter who's calling.
+
+**The idea to keep:** model your domain once, reuse aggressively (fields *and* shapes), and let everything — your apps and your agents — build on the same governed contract. Define it well in the middle, and both the humans and the machines on the outside get a clean, safe, typed surface for free.
+
+---
+
+*Missed part 1? Start with ["The Ontology, Explained Like You're New Here"](/posts/ontology-1) for objects, links, actions, the pipeline, lineage, and the security model.*
