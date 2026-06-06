@@ -23,7 +23,7 @@ export function LatestPosts() {
 
   const renderPosts = () => (
     <>
-      <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+      <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6 mb-8">
         {allPosts.slice(0, 4).map((post: IPost, index: number) => {
           return (
             <article
