@@ -14,9 +14,16 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["blog", "technology", "education"],
     icons: [
       {
-        src: "/favicon.ico",
+        src: "/hf-logo.svg",
         sizes: "any",
-        type: "image/x-icon",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: "/hf_logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
       },
     ],
   };

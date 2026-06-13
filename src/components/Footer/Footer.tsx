@@ -12,6 +12,7 @@ import {
   Coffee,
   Home,
   BookOpen,
+  Briefcase,
 } from "lucide-react";
 
 import { WaveDivider } from "@components/WaveDivider";
@@ -29,6 +30,8 @@ export async function Footer() {
   const navLinks = [
     { label: "Home", href: "/", icon: Home },
     { label: "Blog", href: "/posts", icon: BookOpen },
+    { label: "Works", href: "/works", icon: Briefcase },
+    { label: "Hire Me", href: "/hire", icon: Mail },
   ];
 
   const socialLinks = [
@@ -83,6 +86,7 @@ export async function Footer() {
                     key={label}
                     href={href}
                     target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={label}
                     className="group flex items-center justify-center w-9 h-9 rounded-full border border-border/60 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:shadow-md hover:-translate-y-0.5"
                   >
@@ -123,6 +127,8 @@ export async function Footer() {
                   <Link
                     href="https://ko-fi.com/hamedfarag"
                     target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Support me on Ko-fi"
                     className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                   >
                     <Coffee className="w-3.5 h-3.5" />

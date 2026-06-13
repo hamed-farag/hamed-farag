@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <section className="flex gap-5 flex items-center justify-center w-100 my-4 md:my-20">
       <h1 className="text-6xl md:text-8xl">404</h1>
-      <p>
+      <div>
         <p className="text-xl md:text-3xl">
           Sorry we could&apos;t find this page.
         </p>
@@ -23,7 +23,7 @@ export default function NotFound() {
             </small>
           </Link>
         </p>
-      </p>
+      </div>
     </section>
   );
 }

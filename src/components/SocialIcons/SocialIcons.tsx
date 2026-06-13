@@ -14,6 +14,8 @@ export function SocialIcons(props: TSocialIconsProps) {
     <section className="flex justify-center space-x-5 mb-4">
       <Link
         target="_blank"
+        rel="noopener noreferrer"
+        aria-label="GitHub"
         href={user?.github || "#"}
         className="text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
       >
@@ -21,6 +23,8 @@ export function SocialIcons(props: TSocialIconsProps) {
       </Link>
       <Link
         target="_blank"
+        rel="noopener noreferrer"
+        aria-label="LinkedIn"
         href={user?.linkedIn || "#"}
         className="text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
       >
@@ -28,6 +32,8 @@ export function SocialIcons(props: TSocialIconsProps) {
       </Link>
       <Link
         target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Twitter"
         href={user?.twitter || "#"}
         className="text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
       >

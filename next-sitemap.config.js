@@ -30,6 +30,12 @@ module.exports = {
     } else if (path.startsWith("/posts/")) {
       priority = 0.8;
       changefreq = "monthly";
+    } else if (path === "/works") {
+      priority = 0.8;
+      changefreq = "weekly";
+    } else if (path === "/hire") {
+      priority = 0.7;
+      changefreq = "monthly";
     }
 
     return {
