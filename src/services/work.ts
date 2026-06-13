@@ -7,17 +7,17 @@ const works: IWork[] = [
     id: "claudeck",
     title: "Claudeck",
     description:
-      "A curated deck of tips, workflows, and patterns for getting the most out of Claude Code.",
-    image: "/social-banner.png",
-    link: "https://hamedafarag.github.io/claudeck/",
+      "The browser UI for Claude Code — chat, autonomous agents, workflows, and cost tracking, all from your browser. Built on vanilla JS with zero framework and no build step.",
+    image: "/works/claudeck.png",
+    link: "https://claudeck.app",
   },
   {
-    id: "placeholder-project",
-    title: "Your Next Project",
+    id: "hamedfarag-dev",
+    title: "hamedfarag.dev",
     description:
-      "Replace this placeholder with one of your projects — set the image, title, description, and external link in src/services/work.ts.",
-    image: "/social-banner.png",
-    link: "https://github.com/hamed-farag",
+      "My personal space and technical blog — articles on frontend engineering, React, architecture, and the craft of building for the web. Built with Next.js, Tailwind CSS, Shadcn/UI, and MDX.",
+    image: "/works/hamedfarag-dev.png",
+    link: "https://www.hamedfarag.dev",
   },
 ];
 
