@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
-import { ChevronUp, Search, Home, BookOpen, Sparkles } from "lucide-react";
+import { ChevronUp, Search, Home, BookOpen, Sparkles, Briefcase, Mail } from "lucide-react";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { ThemeToggle } from "@components/ThemeToggle";
@@ -72,33 +72,32 @@ export function Header() {
               </span>
             )}
           </Link>
-          <a
-            href="https://hamedafarag.github.io/claudeck/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nav-pill"
+          <Link
+            href="/works"
+            className={`nav-pill ${pathname.startsWith("/works") ? "nav-pill-active" : ""}`}
           >
             {isScrolled ? (
-              <Image
-                src="https://hamedafarag.github.io/claudeck/images/whaly.png"
-                alt="Claudeck"
-                width={16}
-                height={16}
-                className="h-4 w-4"
-              />
+              <Briefcase className="h-4 w-4" />
             ) : (
               <span className="flex items-center gap-1.5">
-                <Image
-                  src="https://hamedafarag.github.io/claudeck/images/whaly.png"
-                  alt="Claudeck"
-                  width={14}
-                  height={14}
-                  className="h-3.5 w-3.5"
-                />
-                Claudeck
+                <Briefcase className="h-3.5 w-3.5" />
+                Works
               </span>
             )}
-          </a>
+          </Link>
+          <Link
+            href="/hire"
+            className={`nav-pill ${pathname.startsWith("/hire") ? "nav-pill-active" : ""}`}
+          >
+            {isScrolled ? (
+              <Mail className="h-4 w-4" />
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5" />
+                Hire Me
+              </span>
+            )}
+          </Link>
         </nav>
 
         {isScrolled && <div className="island-dot" />}
