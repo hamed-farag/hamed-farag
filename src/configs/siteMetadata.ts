@@ -24,10 +24,17 @@ const siteMetadata = {
 
 function generateSiteMetadata(): Metadata {
   return {
-    metadataBase: new URL(siteMetadata.siteUrl),
+    metadataBase: siteMetadata.siteUrl
+      ? new URL(siteMetadata.siteUrl)
+      : undefined,
     title: {
       template: `%s | ${siteMetadata.title}`,
       default: siteMetadata.title,
+    },
+    icons: {
+      icon: "/hf-logo.svg",
+      shortcut: "/hf-logo.svg",
+      apple: "/hf_logo.png",
     },
     description: siteMetadata.description,
     keywords: [
@@ -83,22 +90,178 @@ function generateSiteMetadata(): Metadata {
   };
 }
 
-function generatePostsPageMetadata(): Metadata {
+function generateHomePageMetadata(): Metadata {
+  const title = `${siteMetadata.author} — ${siteMetadata.jobTitle}`;
+  const description =
+    "Hamed Farag, a Lead Frontend Engineer writing about React, Next.js, frontend architecture, and the craft of building for the web.";
   return {
-    title: "Blog",
-    description:
-      "Articles on frontend engineering, tooling, architecture, and the craft of building for the web.",
+    title: {
+      absolute: title,
+    },
+    description,
     alternates: {
-      canonical: `${siteMetadata.siteUrl}/posts`,
+      canonical: siteMetadata.siteUrl,
     },
     openGraph: {
-      title: "Blog | " + siteMetadata.title,
-      description:
-        "Articles on frontend engineering, tooling, architecture, and the craft of building for the web.",
-      url: `${siteMetadata.siteUrl}/posts`,
+      title,
+      description,
+      url: siteMetadata.siteUrl,
       siteName: siteMetadata.title,
       locale: siteMetadata.locale,
       type: "website",
+      images: [
+        {
+          url: siteMetadata.socialBanner,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      site: siteMetadata.twitterHandle,
+      creator: siteMetadata.twitterHandle,
+      images: [siteMetadata.socialBanner],
+    },
+  };
+}
+
+function generatePostsPageMetadata(): Metadata {
+  const description =
+    "Articles on frontend engineering, tooling, architecture, and the craft of building for the web.";
+  const url = `${siteMetadata.siteUrl}/posts`;
+  return {
+    title: "Blog",
+    description,
+    keywords: [
+      "frontend engineering",
+      "React",
+      "Next.js",
+      "TypeScript",
+      "web development",
+      "software architecture",
+      siteMetadata.author,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: "Blog | " + siteMetadata.title,
+      description,
+      url,
+      siteName: siteMetadata.title,
+      locale: siteMetadata.locale,
+      type: "website",
+      images: [
+        {
+          url: siteMetadata.socialBanner,
+          width: 1200,
+          height: 630,
+          alt: "Blog | " + siteMetadata.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Blog | " + siteMetadata.title,
+      description,
+      site: siteMetadata.twitterHandle,
+      creator: siteMetadata.twitterHandle,
+      images: [siteMetadata.socialBanner],
+    },
+  };
+}
+
+function generateWorksPageMetadata(): Metadata {
+  const description =
+    "A selection of projects, experiments, and things I've built.";
+  const url = `${siteMetadata.siteUrl}/works`;
+  return {
+    title: "My Works",
+    description,
+    keywords: [
+      "portfolio",
+      "projects",
+      "frontend engineering",
+      "React",
+      "Next.js",
+      siteMetadata.author,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: "My Works | " + siteMetadata.title,
+      description,
+      url,
+      siteName: siteMetadata.title,
+      locale: siteMetadata.locale,
+      type: "website",
+      images: [
+        {
+          url: siteMetadata.socialBanner,
+          width: 1200,
+          height: 630,
+          alt: "My Works | " + siteMetadata.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "My Works | " + siteMetadata.title,
+      description,
+      site: siteMetadata.twitterHandle,
+      creator: siteMetadata.twitterHandle,
+      images: [siteMetadata.socialBanner],
+    },
+  };
+}
+
+function generateHirePageMetadata(): Metadata {
+  const description =
+    "Work with Hamed Farag — frontend architecture, React/Next.js development, performance, and technical consulting.";
+  const url = `${siteMetadata.siteUrl}/hire`;
+  return {
+    title: "Hire Me",
+    description,
+    keywords: [
+      "hire frontend engineer",
+      "frontend consultant",
+      "React developer",
+      "Next.js developer",
+      "frontend architecture",
+      "technical consulting",
+      siteMetadata.author,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: "Hire Me | " + siteMetadata.title,
+      description,
+      url,
+      siteName: siteMetadata.title,
+      locale: siteMetadata.locale,
+      type: "website",
+      images: [
+        {
+          url: siteMetadata.socialBanner,
+          width: 1200,
+          height: 630,
+          alt: "Hire Me | " + siteMetadata.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Hire Me | " + siteMetadata.title,
+      description,
+      site: siteMetadata.twitterHandle,
+      creator: siteMetadata.twitterHandle,
+      images: [siteMetadata.socialBanner],
     },
   };
 }
@@ -213,12 +376,78 @@ function generateBreadcrumbJSONLD(
   };
 }
 
+function generateWorksJSONLD(
+  works: Array<{ id: string; title: string; description: string; link: string }>
+) {
+  const url = `${siteMetadata.siteUrl}/works`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "My Works",
+    description: "A selection of projects, experiments, and things I've built.",
+    url,
+    author: {
+      "@type": "Person",
+      name: siteMetadata.author,
+      url: siteMetadata.siteUrl,
+      jobTitle: siteMetadata.jobTitle,
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: works.map((work, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: work.title,
+        description: work.description,
+        url: work.link,
+      })),
+    },
+  };
+}
+
+function generateHireJSONLD(
+  services: Array<{ label: string; description: string }>
+) {
+  const url = `${siteMetadata.siteUrl}/hire`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url,
+    mainEntity: {
+      "@type": "Person",
+      name: siteMetadata.author,
+      url: siteMetadata.siteUrl,
+      jobTitle: siteMetadata.jobTitle,
+      email: `mailto:${siteMetadata.email}`,
+      image: `${siteMetadata.siteUrl}${siteMetadata.authorAvatar}`,
+      sameAs: [
+        siteMetadata.github,
+        siteMetadata.linkedin,
+        siteMetadata.twitter,
+      ],
+      makesOffer: services.map((service) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: service.label,
+          description: service.description,
+        },
+      })),
+    },
+  };
+}
+
 export {
   siteMetadata,
   generateSiteMetadata,
+  generateHomePageMetadata,
   generatePostsPageMetadata,
+  generateWorksPageMetadata,
+  generateHirePageMetadata,
   generatePostMetadata,
   generatePostJSONLD,
   generateWebsiteJSONLD,
   generateBreadcrumbJSONLD,
+  generateWorksJSONLD,
+  generateHireJSONLD,
 };
