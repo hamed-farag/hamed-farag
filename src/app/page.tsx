@@ -1,10 +1,16 @@
 import { Sparkles } from "lucide-react";
+import type { Metadata } from "next";
 
 import { AboutCard } from "@components/AboutCard";
 import { LatestPosts } from "@components/LatestPosts";
 import { WaveDivider } from "@components/WaveDivider";
 
-import { generateWebsiteJSONLD } from "@configs/siteMetadata";
+import {
+  generateWebsiteJSONLD,
+  generateHomePageMetadata,
+} from "@configs/siteMetadata";
+
+export const metadata: Metadata = generateHomePageMetadata();
 
 export default function HomePage() {
   return (
