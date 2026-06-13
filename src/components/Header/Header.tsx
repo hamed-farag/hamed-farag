@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
-import { ChevronUp, Search, Home, BookOpen, Sparkles, Briefcase, Mail } from "lucide-react";
+import { ChevronUp, Search, Home, BookOpen, Sparkles, Briefcase, Handshake } from "lucide-react";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { ThemeToggle } from "@components/ThemeToggle";
@@ -90,10 +90,10 @@ export function Header() {
             className={`nav-pill ${pathname.startsWith("/hire") ? "nav-pill-active" : ""}`}
           >
             {isScrolled ? (
-              <Mail className="h-4 w-4" />
+              <Handshake className="h-4 w-4" />
             ) : (
               <span className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" />
+                <Handshake className="h-3.5 w-3.5" />
                 Hire Me
               </span>
             )}
