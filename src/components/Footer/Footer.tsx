@@ -13,6 +13,7 @@ import {
   Home,
   BookOpen,
   Briefcase,
+  Handshake,
 } from "lucide-react";
 
 import { WaveDivider } from "@components/WaveDivider";
@@ -31,7 +32,7 @@ export async function Footer() {
     { label: "Home", href: "/", icon: Home },
     { label: "Blog", href: "/posts", icon: BookOpen },
     { label: "Works", href: "/works", icon: Briefcase },
-    { label: "Hire Me", href: "/hire", icon: Mail },
+    { label: "Hire Me", href: "/hire", icon: Handshake },
   ];
 
   const socialLinks = [
@@ -106,7 +107,7 @@ export async function Footer() {
                   <li key={label} className="m-0 p-0">
                     <Link
                       href={href}
-                      className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                      className="group inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {label}
