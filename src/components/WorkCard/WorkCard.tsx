@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { IWork } from "@interfaces/work";
@@ -8,11 +9,17 @@ type TWorkCardProps = {
 };
 
 export function WorkCard({ work }: TWorkCardProps) {
+  // Internal routes (e.g. /cortex) open in the same tab via next/link; external
+  // links open in a new tab.
+  const isInternal = work.link.startsWith("/");
+  const Wrapper: any = isInternal ? Link : "a";
+  const linkProps = isInternal
+    ? { href: work.link }
+    : { href: work.link, target: "_blank", rel: "noopener noreferrer" };
+
   return (
-    <a
-      href={work.link}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Wrapper
+      {...linkProps}
       className="group card-whimsy h-full flex flex-col overflow-hidden border border-border/50"
     >
       {/* Cover image */}
@@ -41,6 +48,6 @@ export function WorkCard({ work }: TWorkCardProps) {
           <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
       </div>
-    </a>
+    </Wrapper>
   );
 }

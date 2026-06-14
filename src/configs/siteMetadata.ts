@@ -266,6 +266,79 @@ function generateHirePageMetadata(): Metadata {
   };
 }
 
+function generateCortexPageMetadata(): Metadata {
+  const title = "Cortex — AI Review Assistant";
+  const description =
+    "An in-page AI review copilot for GitHub pull requests — highlight code, ask, summarize, review, and post line-anchored comments on your own Claude subscription or API key. No SaaS middleman.";
+  const url = `${siteMetadata.siteUrl}/cortex`;
+  return {
+    title,
+    description,
+    keywords: [
+      "Cortex",
+      "code review",
+      "GitHub pull requests",
+      "AI code review",
+      "browser extension",
+      "Claude",
+      "Anthropic",
+      siteMetadata.author,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: title + " | " + siteMetadata.title,
+      description,
+      url,
+      siteName: siteMetadata.title,
+      locale: siteMetadata.locale,
+      type: "website",
+      images: [
+        {
+          url: siteMetadata.socialBanner,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: title + " | " + siteMetadata.title,
+      description,
+      site: siteMetadata.twitterHandle,
+      creator: siteMetadata.twitterHandle,
+      images: [siteMetadata.socialBanner],
+    },
+  };
+}
+
+function generateCortexJSONLD() {
+  const url = `${siteMetadata.siteUrl}/cortex`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Cortex — AI Review Assistant",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Chromium-based browsers (Chrome, Edge, Brave)",
+    description:
+      "An in-page AI review copilot for GitHub pull requests, running on the user's own Claude subscription or Anthropic API key.",
+    url,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    author: {
+      "@type": "Person",
+      name: siteMetadata.author,
+      url: siteMetadata.siteUrl,
+      jobTitle: siteMetadata.jobTitle,
+    },
+  };
+}
+
 function generatePostMetadata(post: IPost): Metadata {
   const publishedTime = new Date(post.date).toISOString();
   const postUrl = `${siteMetadata.siteUrl}/posts/${post.id}`;
@@ -444,6 +517,8 @@ export {
   generatePostsPageMetadata,
   generateWorksPageMetadata,
   generateHirePageMetadata,
+  generateCortexPageMetadata,
+  generateCortexJSONLD,
   generatePostMetadata,
   generatePostJSONLD,
   generateWebsiteJSONLD,
