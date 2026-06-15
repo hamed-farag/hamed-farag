@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
   Check,
   Github,
+  Chrome,
 } from "lucide-react";
 
 import { Badge } from "@components/ui/Badge";
@@ -30,6 +31,8 @@ import {
 export const metadata: Metadata = generateCortexPageMetadata();
 
 const REPO = "https://github.com/hamedafarag/Cortex";
+const STORE =
+  "https://chromewebstore.google.com/detail/cortex-%E2%80%94-ai-review-assist/hlfjhmhgkpibcjpflejijbcbpapinifj";
 
 // A small reproduction of the Cortex synapse mark (stroke = currentColor).
 function CortexMark({ className }: { className?: string }) {
@@ -174,6 +177,12 @@ export default function CortexPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
           <Button asChild size="lg">
+            <a href={STORE} target="_blank" rel="noopener noreferrer">
+              <Chrome className="h-4 w-4 mr-2" />
+              Get it on the Chrome Web Store
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="lg">
             <a href={REPO} target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4 mr-2" />
               View on GitHub
@@ -187,7 +196,7 @@ export default function CortexPage() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mt-4">
-          Open source (MIT) · Chrome Web Store listing coming soon
+          Free · Open source (MIT) · Now on the Chrome Web Store
         </p>
 
         {/* Hero shot */}
@@ -327,11 +336,17 @@ export default function CortexPage() {
         <CortexMark className="h-10 w-10 text-[#6b5cf6] mx-auto mb-4" />
         <h2 className="font-display mt-0 mb-2">Make your reviews sharper</h2>
         <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-          Cortex is open source and GitHub-only. Clone it, load it, and bring your own key —
-          or wait for the one-click Chrome Web Store release.
+          Cortex is open source and GitHub-only. Install it in one click from the Chrome Web
+          Store — or clone it, load it, and bring your own key.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button asChild size="lg">
+            <a href={STORE} target="_blank" rel="noopener noreferrer">
+              <Chrome className="h-4 w-4 mr-2" />
+              Get it on the Chrome Web Store
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="lg">
             <a href={REPO} target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4 mr-2" />
               Get it on GitHub
