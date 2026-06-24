@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WebMCP To-Do — full example</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --surface: #1a2332;
+    --raised: #232e40;
+    --border: #2d3a4d;
+    --text: #e6edf3;
+    --muted: #8b97a8;
+    --human: #4d9fff;   /* blue  */
+    --agent: #ffb454;   /* amber — blue/amber pair stays distinct without relying on red/green */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 48px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: 1.45rem; margin: 0; letter-spacing: -0.02em; }
+  h1 .mcp { font-family: var(--mono); color: var(--human); }
+  .thesis { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;
+          font-family: var(--mono); padding: 6px 12px; border: 1px solid var(--border);
+          border-radius: 999px; background: var(--surface); white-space: nowrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill.on .dot { background: var(--human); animation: pulse 2s infinite; }
+  .pill.off .dot { background: var(--agent); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .banner { margin: 18px 0 0; padding: 14px 16px; border: 1px solid var(--border);
+            border-left: 3px solid var(--agent); background: var(--surface); border-radius: 8px;
+            font-size: 0.9rem; }
+  .banner code { font-family: var(--mono); background: var(--raised); padding: 1px 6px; border-radius: 4px; }
+  .banner.hidden { display: none; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .panel h2 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+              color: var(--muted); margin: 0 0 14px; font-weight: 600; }
+  .panel .who { font-family: var(--mono); }
+
+  /* human side */
+  .add-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  input[type=text] { flex: 1; min-width: 0; background: var(--raised); border: 1px solid var(--border);
+         color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 0.92rem; font-family: inherit; }
+  input[type=text]:focus { outline: 2px solid var(--human); outline-offset: 1px; }
+  button { font-family: inherit; font-size: 0.88rem; cursor: pointer; border-radius: 8px;
+           border: 1px solid var(--border); background: var(--raised); color: var(--text);
+           padding: 10px 14px; transition: border-color .15s, background .15s; }
+  button:hover { border-color: var(--human); }
+  button:focus-visible { outline: 2px solid var(--human); outline-offset: 2px; }
+  button.primary { background: var(--human); border-color: var(--human); color: #06101f; font-weight: 600; }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost { padding: 6px 10px; font-size: 0.8rem; }
+
+  ul.todos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  ul.todos li { display: flex; align-items: center; gap: 10px; background: var(--raised);
+                border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; }
+  li .id { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); min-width: 26px; }
+  li .label { flex: 1; min-width: 0; word-break: break-word; }
+  li.done .label { text-decoration: line-through; color: var(--muted); }
+  li .check { font-family: var(--mono); }
+  .empty { color: var(--muted); font-size: 0.9rem; padding: 10px 2px; }
+  .footer-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* agent side */
+  .tool { font-family: var(--mono); font-size: 0.8rem; background: var(--raised);
+          border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .tool .name { color: var(--agent); }
+  .tool .desc { color: var(--muted); font-family: var(--sans); font-size: 0.82rem; margin-top: 4px; }
+  .tool .schema { color: var(--muted); margin-top: 4px; font-size: 0.74rem; }
+
+  .sim { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .sim label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+  .sim-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  select { background: var(--raised); border: 1px solid var(--border); color: var(--text);
+           padding: 9px 10px; border-radius: 8px; font-family: var(--mono); font-size: 0.82rem; }
+  .sim-row input[type=text] { font-family: var(--mono); font-size: 0.82rem; }
+
+  /* activity log spans full width: both sides feed one stream */
+  .log-panel { margin-top: 18px; }
+  .log { font-family: var(--mono); font-size: 0.8rem; max-height: 230px; overflow-y: auto;
+         display: flex; flex-direction: column; gap: 6px; }
+  .log-entry { display: flex; align-items: baseline; gap: 10px; padding: 7px 10px;
+               background: var(--raised); border: 1px solid var(--border); border-radius: 6px;
+               animation: slidein .25s ease; }
+  .log-entry .time { color: var(--muted); font-size: 0.72rem; min-width: 64px; }
+  .tag { font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+  .tag.human { background: rgba(77,159,255,.16); color: var(--human); border: 1px solid var(--human); }
+  .tag.agent { background: rgba(255,180,84,.16); color: var(--agent); border: 1px solid var(--agent); }
+  .log-entry .msg { color: var(--text); word-break: break-word; }
+  .log-entry .msg .fn { color: var(--text); }
+  @keyframes slidein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; } }
+
+  footer { margin-top: 28px; color: var(--muted); font-size: 0.82rem; }
+  footer a { color: var(--human); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>To-Do, powered by <span class="mcp">WebMCP</span></h1>
+      <p class="thesis">Every action below is a single handler. A person clicks it, or an AI agent calls it as a tool — same code, same result. The log shows who fired what.</p>
+    </div>
+    <span id="status" class="pill off"><span class="dot"></span><span id="status-text">WebMCP not detected</span></span>
+  </header>
+
+  <div id="banner" class="banner">
+    <strong>Running without WebMCP.</strong> The buttons and the “simulate agent” panel still work as a local demo.
+    To activate the real browser API, open <code>chrome://flags/#enable-webmcp-testing</code>, set it to
+    <strong>Enabled</strong>, and relaunch Chrome (needs Chrome&nbsp;149+ for the origin trial, or the flag for local dev).
+    Then test with the <em>Model Context Tool Inspector</em> extension.
+  </div>
+
+  <div class="grid">
+    <!-- HUMAN SIDE -->
+    <section class="panel">
+      <h2>Human view <span class="who" style="color:var(--human)">— click to act</span></h2>
+      <div class="add-row">
+        <input id="new-todo" type="text" placeholder="Add a task…" aria-label="New task" />
+        <button class="primary" id="add-btn">Add</button>
+      </div>
+      <ul id="todos" class="todos"></ul>
+      <div class="footer-actions">
+        <button class="ghost" id="clear-btn">Clear completed</button>
+      </div>
+    </section>
+
+    <!-- AGENT SIDE -->
+    <section class="panel">
+      <h2>Agent view <span class="who" style="color:var(--agent)">— callable tools</span></h2>
+      <div id="tools"></div>
+
+      <div class="sim">
+        <label for="sim-tool">Simulate an agent call</label>
+        <div class="sim-row">
+          <select id="sim-tool"></select>
+          <input id="sim-arg" type="text" placeholder='argument (e.g. "Buy milk" or t1)' aria-label="Tool argument" />
+          <button id="sim-run">Call tool</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- SHARED STREAM -->
+  <section class="panel log-panel">
+    <h2>Activity log <span class="who" style="color:var(--muted)">— both sides feed one stream</span></h2>
+    <div id="log" class="log"></div>
+  </section>
+
+  <footer>
+    Docs: <a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">developer.chrome.com/docs/ai/webmcp</a>
+    · Demos: <a href="https://github.com/GoogleChromeLabs/webmcp-tools" target="_blank" rel="noopener">GoogleChromeLabs/webmcp-tools</a>
+  </footer>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   STATE  (kept in memory — no localStorage)
+   ────────────────────────────────────────────────────────────────────────── */
+let nextId = 1;
+const todos = []; // { id: 't1', text, done }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   CORE LOGIC  — the single source of truth.
+   These functions don't know or care whether a human or an agent called them.
+   ────────────────────────────────────────────────────────────────────────── */
+function _addTodo(text) {
+  if (!text || !text.trim()) return 'Nothing to add — text was empty.';
+  const id = 't' + (nextId++);
+  todos.push({ id, text: text.trim(), done: false });
+  render();
+  return `Added ${id}: "${text.trim()}"`;
+}
+function _completeTodo(id) {
+  const t = todos.find(t => t.id === id);
+  if (!t) return `No to-do with id ${id}.`;
+  t.done = !t.done;
+  render();
+  return `${id} marked ${t.done ? 'done' : 'not done'}: "${t.text}"`;
+}
+function _removeTodo(id) {
+  const i = todos.findIndex(t => t.id === id);
+  if (i === -1) return `No to-do with id ${id}.`;
+  const [t] = todos.splice(i, 1);
+  render();
+  return `Removed ${id}: "${t.text}"`;
+}
+function _clearCompleted() {
+  const n = todos.filter(t => t.done).length;
+  for (let i = todos.length - 1; i >= 0; i--) if (todos[i].done) todos.splice(i, 1);
+  render();
+  return `Cleared ${n} completed item${n === 1 ? '' : 's'}.`;
+}
+function _listTodos() {
+  if (!todos.length) return 'The list is empty.';
+  return todos.map(t => `${t.id} [${t.done ? 'x' : ' '}] ${t.text}`).join('\n');
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   TOOL DEFINITIONS  — name, description, JSON Schema, and the handler.
+   This same array drives: (1) WebMCP registration, (2) the agent-view cards,
+   (3) the simulate dropdown.
+   ────────────────────────────────────────────────────────────────────────── */
+const TOOLS = [
+  {
+    name: 'add_todo',
+    description: 'Add a new task to the to-do list.',
+    inputSchema: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] },
+    annotations: { readOnlyHint: false, untrustedContentHint: true },
+    run: (args) => _addTodo(args.text),
+    argHint: '"Buy milk"',
+  },
+  {
+    name: 'complete_todo',
+    description: 'Toggle a task between done and not-done by its id.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+    annotations: { readOnlyHint: false },
+    run: (args) => _completeTodo(args.id),
+    argHint: 't1',
+  },
+  {
+    name: 'remove_todo',
+    description: 'Delete a task from the list by its id.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+    annotations: { readOnlyHint: false },
+    run: (args) => _removeTodo(args.id),
+    argHint: 't1',
+  },
+  {
+    name: 'clear_completed',
+    description: 'Remove all tasks that are marked done.',
+    inputSchema: { type: 'object', properties: {} },
+    annotations: { readOnlyHint: false },
+    run: () => _clearCompleted(),
+    argHint: '(no argument)',
+  },
+  {
+    name: 'list_todos',
+    description: 'Return the current list of tasks with their ids and status.',
+    inputSchema: { type: 'object', properties: {} },
+    annotations: { readOnlyHint: true },
+    run: () => _listTodos(),
+    argHint: '(no argument)',
+  },
+];
+
+/* Map the first required prop of each tool, so the simulate panel knows what to send. */
+function argKeyFor(tool) {
+  return (tool.inputSchema.required && tool.inputSchema.required[0]) || null;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   DISPATCH  — every action goes through here so it always lands in the log
+   with the right HUMAN / AGENT tag.
+   ────────────────────────────────────────────────────────────────────────── */
+function dispatch(toolName, args, source) {
+  const tool = TOOLS.find(t => t.name === toolName);
+  if (!tool) return `Unknown tool: ${toolName}`;
+  const result = tool.run(args || {});
+  logEntry(source, toolName, args, result);
+  return result;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   WEBMCP REGISTRATION  — the real integration.
+   In React you'd do this inside useEffect and pass an AbortController signal
+   to unregister on unmount: registerTool(tool, { signal: controller.signal }).
+   ────────────────────────────────────────────────────────────────────────── */
+function registerWithWebMCP() {
+  // navigator.modelContext is deprecated in Chrome 150 — prefer document.modelContext.
+  const mc = (typeof document !== 'undefined' && document.modelContext)
+          || (typeof navigator !== 'undefined' && navigator.modelContext)
+          || null;
+
+  const status = document.getElementById('status');
+  const statusText = document.getElementById('status-text');
+  const banner = document.getElementById('banner');
+
+  if (!mc) {
+    status.className = 'pill off';
+    statusText.textContent = 'WebMCP not detected';
+    banner.classList.remove('hidden');
+    return null;
+  }
+
+  for (const tool of TOOLS) {
+    mc.registerTool({
+      name: tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+      annotations: tool.annotations,
+      // The agent invokes this. We route through the same dispatch the buttons use.
+      execute: async (args) => dispatch(tool.name, args, 'agent'),
+    });
+  }
+
+  // React to registry changes (e.g. tools added/removed elsewhere in the frame tree).
+  if (mc.addEventListener) {
+    mc.addEventListener('toolchange', () => console.log('[webmcp] tool list changed'));
+  }
+
+  status.className = 'pill on';
+  statusText.textContent = `WebMCP active · ${TOOLS.length} tools`;
+  banner.classList.add('hidden');
+  return mc;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RENDER
+   ────────────────────────────────────────────────────────────────────────── */
+function render() {
+  const ul = document.getElementById('todos');
+  if (!todos.length) {
+    ul.innerHTML = '<li class="empty">No tasks yet. Add one, or let the agent do it.</li>';
+    return;
+  }
+  ul.innerHTML = '';
+  for (const t of todos) {
+    const li = document.createElement('li');
+    if (t.done) li.className = 'done';
+    li.innerHTML = `
+      <span class="id">${t.id}</span>
+      <span class="label"></span>
+      <button class="ghost check" title="Toggle done">${t.done ? '✓ done' : '○ todo'}</button>
+      <button class="ghost" title="Remove">✕</button>`;
+    li.querySelector('.label').textContent = t.text;
+    li.querySelectorAll('button')[0].onclick = () => dispatch('complete_todo', { id: t.id }, 'human');
+    li.querySelectorAll('button')[1].onclick = () => dispatch('remove_todo', { id: t.id }, 'human');
+    ul.appendChild(li);
+  }
+}
+
+function renderTools() {
+  const box = document.getElementById('tools');
+  box.innerHTML = '';
+  for (const t of TOOLS) {
+    const props = Object.keys(t.inputSchema.properties || {});
+    const schema = props.length ? props.map(p => `${p}: ${t.inputSchema.properties[p].type}`).join(', ') : 'no input';
+    const div = document.createElement('div');
+    div.className = 'tool';
+    div.innerHTML = `<span class="name">${t.name}</span>(<span class="schema">${schema}</span>)
+                     <div class="desc"></div>`;
+    div.querySelector('.desc').textContent = t.description;
+    box.appendChild(div);
+  }
+
+  const sel = document.getElementById('sim-tool');
+  sel.innerHTML = TOOLS.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   LOG
+   ────────────────────────────────────────────────────────────────────────── */
+function logEntry(source, toolName, args, result) {
+  const log = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const time = new Date().toLocaleTimeString([], { hour12: false });
+  const argStr = args && Object.keys(args).length ? JSON.stringify(args) : '{}';
+  const tag = source === 'agent' ? 'agent' : 'human';
+  const tagLabel = source === 'agent' ? '⚡ AGENT' : '🖐 HUMAN';
+  entry.innerHTML = `<span class="time">${time}</span>
+                     <span class="tag ${tag}">${tagLabel}</span>
+                     <span class="msg"><span class="fn">${toolName}(${argStr})</span> → </span>`;
+  // result added as text to avoid HTML injection
+  const r = document.createElement('span');
+  r.style.color = 'var(--muted)';
+  r.textContent = String(result).replace(/\n/g, ' · ');
+  entry.querySelector('.msg').appendChild(r);
+  log.prepend(entry);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   WIRE UP THE UI
+   ────────────────────────────────────────────────────────────────────────── */
+function addFromInput() {
+  const input = document.getElementById('new-todo');
+  if (!input.value.trim()) return;
+  dispatch('add_todo', { text: input.value }, 'human');
+  input.value = '';
+  input.focus();
+}
+document.getElementById('add-btn').onclick = addFromInput;
+document.getElementById('new-todo').addEventListener('keydown', e => { if (e.key === 'Enter') addFromInput(); });
+document.getElementById('clear-btn').onclick = () => dispatch('clear_completed', {}, 'human');
+
+document.getElementById('sim-run').onclick = () => {
+  const name = document.getElementById('sim-tool').value;
+  const raw = document.getElementById('sim-arg').value;
+  const tool = TOOLS.find(t => t.name === name);
+  const key = argKeyFor(tool);
+  const args = key ? { [key]: raw } : {};
+  // If WebMCP is live, go through executeTool so it's a *real* round trip;
+  // otherwise dispatch directly so the demo still works everywhere.
+  const mc = document.modelContext || navigator.modelContext;
+  if (mc && mc.getTools && mc.executeTool) {
+    mc.getTools().then(tools => {
+      const handle = tools.find(t => t.name === name);
+      if (handle) mc.executeTool(handle, JSON.stringify(args));
+      else dispatch(name, args, 'agent');
+    });
+  } else {
+    dispatch(name, args, 'agent');
+  }
+  document.getElementById('sim-arg').value = '';
+};
+
+/* Seed a couple of items so the page isn't empty on load. */
+_addTodo('Read the WebMCP docs');
+_addTodo('Wrap registerTool in a useWebMcpTool hook');
+render();
+renderTools();
+registerWithWebMCP();
+</script>
+</body>
+</html>

@@ -127,6 +127,17 @@
     a:hover {
       color: var(--color-secondary);
     }
+    img {
+      @apply rounded-xl my-6 mx-auto;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid hsl(var(--border));
+    }
+    iframe {
+      @apply rounded-xl my-8;
+      width: 100%;
+      border: 1px solid hsl(var(--border));
+    }
   }
 }
 
