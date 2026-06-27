@@ -1,0 +1,395 @@
+---
+id: ontology-3
+title: "The Ontology, Part 3: How You Ask It Questions"
+date: "06-27-2026"
+description: "Part 3 of the beginner's guide to ontologies. How you read: build an object set — a lazy, reusable description — then ask it for a page, a count, an aggregation, or a search. Filters, traversal, ordering, pagination, derived properties — with an interactive playground, then a concrete REST contract."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*This is part 3. [Part 1](/posts/ontology-1) covered what an ontology is — objects, links, actions, security — and [Part 2](/posts/ontology-2) covered how it's consumed. This time: the single most important thing for anyone building on top of it — **how you read**. Every screen, every list, every chart, every agent answer starts with a query. Get the query model right and the whole frontend falls out of it. We'll build the intuition with Mai and Hamed, play with it live, then the appendix pins it down as an actual API contract you could implement.*
+
+---
+
+## The big idea: you don't write SQL, you build an *object set*
+
+Here's the mental shift. You're not writing a query string that runs once and vanishes. You build an **object set** — a *description* of a slice of your data — and then you ask that description for things.
+
+The description is lazy. Nothing is fetched when you build it. It's a recipe, not the cooked dish. Only when you ask it a concrete question ("give me the first page," "how many," "group these by status") does anything actually run.
+
+> **👩‍💻 Mai (junior):** Why not just send a query and get rows back, like SQL?
+>
+> **👨‍🏫 Hamed (mentor):** Because an object set is *composable* and *reusable*. You build "open orders over $100," and then you can hand that same thing around — page it on one screen, count it on a badge, chart it on a dashboard — without rewriting the filter three times. One description, many questions. SQL makes you rewrite the FROM/WHERE every time; this doesn't.
+
+You build a set by stacking operations, and every operation just returns *another description* — still nothing fetched:
+
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Building an object set by stacking filter and ordering operations, still just a description" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="q1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="20" y="34" width="140" height="56" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="90" y="60" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Object set</text>
+    <text x="90" y="78" font-size="11" fill="#5B6675" text-anchor="middle">start: all Orders</text>
+    <rect x="180" y="34" width="140" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="250" y="60" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">filter</text>
+    <text x="250" y="78" font-size="11" fill="#5B6675" text-anchor="middle">status = open</text>
+    <rect x="340" y="34" width="140" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="410" y="60" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">filter</text>
+    <text x="410" y="78" font-size="11" fill="#5B6675" text-anchor="middle">total &gt; 100</text>
+    <rect x="500" y="34" width="140" height="56" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="570" y="60" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">order</text>
+    <text x="570" y="78" font-size="11" fill="#5B6675" text-anchor="middle">by date, desc</text>
+    <line x1="160" y1="62" x2="178" y2="62" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q1)"/>
+    <line x1="320" y1="62" x2="338" y2="62" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q1)"/>
+    <line x1="480" y1="62" x2="498" y2="62" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q1)"/>
+    <text x="340" y="118" font-size="12" fill="#5B6675" text-anchor="middle">Still just a description — nothing has been fetched yet.</text>
+  </g>
+</svg>
+
+In code, on the client, that's a fluent, immutable builder:
+
+```ts
+const openOrders = client.objects(Order)
+  .where({ status: { eq: "open" }, total: { gt: 100 } })
+  .orderBy("createdAt", "desc");
+// Nothing has run. openOrders is a description you can pass around.
+```
+
+## One description, many questions
+
+Now the payoff. That one `openOrders` set answers several *different* questions, each a different "terminal" operation that actually hits the server:
+
+<svg width="100%" viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One object set answering three kinds of question: a page of objects, a count, and an aggregation" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="q2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="84" width="190" height="64" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="135" y="112" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Object set</text>
+    <text x="135" y="131" font-size="11" fill="#5B6675" text-anchor="middle">the description</text>
+    <rect x="420" y="20" width="220" height="48" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="530" y="40" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">fetchPage()</text>
+    <text x="530" y="57" font-size="11" fill="#5B6675" text-anchor="middle">a page of objects</text>
+    <rect x="420" y="92" width="220" height="48" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="530" y="112" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">count()</text>
+    <text x="530" y="129" font-size="11" fill="#5B6675" text-anchor="middle">a single number</text>
+    <rect x="420" y="164" width="220" height="48" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="530" y="184" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">aggregate()</text>
+    <text x="530" y="201" font-size="11" fill="#5B6675" text-anchor="middle">groups / a chart</text>
+    <line x1="230" y1="110" x2="418" y2="46" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q2)"/>
+    <line x1="230" y1="116" x2="418" y2="116" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q2)"/>
+    <line x1="230" y1="122" x2="418" y2="186" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q2)"/>
+  </g>
+</svg>
+
+```ts
+const page     = await openOrders.fetchPage({ pageSize: 25 });   // objects
+const total    = await openOrders.count();                       // a number
+const byStatus = await openOrders.aggregate({                    // a chart
+  groupBy: "status",
+  metrics: ["count"],
+});
+```
+
+This is *the* reason to model reads as object sets rather than one-off queries. A table, a count badge, and a chart on the same screen are three terminal calls on **one** shared description — not three hand-written queries that can drift out of sync.
+
+**Try it.** The playground below *is* this model, live. Build an object set step by step, then press **Run** to materialize it — and watch the engine console trace every stage of the pipeline. It's also where Part 1's ideas come alive: flip **View as** to watch the security gate hide rows and mask columns, and acknowledge an alert to see an action's optimistic write (and a rollback when it's rejected).
+
+<figure style="margin:1.75rem 0">
+  <iframe
+    id="onto-pg"
+    src="/demos/ontology-query.html"
+    title="Interactive ontology query playground"
+    loading="lazy"
+    style="width:100%;height:840px;border:1px solid #E2E7EF;border-radius:12px;background:#fff">
+  </iframe>
+  <figcaption style="font-size:0.85rem;color:#5B6675;text-align:center;margin-top:0.5rem">
+    A self-contained ontology query playground (construction-site example). <a href="/demos/ontology-query.html" target="_blank" rel="noopener">Open full screen ↗</a>
+  </figcaption>
+</figure>
+
+## Filters: how you narrow
+
+A filter is a tree of predicates. At the leaves are simple comparisons on a property; above them, boolean glue. The operator vocabulary you need to cover *everything*:
+
+- Equality and sets: `eq`, `neq`, `in`
+- Ordering: `lt`, `lte`, `gt`, `gte`, `between` (ranges — numbers, dates)
+- Null checks: `isNull`
+- Text: `contains`, `startsWith`, `endsWith`
+- Geo: `withinRadius`, `withinBbox`
+- Relationship existence: `hasLink` (objects that *have* a link to some other set)
+- Composition: `and`, `or`, `not`
+
+> **👩‍💻 Mai:** What about "customers who have at least one open order"? That's not a property on the customer.
+>
+> **👨‍🏫 Hamed:** Right — that's a *relationship* filter, and it's where this gets more powerful than a flat WHERE clause. You filter one set by the existence of a link into another set. Which brings us to the real superpower: traversal.
+
+## Traversal: walking the graph
+
+Because objects are linked, a query can *move* across the graph. The key rule that keeps it simple: **traversing a link gives you back another object set.** Start with a set of Customers, follow their `orders` link, and now you have a set of Orders — which you can filter, order, and paginate exactly like any other set.
+
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Traversing a link turns one object set into another" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="q3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="60" y="34" width="220" height="60" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="170" y="60" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Customers</text>
+    <text x="170" y="79" font-size="11" fill="#5B6675" text-anchor="middle">an object set</text>
+    <rect x="400" y="34" width="220" height="60" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="510" y="60" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">their Orders</text>
+    <text x="510" y="79" font-size="11" fill="#5B6675" text-anchor="middle">another object set</text>
+    <line x1="280" y1="64" x2="398" y2="64" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#q3)"/>
+    <text x="339" y="54" font-size="11" fill="#5B6675" text-anchor="middle">follow: orders</text>
+    <text x="340" y="124" font-size="12" fill="#5B6675" text-anchor="middle">Traversal returns a set — so you keep filtering, ordering, paginating.</text>
+  </g>
+</svg>
+
+```ts
+const hongkongOpenOrders = client.objects(Customer)
+  .where({ branch: { eq: "Hong Kong" } })
+  .traverse("orders")                 // now an object set of Orders
+  .where({ status: { eq: "open" } }); // keep narrowing — it's just a set
+```
+
+That uniformity — *traversal in, set out* — is what lets the frontend treat "a customer's orders" and "all orders" identically. Same component, same hook, same pagination.
+
+## Ordering and pagination
+
+Two boring-but-critical mechanics.
+
+**Ordering** is a list of keys (property + direction), applied in order. One rule that saves you from flaky lists: always tie-break on the primary key. Two orders with the same timestamp must come back in a stable order, every time, or pagination breaks.
+
+**Pagination is cursor-based, not offset-based.** You ask for a `pageSize` and get back a `nextPageToken`; you pass that token to get the next page. Why not `LIMIT/OFFSET`? Because data changes under you — if someone inserts a row while a user is scrolling, offset-based paging silently skips or repeats items. A cursor points at "where you were," so it stays correct even as the underlying set shifts. It's also far cheaper at scale.
+
+## Aggregations: ask for numbers, not objects
+
+Sometimes you don't want the objects — you want a *summary*. Aggregations run on the server over the whole set (not just one page) and return groups and metrics:
+
+```ts
+const revenueByMonth = await openOrders.aggregate({
+  groupBy: [{ property: "createdAt", bucket: { dateHistogram: "month" } }],
+  metrics: [{ sum: "total" }, "count"],
+});
+```
+
+Metrics cover `count`, `sum`, `avg`, `min`, `max`, and `approxDistinct`. Grouping is either by an exact property value or by a *bucket* — numeric ranges, or a date histogram (day/week/month). This is what powers every dashboard tile without shipping thousands of objects to the browser.
+
+## Search: when the user types words, not filters
+
+Filters are for precise, structured narrowing. **Search** is for fuzzy, human input — a search box. It runs full-text (and typically prefix/fuzzy) matching across the properties you've marked searchable, ranks the results, and can be combined with a regular filter:
+
+```ts
+const results = client.objects(Order)
+  .search("acme refund")               // ranked, fuzzy
+  .where({ status: { neq: "archived" } }); // still composable
+```
+
+Keep the distinction clean: filters answer "exactly these," search answers "best matches for these words."
+
+## Derived and computed properties
+
+Not every property is stored. A **derived property** is computed — `daysOpen`, `riskScore`, `fullName` — by a function defined in the ontology. The important part for the query model: once defined, a derived property behaves like any other. You can **select** it, **filter** on it, and **order** by it:
+
+```ts
+client.objects(Order)
+  .where({ daysOpen: { gt: 30 } })   // filter on a computed value
+  .orderBy("riskScore", "desc");     // order by another
+```
+
+The only caveat is cost — a derived value may be computed at query time, so filtering/sorting on it can be heavier than on a stored column. That's a performance note, not a different API.
+
+## Two things that are always true
+
+**Selection keeps payloads small.** By default, don't ship every property and every linked object. Let the caller say which properties it needs and which links to expand — the table that shows three columns shouldn't download forty.
+
+```ts
+openOrders.select(["id", "status", "total"]).expand({ customer: ["name"] });
+```
+
+**Security is not your job here — it's automatic.** Every one of these calls runs through the policy gates from Part 1. An object set silently returns only the rows the caller may see, with forbidden columns omitted. You never write a permission check in a query; the set is *already* scoped to the caller. The frontend's only related job is to read the visibility metadata so it doesn't render a column the server was never going to return.
+
+> **👩‍💻 Mai:** So the whole read side is really just: build a set, then call one of a handful of terminal operations on it?
+>
+> **👨‍🏫 Hamed:** That's it. Build → filter → traverse → shape, then `fetchPage` / `count` / `aggregate` / `search`. Learn those once and you've learned every read in the platform. And it maps one-to-one onto the frontend hooks — which is exactly why we pinned the query model down before touching React.
+
+---
+
+## The one-paragraph summary
+
+You read an ontology by composing an **object set** — a lazy, reusable description built from a starting object type plus filters, link traversals, ordering, and selection. You then ask that set a terminal question: a **page** of objects, a **count**, an **aggregation**, or a ranked **search**. Traversal turns one set into another, so the whole graph is reachable through one uniform model. Derived properties behave like stored ones. Pagination is cursor-based for stability. And every set is automatically scoped to what the caller is allowed to see. That single model — *build a description, ask it questions* — is the entire read surface, and it's what your data-layer hooks will wrap one-for-one.
+
+---
+
+## Appendix — The Query API (REST contract)
+
+*This is the concrete contract to implement. REST-ish: simple reads are `GET`; anything with a nested filter is `POST` with a JSON body (query strings can't carry a filter tree). The object-set description is the central data structure; the endpoints are thin operations over it.*
+
+### Conventions
+
+- Base path: `/api/v1/ontology`
+- `{type}` = an object type's API name (e.g. `Order`). `{pk}` = a primary key value.
+- All `POST` reads take a JSON body and are **safe/idempotent** (they don't mutate). `POST` is used only because the filter tree won't fit in a URL.
+- All responses are scoped to the caller's policy. Forbidden rows are absent; forbidden properties are omitted from each object (never returned as `null` to disguise existence).
+
+### Endpoints
+
+<table>
+<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/objects/{type}/{pk}</code></td><td>Fetch one object by primary key</td></tr>
+<tr><td><code>POST</code></td><td><code>/objects/{type}/load</code></td><td>Load a page of an object set</td></tr>
+<tr><td><code>POST</code></td><td><code>/objects/{type}/count</code></td><td>Count an object set</td></tr>
+<tr><td><code>POST</code></td><td><code>/objects/{type}/aggregate</code></td><td>Aggregate an object set</td></tr>
+<tr><td><code>POST</code></td><td><code>/objects/{type}/search</code></td><td>Ranked full-text search</td></tr>
+<tr><td><code>POST</code></td><td><code>/objects/{type}/{pk}/links/{link}/load</code></td><td>Load a page of linked objects</td></tr>
+<tr><td><code>POST</code></td><td><code>/objectSets/load</code></td><td>Load from a full object-set description (incl. traversal chains)</td></tr>
+</tbody>
+</table>
+
+The per-type endpoints are conveniences. `/objectSets/load` is the general form: it accepts a complete object-set description, including traversal, so multi-hop queries have a home.
+
+### The object-set description
+
+The body shared by `load`, `count`, and `aggregate`:
+
+```json
+{
+  "base": { "objectType": "Order" },
+  "where": { "/* see Filter grammar below */": "..." },
+  "traverse": [ { "link": "customer" } ],
+  "orderBy": [ { "property": "createdAt", "direction": "desc" } ],
+  "select": ["id", "status", "total"],
+  "expand": { "customer": { "select": ["id", "name"] } },
+  "page": { "pageSize": 25, "pageToken": null }
+}
+```
+
+- `base` — the starting object type (and optionally a starting `where`).
+- `traverse` — an ordered list of link hops. After traversal, the set's type is the final hop's target; `where`/`orderBy`/`select` apply to *that* type.
+- `select` / `expand` — projection. `select` lists properties to return (omit ⇒ a default set). `expand` pulls in linked objects with their own `select`.
+- `orderBy` — ordered keys; the server appends the primary key as a final tie-breaker.
+- `page` — `pageSize` (server clamps to a max, e.g. 1000) and the opaque `pageToken`.
+
+### Filter grammar
+
+A filter is either a **leaf** or a **composite**.
+
+```json
+{ "property": "status", "op": "eq", "value": "open" }
+```
+
+```json
+{ "and": [
+  { "property": "status", "op": "eq", "value": "open" },
+  { "property": "total",  "op": "gt", "value": 100 },
+  { "not": { "property": "channel", "op": "in", "value": ["test", "demo"] } }
+] }
+```
+
+Leaf operators:
+
+<table>
+<thead><tr><th>Category</th><th>Ops</th><th>Value shape</th></tr></thead>
+<tbody>
+<tr><td>Equality / set</td><td><code>eq</code>, <code>neq</code>, <code>in</code></td><td>scalar; <code>in</code> → array</td></tr>
+<tr><td>Ordering / range</td><td><code>lt</code>, <code>lte</code>, <code>gt</code>, <code>gte</code>, <code>between</code></td><td>scalar; <code>between</code> → <code>[min, max]</code></td></tr>
+<tr><td>Null</td><td><code>isNull</code></td><td>boolean</td></tr>
+<tr><td>Text</td><td><code>contains</code>, <code>startsWith</code>, <code>endsWith</code></td><td>string</td></tr>
+<tr><td>Geo</td><td><code>withinRadius</code>, <code>withinBbox</code></td><td><code>{center, radius}</code> / <code>{bbox}</code></td></tr>
+<tr><td>Relationship</td><td><code>hasLink</code></td><td>a nested set + filter (see below)</td></tr>
+</tbody>
+</table>
+
+`hasLink` is how you express "customers who have at least one open order" without leaving the customer set:
+
+```json
+{ "op": "hasLink",
+  "value": { "link": "orders", "where": { "property": "status", "op": "eq", "value": "open" } } }
+```
+
+### Load response
+
+```json
+{
+  "data": [
+    { "__type": "Order", "__primaryKey": "ord_9", "id": "ord_9", "status": "open", "total": 240 }
+  ],
+  "nextPageToken": "eyJvZmZzZXQiOiAyNX0"
+}
+```
+
+`nextPageToken` is `null` when the last page has been returned. Clients pass it back verbatim in `page.pageToken`.
+
+### Count response
+
+```json
+{ "count": 1843 }
+```
+
+### Aggregate
+
+Request:
+
+```json
+{
+  "where": { "property": "status", "op": "eq", "value": "open" },
+  "groupBy": [
+    { "property": "branch" },
+    { "property": "createdAt", "bucket": { "dateHistogram": "month" } }
+  ],
+  "metrics": [ { "op": "count" }, { "op": "sum", "property": "total" } ]
+}
+```
+
+Bucketing kinds: exact (no `bucket`), `dateHistogram` (`day|week|month|quarter|year`), and `ranges`. Metric ops: `count`, `sum`, `avg`, `min`, `max`, `approxDistinct`.
+
+Response — one row per group key combination:
+
+```json
+{
+  "groups": [
+    { "key": { "branch": "Hong Kong", "createdAt": "2026-05" }, "metrics": { "count": 92, "sum_total": 41200 } }
+  ]
+}
+```
+
+### Search
+
+```json
+{ "query": "acme refund", "where": { "property": "status", "op": "neq", "value": "archived" },
+  "page": { "pageSize": 20 } }
+```
+
+Runs full-text (prefix + fuzzy) over the type's searchable properties, combinable with a structured `where`. Response is a `load` response plus a per-object `__score` for ranking.
+
+### Derived properties
+
+Derived properties (computed by an ontology function) appear in `select`, `where`, and `orderBy` exactly like stored ones — no special syntax. The server resolves them; treat them as potentially more expensive to filter/sort on.
+
+### Errors
+
+```json
+{ "error": { "code": "INVALID_FILTER", "message": "Unknown property 'totl' on Order", "details": { "property": "totl" } } }
+```
+
+Codes: `INVALID_FILTER`, `INVALID_ORDER`, `UNKNOWN_OBJECT_TYPE`, `UNKNOWN_LINK`, `PAGE_TOKEN_EXPIRED`, `FORBIDDEN` (caller can't see the type at all), `PAGE_SIZE_EXCEEDED`.
+
+### Mapping to the frontend hooks
+
+This is why the model was worth pinning down first — the hooks are one-for-one wrappers:
+
+<table>
+<thead><tr><th>Hook</th><th>Endpoint</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><code>useObject(type, pk)</code></td><td><code>GET /objects/{type}/{pk}</code></td><td>one object</td></tr>
+<tr><td><code>useObjects(set)</code></td><td><code>POST /objects/{type}/load</code></td><td>page + <code>fetchMore</code></td></tr>
+<tr><td><code>useLinks(object, link)</code></td><td><code>POST /objects/{type}/{pk}/links/{link}/load</code></td><td>linked page</td></tr>
+<tr><td><code>useCount(set)</code></td><td><code>POST /objects/{type}/count</code></td><td>a number</td></tr>
+<tr><td><code>useAggregation(set, spec)</code></td><td><code>POST /objects/{type}/aggregate</code></td><td>groups</td></tr>
+<tr><td><code>useSearch(type, query)</code></td><td><code>POST /objects/{type}/search</code></td><td>ranked page</td></tr>
+</tbody>
+</table>
+
+### Design decisions (the "why")
+
+- **POST for complex reads.** A filter tree, traversal chain, and aggregation spec don't fit a query string. Keep `GET` only for fetch-by-id.
+- **Object set as a first-class description.** It composes (filter → traverse → filter), it's serializable (you can save/share/cache a set definition), and the server can plan/optimize the whole thing at once.
+- **Cursor pagination.** Stable under concurrent writes; scales past the offset cliff.
+- **Stable ordering via primary-key tie-break.** Non-negotiable, or pagination duplicates/skips.
+- **Projection by default-narrow.** `select`/`expand` exist so the common case (a few columns) doesn't drag the whole object graph over the wire.
+- **Security is server-side and invisible to the query.** The query never expresses permissions; the set is pre-scoped to the caller. The UI mirrors it via metadata, never enforces it.

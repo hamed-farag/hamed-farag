@@ -1,0 +1,172 @@
+---
+id: ontology-5
+title: "The Ontology, Part 5: How You Change It"
+date: "06-09-2026"
+description: "Part 5 of the beginner's guide to ontologies. The write side, as a story: you never touch the database — you propose a named action, which is validated, checked against the rules, then committed to writeback and audited. Optimistic updates and rollback, all-or-nothing edits, and the ripples a write sets off."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*This is part 5. [Part 3](/posts/ontology-3) was how you* read *the ontology — build an object set, ask it a question. This is the other half: how you* change *it. The two are mirror images, and together they're the whole verb surface of the system. [Part 1](/posts/ontology-1) promised that the only sanctioned way to write is an **action** — now we follow one all the way through, from the button click to the audit entry, with the rollback in between. The running example is the same little construction-site world from the [playground](/posts/ontology-3): acknowledging an alert.*
+
+---
+
+## You don't write to the database. You propose an action.
+
+Here's the rule that shapes everything else: in an ontology, you never write directly. There's no "set this field to that value." You invoke a **named action** — `acknowledgeAlert`, `cancelOrder`, `reassignWorker` — with typed parameters, and the action does the writing.
+
+```ts
+await client.actions.acknowledgeAlert({ alert: "alr_22", assignee: "wkr_8" });
+```
+
+That feels like a restriction. It's the whole point. Compare two ways the same change could land in your data:
+
+- A raw write: `UPDATE alerts SET status='ack' WHERE id='alr_22'`. Six months later, nobody knows who ran it, why, or whether they were allowed to.
+- An action: `acknowledgeAlert`. It has a *name* (so the audit log reads like sentences, not field diffs), typed inputs (so it can't be called wrong), and one place to put the rules. 
+
+> **👩‍💻 Mai (junior):** So I can't just set the field, even when I know exactly what I want to change?
+>
+> **👨‍🏫 Hamed (mentor):** Right — and that constraint *is* the feature. The moment writes have to go through named actions, you get governance for free: every change is intentional, attributable, and checkable. A bare `UPDATE` throws all of that away. From Part 1: actions are the only governed door into your data. Everything below is what happens once you walk through it.
+
+## The journey of a write: validate, check, commit, audit
+
+When you invoke an action, it runs a short pipeline before anything is saved. Four stages, and the order matters.
+
+<svg width="100%" viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The action pipeline: propose, validate, check, commit, audit — with a rejection branch" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="w1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="18" y="24" width="108" height="56" rx="9" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="72" y="48" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">Propose</text>
+    <text x="72" y="65" font-size="10.5" fill="#5B6675" text-anchor="middle">an action</text>
+    <rect x="152" y="24" width="108" height="56" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="206" y="48" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">Validate</text>
+    <text x="206" y="65" font-size="10.5" fill="#5B6675" text-anchor="middle">shape</text>
+    <rect x="286" y="24" width="108" height="56" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="340" y="48" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">Check</text>
+    <text x="340" y="65" font-size="10.5" fill="#5B6675" text-anchor="middle">rules + who</text>
+    <rect x="420" y="24" width="108" height="56" rx="9" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="474" y="48" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">Commit</text>
+    <text x="474" y="65" font-size="10.5" fill="#5B6675" text-anchor="middle">to writeback</text>
+    <rect x="554" y="24" width="108" height="56" rx="9" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="608" y="48" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">Audit</text>
+    <text x="608" y="65" font-size="10.5" fill="#5B6675" text-anchor="middle">who/what/when</text>
+    <line x1="126" y1="52" x2="150" y2="52" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w1)"/>
+    <line x1="260" y1="52" x2="284" y2="52" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w1)"/>
+    <line x1="394" y1="52" x2="418" y2="52" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w1)"/>
+    <line x1="528" y1="52" x2="552" y2="52" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w1)"/>
+    <rect x="150" y="150" width="246" height="42" rx="9" fill="#FBECEC" stroke="#C0564B"/>
+    <text x="273" y="168" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">Rejected</text>
+    <text x="273" y="184" font-size="11" fill="#5B6675" text-anchor="middle">nothing written · no audit entry</text>
+    <line x1="206" y1="80" x2="250" y2="148" stroke="#C0564B" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#w1)"/>
+    <line x1="340" y1="80" x2="300" y2="148" stroke="#C0564B" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#w1)"/>
+  </g>
+</svg>
+
+**Validate** asks: *is this a sensible request at all?* Are the parameters the right types, are required fields present, is the reason non-empty? It's the structural check — cheap, instant, the same spirit as form validation. It looks only at the *request*, never at the world.
+
+**Check** asks: *is this allowed, right now?* Two questions bundled together — **permission** (are *you* allowed to do this? — the security gate from Part 1) and **business rule** (does the current state of the world permit it? — you can't acknowledge an alert if your safety cert has expired, can't cancel an order that already shipped). Check looks at the *world* and the *caller*, which is why it runs second: no point asking the expensive question until the request is well-formed.
+
+**Commit** is where it becomes real. The action computes a set of **edits** and writes them to the **writeback store** — that layer from Part 1 that sits *over* your pristine source data, never touching it. Your warehouse stays untouched; the change lives in the overlay.
+
+**Audit** appends the receipt: who ran what, when, and the before→after. This is the reason the whole "named actions only" rule exists — you can answer "who changed this, and why" months later, which a raw `UPDATE` can never tell you.
+
+```ts
+// Anatomy of an action (conceptual — not a real API)
+action("acknowledgeAlert", {
+  params:   { alert: Alert, assignee: Worker },        // typed inputs
+  validate: (p) => p.assignee != null,                 // shape: sensible request?
+  check:    (p, ctx) =>                                 // world: allowed now?
+    ctx.user.can("ack", p.alert) && p.assignee.certValid,
+  apply:    (p) => [                                    // the edits to commit
+    edit(p.alert, { status: "ack", assignee: p.assignee }),
+  ],
+});
+```
+
+> **👩‍💻 Mai:** Validate and check feel like the same thing. Why two stages?
+>
+> **👨‍🏫 Hamed:** Different questions. Validate is about the *request* — "is this even a coherent thing to ask?" Check is about the *world* — "is it allowed, by this person, in this state, right now?" The first is cheap and stateless; the second may hit the database and the security policy. Separating them means you fail the cheap way before paying for the expensive way.
+
+## Making it feel instant: optimistic writes and rollback
+
+That pipeline takes a round-trip to the server, and users hate waiting for a button. So the UI plays a trick — the same one the [playground](/posts/ontology-3) uses when you acknowledge an alert.
+
+<svg width="100%" viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Optimistic write round-trip: the screen updates instantly, then the server either confirms or the change is rolled back" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="w2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="90" width="150" height="64" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="115" y="116" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Your screen</text>
+    <text x="115" y="135" font-size="10.5" fill="#5B6675" text-anchor="middle">shows the edit at once</text>
+    <rect x="300" y="90" width="140" height="64" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="370" y="116" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Server</text>
+    <text x="370" y="135" font-size="10.5" fill="#5B6675" text-anchor="middle">validate · check</text>
+    <rect x="520" y="26" width="150" height="60" rx="10" fill="#EAF6EE" stroke="#2E9A57"/>
+    <text x="595" y="51" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">✓ Accepted</text>
+    <text x="595" y="69" font-size="10.5" fill="#5B6675" text-anchor="middle">commit + audit · keep it</text>
+    <rect x="520" y="158" width="150" height="60" rx="10" fill="#FBECEC" stroke="#C0564B"/>
+    <text x="595" y="183" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">✗ Rejected</text>
+    <text x="595" y="201" font-size="10.5" fill="#5B6675" text-anchor="middle">rollback · revert it</text>
+    <line x1="190" y1="122" x2="298" y2="122" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w2)"/>
+    <line x1="440" y1="108" x2="518" y2="62" stroke="#2E9A57" stroke-width="1.5" marker-end="url(#w2)"/>
+    <line x1="440" y1="136" x2="518" y2="182" stroke="#C0564B" stroke-width="1.5" marker-end="url(#w2)"/>
+    <text x="340" y="240" font-size="11.5" fill="#5B6675" text-anchor="middle">The screen updates instantly; the server's answer either confirms the change or undoes it.</text>
+  </g>
+</svg>
+
+The UI applies the edit **optimistically** — it shows the alert as acknowledged the instant you click, before the server has answered. Then one of two things happens:
+
+- **Accepted.** The server's committed edit quietly replaces the optimistic one. The user never saw a spinner; the change was real all along.
+- **Rejected.** A check failed — say you assigned a worker whose cert expired. The optimistic edit is **rolled back**: the row snaps back to its old value, nothing reaches the writeback store, and no audit entry is written. The user sees the rejection. (Try it in the playground — acknowledge with the expired-cert worker and watch the row revert.)
+
+> **👩‍💻 Mai:** So the optimistic update is basically a lie we tell the screen?
+>
+> **👨‍🏫 Hamed:** A *hopeful bet*. It's right the overwhelming majority of the time, so the UI feels instant. When it's wrong, you undo it cleanly and tell the truth. The honesty lives in the rollback — the optimistic edit only ever existed on the client, and nothing touched writeback or the audit log until the server said yes.
+
+## One action, many edits — all or nothing
+
+A real-world change is rarely one field. Cancelling an order isn't just `status = cancelled` — it also restocks the inventory and creates a refund. An action bundles all of those into **one transaction**: every edit commits together, or none do.
+
+<svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One action producing three edits that commit together as one atomic transaction" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="w3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="44" y="72" width="166" height="56" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="127" y="98" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">cancelOrder</text>
+    <text x="127" y="116" font-size="10.5" fill="#5B6675" text-anchor="middle">one action</text>
+    <rect x="418" y="22" width="220" height="40" rx="9" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="528" y="47" font-size="12" fill="#1F2733" text-anchor="middle">Order → cancelled</text>
+    <rect x="418" y="80" width="220" height="40" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="528" y="105" font-size="12" fill="#1F2733" text-anchor="middle">Inventory → +1 restocked</text>
+    <rect x="418" y="138" width="220" height="40" rx="9" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="528" y="163" font-size="12" fill="#1F2733" text-anchor="middle">Refund → created</text>
+    <line x1="210" y1="100" x2="416" y2="42" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w3)"/>
+    <line x1="210" y1="100" x2="416" y2="100" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w3)"/>
+    <line x1="210" y1="100" x2="416" y2="158" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#w3)"/>
+    <text x="340" y="194" font-size="11.5" fill="#5B6675" text-anchor="middle">One transaction — all three commit together, or none of them do.</text>
+  </g>
+</svg>
+
+This is why the *action*, not the field, is the unit of change: it groups the edits that have to stay consistent with each other. You never end up with a cancelled order that has no refund, or restocked inventory for an order that's still active. The batch is atomic.
+
+> **👩‍💻 Mai:** What if two of us cancel the same order at the same moment?
+>
+> **👨‍🏫 Hamed:** The check runs against the *current* state each time. The first one wins; the second one finds the order already cancelled and gets rejected. A stale edit — one based on a version of the world that's already moved on — is caught at the check, not blindly applied. The world stays consistent.
+
+## After the commit: the ripples
+
+A committed action isn't the end of the story — it's a stone in a pond. Once those edits land:
+
+- The **serving index** updates, so the next object set you build in Part 3 sees the change.
+- **Automations** may fire — Part 1's condition→effect rules. A new refund might notify the finance team; a critical alert might page a supervisor.
+- **Derived properties** recompute — Part 4's `daysOpen`, a `riskScore` — because their inputs just changed.
+- **Lineage** records it. The audit entry plus the writeback overlay mean the path from "today's value" back to "who changed it, from what, when" is always traceable.
+
+So a single write fans out into reads, automations, and recomputations — all of them downstream of one named, audited action.
+
+---
+
+## The one-paragraph summary
+
+You never write to the data directly — you propose a **named action**. It's **validated** (is the request well-formed?), then **checked** (are you allowed, and does the world permit it right now?), and only then are its **edits committed** to the writeback store, leaving your source data pristine, and **recorded** in an audit log. The UI applies the change **optimistically** so it feels instant, and **rolls it back** cleanly if the action is rejected — nothing reaches writeback or audit until the server says yes. One action can bundle **many edits that commit all-or-nothing**, and once committed, the change **ripples out** to reads, automations, and recomputed values. Part 3 was the read verb; Part 5 is the write verb. Learn both and you can drive any ontology — which is exactly the ground the frontend stands on.
+
+---
+
+*That's reads and writes both. Caught up on the rest? [Part 1](/posts/ontology-1) (the big picture), [Part 2](/posts/ontology-2) (reuse and agents), [Part 3](/posts/ontology-3) (how you read), [Part 4](/posts/ontology-4) (objects, properties, links up close). Next, the capstone: with the read and write models in hand, how you build a **frontend** on top of an ontology — the builder that edits definitions, the client that edits data, and the one foundation they share.*

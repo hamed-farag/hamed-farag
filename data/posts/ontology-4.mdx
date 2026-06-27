@@ -1,0 +1,175 @@
+---
+id: ontology-4
+title: "The Ontology, Part 4: What Objects, Properties, and Links Really Are"
+date: "06-28-2026"
+description: "Part 4 of the beginner's guide to ontologies. We've used objects, properties, and links since part 1 — now we look at the grammar underneath them: what gives an object its identity, what a property's type really buys you, and the one word nobody defined — link cardinality, including the many-to-many that hides its own data."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*This is part 4. We've used objects, properties, and links since [part 1](/posts/ontology-1), reused them in [part 2](/posts/ontology-2), and queried them in [part 3](/posts/ontology-3) — all while saying "an object has properties and links" as if that were obvious. It isn't. There's real grammar underneath, and it's the grammar everything else stands on. So let's slow down and look at the three building blocks up close: what gives an object its **identity**, what a property's **type** really buys you, and the one word nobody defined — link **cardinality**.*
+
+---
+
+## First, what makes a thing *that* thing?
+
+Start with objects. Part 1 said objects are the nouns — Customer, Order, Product. Fine. But here's a question that sounds dumb and isn't: if two customers are both named "Sara Ahmed," are they the same customer?
+
+Obviously not. But *how does the system know?* Not by the name — names collide, and names change (people marry, fix typos, switch "Mohammed" to "Mohamed"). The thing that says "this is *this* customer, not that one" is the object's **identity** — a stable key, usually called the **primary key**.
+
+<svg width="100%" viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two people with the same name but different identity keys, and an order that links by key" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="t1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="60" y="28" width="200" height="74" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="160" y="58" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Sara Ahmed</text>
+    <text x="160" y="80" font-size="12" fill="#5B6675" text-anchor="middle">id: cust_8842</text>
+    <rect x="300" y="28" width="200" height="74" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="400" y="58" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Sara Ahmed</text>
+    <text x="400" y="80" font-size="12" fill="#5B6675" text-anchor="middle">id: cust_3190</text>
+    <text x="540" y="58" font-size="12.5" fill="#5B6675" text-anchor="start">Same name.</text>
+    <text x="540" y="78" font-size="12.5" fill="#5B6675" text-anchor="start">Different people.</text>
+    <rect x="300" y="150" width="200" height="50" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="400" y="172" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Order #5567</text>
+    <text x="400" y="190" font-size="11.5" fill="#5B6675" text-anchor="middle">customer → cust_3190</text>
+    <line x1="400" y1="150" x2="400" y2="104" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#t1)"/>
+    <text x="160" y="190" font-size="11.5" fill="#5B6675" text-anchor="middle">The link points at the key — never the name.</text>
+  </g>
+</svg>
+
+Think of it like a passport number. Your name is printed on the passport, but the *number* is what's unique — two people can share a name, never a passport number. In Part 1's mapping step, this was the quiet line "which column uniquely identifies one Customer." That column is the object's identity.
+
+Identity is load-bearing for the whole system, in three places:
+
+- **Links point at identity, not at names.** When an Order links to its Customer, it stores the customer's *key* (`cust_3190`), not the string "Sara Ahmed." That's why renaming a customer never breaks their orders.
+- **Edits are keyed by identity.** Remember the writeback store from Part 1? An edit to a customer is filed under that key, so it lands on the right object and nowhere else.
+- **Deduplication needs it.** If two messy source rows are really the same person, the mapping has to resolve them to *one* key — or you get two ghost customers.
+
+> **👩‍💻 Mai (junior):** So why not just key on email? Everyone has one.
+>
+> **👨‍🏫 Hamed (mentor):** Until they change it. The golden rule of a primary key: pick something that never changes and never repeats. Email fails the first test; names fail both. When nothing natural fits, you mint a meaningless id — `cust_3190` — *because* it has no meaning to drift. Boring and permanent beats descriptive and fragile.
+
+## Properties have *types* — and the type is a promise
+
+Part 1 drew properties as the italic text inside the boxes — `name`, `total`, `date`. What it skipped is that every property has a **type**, and the type is the most underrated decision in the whole model. A type isn't just "how it's stored." It's a *promise* the rest of the system gets to rely on.
+
+Here's the menu, grouped the way you'd really reach for it:
+
+<svg width="100%" viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A menu of property types grouped into basics, structured, and specialized" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="24" y="18" width="200" height="32" rx="8" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="124" y="39" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Basics</text>
+    <rect x="240" y="18" width="200" height="32" rx="8" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="340" y="39" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Structured</text>
+    <rect x="456" y="18" width="200" height="32" rx="8" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="556" y="39" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Specialized</text>
+    <rect x="24" y="62" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="124" y="81" font-size="12" fill="#1F2733" text-anchor="middle">text</text>
+    <rect x="24" y="98" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="124" y="117" font-size="12" fill="#1F2733" text-anchor="middle">number</text>
+    <rect x="24" y="134" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="124" y="153" font-size="12" fill="#1F2733" text-anchor="middle">true / false</text>
+    <rect x="24" y="170" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="124" y="189" font-size="12" fill="#1F2733" text-anchor="middle">date / timestamp</text>
+    <rect x="240" y="62" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="340" y="81" font-size="12" fill="#1F2733" text-anchor="middle">enum (a fixed set)</text>
+    <rect x="240" y="98" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="340" y="117" font-size="12" fill="#1F2733" text-anchor="middle">array (many values)</text>
+    <rect x="240" y="134" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="340" y="153" font-size="12" fill="#1F2733" text-anchor="middle">struct (a bundle)</text>
+    <rect x="456" y="62" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="556" y="81" font-size="12" fill="#1F2733" text-anchor="middle">location (geo)</text>
+    <rect x="456" y="98" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="556" y="117" font-size="12" fill="#1F2733" text-anchor="middle">time-series</text>
+    <rect x="456" y="134" width="200" height="30" rx="7" fill="#FFFFFF" stroke="#D7DEE8"/><text x="556" y="153" font-size="12" fill="#1F2733" text-anchor="middle">attachment</text>
+    <text x="340" y="226" font-size="12" fill="#5B6675" text-anchor="middle">The type decides what you can store, validate, filter, and how the UI renders it.</text>
+  </g>
+</svg>
+
+- **The basics:** text, number, boolean, date/timestamp. The bread and butter.
+- **Structured:** an **enum** is a fixed set of allowed values (`status` is one of `open` / `paid` / `cancelled` — so nobody can typo `opn`). An **array** holds many values (a list of `tags`). A **struct** bundles a few fields into one property (an `address` of street/city/zip that travels together).
+- **Specialized:** a **location** (latitude/longitude) is what lets an object land on a map. A **time-series** holds readings over time (a sensor's temperature). An **attachment** points at a file.
+
+Why does picking the right one matter so much? Because the type is what makes everything *downstream* smart, for free:
+
+- Type it as a **date**, and Part 3's query model can filter by range ("last 30 days") and sort chronologically. Store it as text and you've thrown that away.
+- Type it as a **location**, and a map component can drop a pin — this is exactly the `Facility` / `ILocatable` idea from Part 2. That interface only works because `location` is a real geo type, not a string.
+- Type it as an **enum**, and the UI renders a clean dropdown, the data can't hold a misspelling, and a chart can group by it without surprises.
+
+```ts
+type Order = {
+  id: string;                              // identity — a text key
+  total: number;                           // money — filter by >, sort, sum
+  status: "open" | "paid" | "cancelled";   // enum — a typo can't exist
+  createdAt: Date;                         // date — range filters, chronological sort
+  shipTo: Address;                         // struct — a bundle that travels together
+  tags: string[];                          // array — many values
+};
+```
+
+> **👩‍💻 Mai:** Couldn't I just store all of it as text and parse it when I need to?
+>
+> **👨‍🏫 Hamed:** You could — and you'd spend the rest of the project paying for it. "Stringly-typed" data can't be range-filtered, can't be validated, can't be mapped, can't be charted without re-parsing every single time. The type is a one-time decision that buys correctness everywhere after. It's the difference between the system *knowing* what it holds and merely *storing* it.
+
+One callback: not every property is stored. Some are **derived** — computed by a function, like Part 1's risk score or a `daysOpen`. They still have a type, and Part 3 lets you select, filter, and sort on them exactly like stored ones.
+
+## Links have a shape: *cardinality*
+
+Now the big one — the idea the series has been quietly leaning on without ever naming. Part 1 told you links are relationships ("a Customer *places* an Order"). What it never said is that every link has a **cardinality**: how many things sit on each end. There are three shapes, and you already know all of them from real life.
+
+<svg width="100%" viewBox="0 0 680 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The three link cardinalities — one-to-one, one-to-many, many-to-many — with everyday examples" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="70" y="22" width="150" height="44" rx="9" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="145" y="49" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Person</text>
+    <rect x="460" y="22" width="150" height="44" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="535" y="49" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Passport</text>
+    <line x1="220" y1="44" x2="458" y2="44" stroke="#8A93A1" stroke-width="1.5"/>
+    <text x="339" y="37" font-size="12" font-weight="600" fill="#6B5FD0" text-anchor="middle">one ↔ one</text>
+    <text x="340" y="86" font-size="11.5" fill="#5B6675" text-anchor="middle">each person has exactly one passport, and the reverse</text>
+    <rect x="70" y="112" width="150" height="44" rx="9" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="145" y="139" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Customer</text>
+    <rect x="460" y="112" width="150" height="44" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="535" y="139" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Orders</text>
+    <line x1="220" y1="134" x2="458" y2="134" stroke="#8A93A1" stroke-width="1.5"/>
+    <text x="339" y="127" font-size="12" font-weight="600" fill="#1F9AA8" text-anchor="middle">one → many</text>
+    <text x="340" y="176" font-size="11.5" fill="#5B6675" text-anchor="middle">one customer, many orders — but each order has exactly one customer</text>
+    <rect x="70" y="202" width="150" height="44" rx="9" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="145" y="229" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Students</text>
+    <rect x="460" y="202" width="150" height="44" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="535" y="229" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Courses</text>
+    <line x1="220" y1="224" x2="458" y2="224" stroke="#8A93A1" stroke-width="1.5"/>
+    <text x="339" y="217" font-size="12" font-weight="600" fill="#C8861E" text-anchor="middle">many ↔ many</text>
+    <text x="340" y="266" font-size="11.5" fill="#5B6675" text-anchor="middle">a student takes many courses; a course has many students</text>
+  </g>
+</svg>
+
+- **One-to-one.** A Person and their Passport — one each way. Rare in practice, and usually a sign that two things could have been one object, or that you split off sensitive fields on purpose.
+- **One-to-many.** A Customer and their Orders. One customer has many orders; each order belongs to exactly one customer. This is the workhorse — most links you draw are one-to-many. (Part 1's "a Dog has exactly one Owner" is this same link, seen from the Dog's side.)
+- **Many-to-many.** Students and Courses. A student takes many courses; a course enrolls many students. *Both* ends are "many."
+
+> **👩‍💻 Mai:** Wait — go back to Part 1. "An Order contains Products." A product can be in lots of orders, and an order has lots of products. Isn't that... many-to-many?
+>
+> **👨‍🏫 Hamed:** It is — and you just caught the most common modeling slip in the book. We drew it as a plain arrow, but it's a many-to-many. Spotting it early matters, because many-to-many has a twist the other two don't.
+
+Here's the twist. In a one-to-many, the link is just a pointer. But a many-to-many often has **facts that belong to the relationship itself**, not to either end. Take Student–Course: the *grade* and the *enrollment date* aren't a fact about the student (they have many grades) or about the course (it has many) — they're a fact about *that student in that course*. When that happens, the link grows up into its own object — an **Enrollment** — sitting between the two:
+
+```ts
+// Many-to-many with no extra facts → a plain link:
+type Student = { id: string; courses: Course[] };
+
+// Many-to-many that carries its own data → promote it to an object:
+type Enrollment = {
+  id: string;
+  student: Student;   // to-one
+  course: Course;     // to-one
+  grade: string;      // a fact about the pairing itself
+  enrolledAt: Date;
+};
+```
+
+That's the whole trick: **a many-to-many with its own properties becomes an object in the middle, linked one-to-many to each side.** Once you see it, you see it everywhere — orders and products (the middle object is the *line item*, holding quantity and price), users and roles, doctors and patients.
+
+And cardinality isn't trivia — it decides how you *use* the link. Traversing the "many" side (Part 3's `.traverse("orders")`) hands you a *set* you page through; traversing the "one" side hands you a *single* object. It even decides the UI: a to-many link renders as a table or list; a to-one renders as a single linked card.
+
+> **👩‍💻 Mai:** So when I built that object set in Part 3 and followed a link, the cardinality is *why* I got back a list I could keep filtering?
+>
+> **👨‍🏫 Hamed:** Exactly. "Traversal in, set out" only makes sense because you followed a to-many link. You were leaning on cardinality the whole time — now you know its name.
+
+---
+
+## The one-paragraph summary
+
+Under the friendly boxes-and-arrows, the three building blocks have real grammar. An **object** is pinned down by a stable **identity** — a primary key that never changes and never repeats — and that's what links point at and what edits are filed under. A **property** has a **type**, and the type is a promise: choose *date*, *enum*, or *location* and you get range filters, validation, and maps for free; choose *text* for everything and you pay for it forever. A **link** has a **cardinality** — one-to-one, one-to-many, or many-to-many — and the moment a many-to-many carries its own facts, it quietly becomes an object in the middle. Identity, types, cardinality. Get these three right and everything you've read so far — the query model, the actions, the SDK, the security gates — has solid ground to stand on. These are the bricks; the rest of the ontology is what you build with them.
+
+---
+
+*Missed the earlier parts? Start with [part 1](/posts/ontology-1) for the big picture, [part 2](/posts/ontology-2) for reuse and agents, and [part 3](/posts/ontology-3) for how you read the model. Next up: now that the nouns are precise, the other half of part 3's story — not how you read the ontology, but how you safely* change *it.*
