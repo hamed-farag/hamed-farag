@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ontology Query Playground</title>
+<style>
+  :root{
+    --bg:#F4F6FA; --card:#FFFFFF; --ink:#1F2733; --mut:#5B6675; --line:#E2E7EF;
+    --purple:#6B5FD0; --teal:#1F9AA8; --amber:#C8861E; --coral:#D2553B; --green:#2E9E6B;
+    --chip:#F1F3F8;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:14px;line-height:1.5}
+  header{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--card);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  h1{font-size:18px;margin:0;font-weight:650}
+  .sub{color:var(--mut);font-size:12.5px;margin-top:2px}
+  .model{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .pill{font-size:11.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);background:var(--chip);color:var(--ink)}
+  .pill.iface{border-style:dashed;border-color:var(--purple);color:var(--purple);background:#F4F2FC}
+  .lens{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut)}
+  main{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px 22px;align-items:start}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+  label{font-size:12px;color:var(--mut);display:block;margin-bottom:3px}
+  select,input{font-family:var(--sans);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  select:focus,input:focus{outline:2px solid #cdd6ff;border-color:var(--purple)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .step{border:1px solid var(--line);border-radius:10px;padding:9px;margin:8px 0;background:#FbFcfe}
+  .step .tag{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+  .step.filter .tag{color:var(--teal)} .step.traverse .tag{color:var(--purple)} .step.order .tag{color:var(--amber)}
+  .x{margin-left:auto;border:none;background:transparent;color:var(--mut);cursor:pointer;font-size:15px;line-height:1}
+  .addbtns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .btn{font-family:var(--sans);font-size:12.5px;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+  .btn:hover{background:var(--chip)}
+  .btn.ghost{color:var(--mut)}
+  .runbar{display:flex;gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);flex-wrap:wrap}
+  .run{background:var(--purple);color:#fff;border:none;font-weight:600;padding:8px 18px;border-radius:9px;cursor:pointer;font-size:13px}
+  .run.stale{animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,95,208,.4)}50%{box-shadow:0 0 0 6px rgba(107,95,208,0)}}
+  .tabs{display:flex;gap:4px;margin-bottom:10px}
+  .tab{font-size:12px;padding:4px 10px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--mut)}
+  .tab.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+  pre{font-family:var(--mono);font-size:12px;background:#0F1521;color:#E8ECF3;padding:12px;border-radius:9px;overflow:auto;margin:0;max-height:260px}
+  .recipe{font-size:13.5px;line-height:1.7}
+  .recipe b{color:var(--purple)}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  .masked{color:var(--coral);font-family:var(--mono);font-size:11px}
+  .scroll{overflow:auto;max-height:340px;border:1px solid var(--line);border-radius:9px}
+  .count{font-size:46px;font-weight:700;color:var(--purple);text-align:center;padding:24px 0}
+  .count small{display:block;font-size:13px;color:var(--mut);font-weight:400}
+  .bar{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .bar .lab{width:110px;font-size:12px;text-align:right;color:var(--mut)}
+  .bar .track{flex:1;background:var(--chip);border-radius:6px;height:22px;position:relative}
+  .bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:6px}
+  .bar .val{position:absolute;right:8px;top:0;line-height:22px;font-size:11.5px;color:var(--ink);font-weight:600}
+  .note{font-size:12.5px;background:#FFF8EC;border:1px solid #F0DDB8;color:#7a5a17;border-radius:9px;padding:9px 11px;margin-top:10px}
+  .note.sec{background:#FBEFEC;border-color:#F0C9bf;color:#8a3a28}
+  .concept{font-size:13px;background:#F4F2FC;border:1px solid #DAD3F5;color:#4a3fb0;border-radius:9px;padding:11px 13px;margin-top:12px}
+  .concept b{color:var(--purple)}
+  .pagi{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;font-size:12px;color:var(--mut)}
+  .placeholder{color:var(--mut);text-align:center;padding:30px 0;font-size:13px}
+  .stack{margin-bottom:16px}
+  .auditrow{font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .auditrow .mono{font-family:var(--mono);color:var(--mut);font-size:11px}
+  td .btn{padding:3px 9px;font-size:11.5px}
+  td select{padding:3px 6px;font-size:11.5px}
+  .ackd{color:var(--green);font-weight:600}
+  .console{margin:0 22px 22px;background:#0E1422;border:1px solid #1d2738;border-radius:12px;overflow:hidden;font-family:var(--mono)}
+  .console-head{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 12px;background:#121a2b;border-bottom:1px solid #1d2738}
+  .console-head .ttl{color:#8aa0c0;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+  .console-body{max-height:300px;overflow:auto;padding:8px 12px;font-size:12px;line-height:1.55}
+  .console .ev{padding:5px 0;border-bottom:1px solid #18202f}
+  .console .evh{color:#e8ecf3}
+  .console .ln{padding-left:18px;white-space:pre-wrap;color:#aeb9cc}
+  .console .t{color:#5a6a85}
+  .lvl-load{color:#7fb0ff}.lvl-filter{color:#5fd0c0}.lvl-traverse{color:#b69bff}.lvl-sec{color:#ff9b8a}.lvl-order{color:#e0b341}.lvl-project{color:#9aa7bd}.lvl-action{color:#5fd08a}.lvl-done{color:#79e0a0}.lvl-error{color:#ff6b6b}.lvl-wire{color:#6fa8ff}
+  .miniclear{background:transparent;border:1px solid #2a3850;color:#8aa0c0;border-radius:6px;font-size:11px;padding:2px 9px;cursor:pointer;font-family:var(--mono)}
+  .miniclear:hover{background:#1a2336}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Ontology Query Playground</h1>
+    <div class="sub">Build an <b>object set</b> — a lazy description — then press Run to materialize it. Construction-site example.</div>
+  </div>
+  <div class="model" id="model"></div>
+  <div class="lens">View as
+    <select id="role"><option>Field Engineer</option><option>Supervisor</option></select>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="builderCard">
+    <h2>1 · Build the object set</h2>
+    <label>Start from</label>
+    <select id="baseType"></select>
+    <div id="steps"></div>
+    <div class="addbtns">
+      <button class="btn" data-add="filter">+ Filter</button>
+      <button class="btn" data-add="traverse">+ Traverse</button>
+      <button class="btn" data-add="order">+ Order by</button>
+    </div>
+    <div class="runbar">
+      <label style="margin:0">Ask for</label>
+      <select id="mode">
+        <option value="page">a page of objects</option>
+        <option value="count">a count</option>
+        <option value="aggregate">an aggregation</option>
+      </select>
+      <span id="aggControls"></span>
+      <button class="run" id="run">Run ▶</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="card stack">
+      <h2>2 · The description <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">(lazy — nothing fetched yet)</span></h2>
+      <div class="tabs" id="descTabs">
+        <button class="tab on" data-tab="recipe">Recipe</button>
+        <button class="tab" data-tab="json">JSON</button>
+        <button class="tab" data-tab="code">Code</button>
+        <button class="tab" data-tab="wire">Wire</button>
+      </div>
+      <div id="descBody"></div>
+      <div class="concept" id="concept"></div>
+    </div>
+    <div class="card">
+      <h2>3 · The result <span style="color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0">(materialized)</span></h2>
+      <div id="results"><div class="placeholder">Press <b>Run ▶</b> to materialize the description.</div></div>
+    </div>
+    <div class="card stack" id="auditCard" style="margin-top:16px">
+      <h2>4 · Action &amp; writeback</h2>
+      <div id="audit"></div>
+    </div>
+  </section>
+</main>
+
+<section class="console" id="console">
+  <div class="console-head">
+    <span class="ttl">⚙ engine console — live trace of every operation</span>
+    <span><span class="t" id="consoleStat"></span> <button class="miniclear" id="clearLog">clear</button></span>
+  </div>
+  <div class="console-body" id="consoleBody"></div>
+</section>
+
+<script>
+//<<ENGINE_START>>
+/* ---------------- Ontology definition ---------------- */
+const prop = (type, displayName, opts={}) => ({ type, displayName, ...opts });
+const ontology = {
+  interfaces: {
+    Locatable: { apiName:"Locatable", displayName:"Locatable",
+      properties:{ name:prop("string","Name"), location:prop("geopoint","Location") } },
+  },
+  objectTypes: {
+    Site: { apiName:"Site", displayName:"Site", primaryKey:"id", implements:["Locatable"],
+      properties:{ id:prop("string","ID"), name:prop("string","Name",{searchable:true}),
+        region:prop("enum","Region",{enumValues:["Riyadh","Hong Kong","Cairo"]}),
+        status:prop("enum","Status",{enumValues:["active","paused"]}), location:prop("geopoint","Location") },
+      links:{ sensors:{apiName:"sensors",target:"Sensor",many:true,foreignKey:"siteId"},
+              workers:{apiName:"workers",target:"Worker",many:true,foreignKey:"siteId"} } },
+    Sensor: { apiName:"Sensor", displayName:"Sensor", primaryKey:"id", implements:["Locatable"],
+      properties:{ id:prop("string","ID"), label:prop("string","Label",{searchable:true}),
+        kind:prop("enum","Kind",{enumValues:["motion","gas","temp"]}),
+        status:prop("enum","Status",{enumValues:["ok","alarm","offline"]}),
+        batteryPct:prop("number","Battery %"), lastReading:prop("timestamp","Last reading"),
+        location:prop("geopoint","Location") },
+      links:{ site:{apiName:"site",target:"Site",many:false,localKey:"siteId"},
+              alerts:{apiName:"alerts",target:"Alert",many:true,foreignKey:"sensorId"} } },
+    Worker: { apiName:"Worker", displayName:"Worker", primaryKey:"id", implements:["Locatable"],
+      properties:{ id:prop("string","ID"), name:prop("string","Name",{searchable:true}),
+        jobTitle:prop("string","Job title"),
+        phone:prop("string","Phone",{marking:"PII"}),               // column-level security
+        certExpiry:prop("date","Cert expiry"),
+        certValid:prop("boolean","Cert valid",{derived:(w)=> new Date(w.certExpiry) > new Date()}), // derived
+        location:prop("geopoint","Location") },
+      links:{ site:{apiName:"site",target:"Site",many:false,localKey:"siteId"} } },
+    Alert: { apiName:"Alert", displayName:"Alert", primaryKey:"id",
+      properties:{ id:prop("string","ID"),
+        severity:prop("enum","Severity",{enumValues:["low","med","high"]}),
+        message:prop("string","Message",{searchable:true}),
+        status:prop("enum","Status",{enumValues:["open","ack","closed"]}),
+        createdAt:prop("timestamp","Created"),
+        ageHours:prop("number","Age (h)",{derived:(a)=> Math.round((Date.now()-+new Date(a.createdAt))/3.6e6)}) }, // derived
+      links:{ sensor:{apiName:"sensor",target:"Sensor",many:false,localKey:"sensorId"},
+              assignee:{apiName:"assignee",target:"Worker",many:false,localKey:"assigneeId"} },
+      rowPolicy:(a,ctx)=> a.severity!=="high" || ctx.role==="Supervisor" },        // row-level security
+  },
+  actions: {
+    acknowledgeAlert: {
+      displayName:"Acknowledge alert",
+      validate:(p)=> (p.alert && p.assignee) ? null : "alert and assignee are required",
+      check:(p)=>{ const w=storeRows("Worker").find(x=>x.id===p.assignee); return (w && !propDef("Worker","certValid").derived(w,{})) ? `${w.name}'s certification has expired — cannot assign this alert.` : null; },
+      apply:(p)=> ({ edits:[{ type:"Alert", pk:p.alert, set:{ status:"ack", assigneeId:p.assignee } }] }),
+    },
+  },
+};
+const ROLES = { "Field Engineer":{role:"Field Engineer",markings:[]}, "Supervisor":{role:"Supervisor",markings:["PII"]} };
+
+/* ---------------- Seed data ---------------- */
+const NOW = Date.now();
+const hrsAgo = h => new Date(NOW - h*3.6e6).toISOString();
+const dateFromNow = d => new Date(NOW + d*864e5).toISOString().slice(0,10);
+const seed = { Site:[], Sensor:[], Worker:[], Alert:[] };
+seed.Site = [
+  {id:"site-1", name:"North Tower",  region:"Riyadh", status:"active", location:"24.71,46.67"},
+  {id:"site-2", name:"Marina Block", region:"Hong Kong", status:"active", location:"26.28,50.20"},
+  {id:"site-3", name:"Depot 7",      region:"Cairo", status:"paused", location:"26.42,50.09"},
+];
+const _alarm=new Set([1,4,8,11]), _off=new Set([3,9]);
+for(let i=1;i<=12;i++){
+  seed.Sensor.push({ id:`sen-${i}`, label:`Sensor ${i}`, kind:["motion","gas","temp"][i%3],
+    status:_alarm.has(i)?"alarm":_off.has(i)?"offline":"ok",
+    batteryPct: 100-((i*9)%85), lastReading:hrsAgo(i*2), siteId:`site-${(i%3)+1}`, location:"24.7,46.6" });
+}
+const _names=["Omar","Sara","Yusuf","Lina","Khalid","Mona","Tariq","Hana"];
+for(let i=1;i<=8;i++){
+  seed.Worker.push({ id:`wkr-${i}`, name:_names[i-1], jobTitle:["Electrician","Welder","Inspector","Operator"][i%4],
+    phone:`+96650${(1000000+i*135791)%9000000}`, certExpiry: dateFromNow(i%3===0? -30 : 90+i*12),
+    siteId:`site-${(i%3)+1}`, location:"24.7,46.6" });
+}
+for(let i=1;i<=16;i++){
+  seed.Alert.push({ id:`alr-${i}`, severity: i%5===0?"high":(i%2?"low":"med"),
+    message:`Reading anomaly #${i}`, status:["open","ack","closed"][i%3], createdAt:hrsAgo(i*5+2),
+    sensorId:`sen-${(i%12)+1}`, assigneeId: i%4? `wkr-${(i%8)+1}`:null });
+}
+
+/* ---------------- The engine ---------------- */
+const writeback = {};                                    // committed edits: "type:pk" -> patch
+const optimistic = {};                                   // in-flight edits (not yet committed)
+const auditLog = [];                                     // newest first
+function storeRows(type){ return seed[type].map(r=>{ const k=type+":"+r.id; const p={ ...(writeback[k]||{}), ...(optimistic[k]||{}) }; return Object.keys(p).length? {...r,...p}: r; }); }
+function applyAction(name, params, ctx){                  // governed, audited write
+  const def=ontology.actions[name];
+  const err = (def.validate && def.validate(params)) || (def.check && def.check(params)); if(err) throw new Error(err);
+  const eff = def.apply(params);
+  for(const e of eff.edits){ const k=e.type+":"+e.pk; writeback[k]={ ...(writeback[k]||{}), ...e.set }; }  // commit to writeback
+  auditLog.unshift({ action:name, params, actor:ctx.role, at:new Date().toLocaleTimeString(), edits:eff.edits });
+  return eff;
+}
+function propDef(type,name){ return ontology.objectTypes[type].properties[name]; }
+function getValue(row,type,name,ctx){ const p=propDef(type,name); if(!p) return row[name]; return p.derived? p.derived(row,ctx): row[name]; }
+function leafMatch(row,f,type,ctx){
+  const v=getValue(row,type,f.property,ctx);
+  switch(f.op){
+    case "eq": return v===f.value;
+    case "neq": return v!==f.value;
+    case "in": return Array.isArray(f.value) && f.value.includes(v);
+    case "lt": return v<f.value;   case "lte": return v<=f.value;
+    case "gt": return v>f.value;   case "gte": return v>=f.value;
+    case "between": return v>=f.value[0] && v<=f.value[1];
+    case "isNull": return (v==null)===!!f.value;
+    case "contains":   return String(v).toLowerCase().includes(String(f.value).toLowerCase());
+    case "startsWith": return String(v).toLowerCase().startsWith(String(f.value).toLowerCase());
+    case "endsWith":   return String(v).toLowerCase().endsWith(String(f.value).toLowerCase());
+    default: return true;
+  }
+}
+function matchFilter(row,f,type,ctx){
+  if(!f) return true;
+  if(f.and) return f.and.every(x=>matchFilter(row,x,type,ctx));
+  if(f.or)  return f.or.some(x=>matchFilter(row,x,type,ctx));
+  if(f.not) return !matchFilter(row,f.not,type,ctx);
+  return leafMatch(row,f,type,ctx);
+}
+function applyRowPolicy(rows,type,ctx){ const pol=ontology.objectTypes[type].rowPolicy; return pol? rows.filter(r=>pol(r,ctx)): rows; }
+function traverseRows(rows,type,linkName){
+  const link=ontology.objectTypes[type].links[linkName]; const target=storeRows(link.target);
+  const out=[], seen=new Set();
+  for(const r of rows){
+    if(link.localKey){ const t=target.find(x=>x.id===r[link.localKey]); if(t&&!seen.has(t.id)){seen.add(t.id);out.push(t);} }
+    else { for(const t of target){ if(t[link.foreignKey]===r.id && !seen.has(t.id)){seen.add(t.id);out.push(t);} } }
+  }
+  return out;
+}
+function sortRows(rows,orderBy,type,ctx){
+  return rows.slice().sort((a,b)=>{
+    for(const o of orderBy){ const av=getValue(a,type,o.property,ctx), bv=getValue(b,type,o.property,ctx);
+      if(av<bv) return o.direction==="desc"?1:-1; if(av>bv) return o.direction==="desc"?-1:1; }
+    return a.id<b.id?-1: a.id>b.id?1:0;   // primary-key tiebreak → stable order
+  });
+}
+function evaluate(set,ctx,tr){                     // ObjectSet -> { type, rows }   (tr = optional trace sink)
+  const wbN=t=>Object.keys(writeback).filter(k=>k.startsWith(t+":")).length;
+  const opN=t=>Object.keys(optimistic).filter(k=>k.startsWith(t+":")).length;
+  let type=set.base.objectType; let rows=storeRows(type).slice();
+  tr&&tr.push({level:"load", text:`load ${type}: ${rows.length} rows  (base ${seed[type].length} · writeback ${wbN(type)} · optimistic ${opN(type)})`});
+  let b=rows.length; rows=applyRowPolicy(rows,type,ctx);                  // row-level security
+  if(tr&&rows.length!==b) tr.push({level:"sec", text:`rowPolicy(${type}): ${b} → ${rows.length}   −${b-rows.length} hidden for role=${ctx.role}`});
+  if(set.base.where){ b=rows.length; rows=rows.filter(r=>matchFilter(r,set.base.where,type,ctx)); tr&&tr.push({level:"filter", text:`where ${filterText(set.base.where)}: ${b} → ${rows.length}`}); }
+  for(const hop of set.traverse||[]){
+    b=rows.length; rows=traverseRows(rows,type,hop.link);                 // traversal: set -> set
+    const tgt=ontology.objectTypes[type].links[hop.link].target;
+    tr&&tr.push({level:"traverse", text:`traverse "${hop.link}": ${b} ${type} → ${rows.length} ${tgt}  (deduped)`});
+    type=tgt;
+    b=rows.length; rows=applyRowPolicy(rows,type,ctx);
+    if(tr&&rows.length!==b) tr.push({level:"sec", text:`rowPolicy(${type}): ${b} → ${rows.length}   −${b-rows.length}`});
+    if(hop.where){ b=rows.length; rows=rows.filter(r=>matchFilter(r,hop.where,type,ctx)); tr&&tr.push({level:"filter", text:`where ${filterText(hop.where)}: ${b} → ${rows.length}`}); }
+  }
+  if(set.where){ b=rows.length; rows=rows.filter(r=>matchFilter(r,set.where,type,ctx)); tr&&tr.push({level:"filter", text:`where ${filterText(set.where)}: ${b} → ${rows.length}`}); }
+  if(set.orderBy&&set.orderBy.length){ rows=sortRows(rows,set.orderBy,type,ctx); tr&&tr.push({level:"order", text:`orderBy ${set.orderBy.map(o=>o.property+" "+o.direction).join(", ")}  + primary-key tiebreak`}); }
+  return { type, rows };
+}
+function fetchPage(set,ctx,page={}){ const {type,rows}=evaluate(set,ctx);
+  const size=page.pageSize??6, off=page.offset??0; const data=rows.slice(off,off+size);
+  return { type, data, total:rows.length, offset:off, pageSize:size, nextOffset: off+size<rows.length? off+size:null }; }
+function count(set,ctx){ return evaluate(set,ctx).rows.length; }
+function aggregateRows(rows,type,ctx,spec){ const g={};
+  for(const r of rows){ const k=String(getValue(r,type,spec.groupBy,ctx)); (g[k]||(g[k]=[])).push(r); }
+  return Object.entries(g).map(([key,rs])=>{ let value;
+    if(spec.metric==="count") value=rs.length;
+    else { const nums=rs.map(r=>Number(getValue(r,type,spec.prop,ctx))||0);
+      value = spec.metric==="sum"? nums.reduce((a,b)=>a+b,0)
+            : spec.metric==="avg"? nums.reduce((a,b)=>a+b,0)/(nums.length||1)
+            : spec.metric==="min"? Math.min(...nums) : Math.max(...nums); }
+    return { key, value: Math.round(value*10)/10 }; }).sort((a,b)=>b.value-a.value);
+}
+function aggregate(set,ctx,spec){ const {type,rows}=evaluate(set,ctx); return aggregateRows(rows,type,ctx,spec); }
+//<<ENGINE_END>>
+
+/* ---------------- Builder helpers ---------------- */
+function typeAtStep(idx){ let t=state.baseType; for(let i=0;i<idx;i++){ const s=state.steps[i]; if(s.kind==="traverse") t=ontology.objectTypes[t].links[s.link].target; } return t; }
+function resultType(){ return typeAtStep(state.steps.length); }
+function coerce(value, ptype, op){
+  if(op==="in") return value.split(",").map(v=>coerceScalar(v.trim(),ptype));
+  if(op==="between"){ const [a,b]=value.split(",").map(v=>coerceScalar(v.trim(),ptype)); return [a,b]; }
+  if(op==="isNull") return value==="true";
+  return coerceScalar(value,ptype);
+}
+function coerceScalar(v,ptype){ if(ptype==="number") return Number(v); if(ptype==="boolean") return v==="true"; return v; }
+function buildObjectSet(){
+  const set={ base:{ objectType:state.baseType } }; set.traverse=[]; set.orderBy=[];
+  const buckets=[{obj:set.base,filters:[]}]; let curType=state.baseType;
+  for(const s of state.steps){
+    if(s.kind==="traverse"){ const hop={link:s.link}; set.traverse.push(hop); buckets.push({obj:hop,filters:[]});
+      curType=ontology.objectTypes[curType].links[s.link].target; }
+    else if(s.kind==="filter"){ const pd=propDef(curType,s.property);
+      buckets[buckets.length-1].filters.push({ property:s.property, op:s.op, value: s.op==="isNull"?(s.value==="true"):coerce(s.value, pd?pd.type:"string", s.op) }); }
+    else if(s.kind==="order"){ set.orderBy.push({ property:s.property, direction:s.direction }); }
+  }
+  for(const b of buckets){ if(b.filters.length===1) b.obj.where=b.filters[0]; else if(b.filters.length>1) b.obj.where={and:b.filters}; }
+  if(!set.traverse.length) delete set.traverse;
+  if(!set.orderBy.length) delete set.orderBy;
+  return set;
+}
+
+/* ---------------- State ---------------- */
+const state = { baseType:"Sensor", steps:[], role:"Field Engineer", mode:"page",
+  agg:{ groupBy:"status", metric:"count", prop:"batteryPct" }, offset:0, result:null, stale:false, tab:"recipe" };
+const ctx = () => ROLES[state.role];
+
+/* ---------------- Renders ---------------- */
+const $ = id => document.getElementById(id);
+function opt(v, sel){ return `<option ${v===sel?"selected":""}>${v}</option>`; }
+
+function renderModel(){
+  $("model").innerHTML = Object.keys(ontology.objectTypes).map(t=>{
+    const isLoc = (ontology.objectTypes[t].implements||[]).includes("Locatable");
+    return `<span class="pill ${isLoc?"iface":""}" title="${isLoc?"implements Locatable":""}">${t}</span>`;
+  }).join("") + `<span class="pill iface" title="an interface">Locatable ⋯</span>`;
+}
+
+function renderBuilder(){
+  $("baseType").innerHTML = Object.keys(ontology.objectTypes).map(t=>opt(t,state.baseType)).join("");
+  const stepsEl = $("steps"); stepsEl.innerHTML = state.steps.map((s,i)=>renderStep(s,i)).join("");
+  // wire per-step controls
+  state.steps.forEach((s,i)=>{
+    const root = stepsEl.querySelector(`[data-i="${i}"]`);
+    root.querySelector(".x").onclick = ()=>{ state.steps.splice(i,1); markStale(); renderBuilder(); renderDesc(); renderConcept(); };
+    root.querySelectorAll("[data-k]").forEach(ctrl=>{
+      ctrl.addEventListener(ctrl.dataset.live? "input":"change", e=>{
+        s[ctrl.dataset.k] = e.target.value;
+        if(ctrl.dataset.k==="property" && s.kind==="filter"){ /* keep op/value */ }
+        if(!ctrl.dataset.live){ markStale(); renderBuilder(); }
+        renderDesc(); renderConcept();
+        if(ctrl.dataset.live) markStale();
+      });
+    });
+  });
+  renderAggControls();
+}
+function renderStep(s,i){
+  const t = typeAtStep(i);
+  const otype = ontology.objectTypes[t];
+  if(s.kind==="traverse"){
+    const links = Object.keys(otype.links);
+    return `<div class="step traverse" data-i="${i}"><div class="tag">⟶ traverse <button class="x">×</button></div>
+      <div class="row"><label style="margin:0">follow</label>
+      <select data-k="link">${links.map(l=>opt(l,s.link)).join("")}</select>
+      <span style="color:var(--mut);font-size:12px">→ ${otype.links[s.link]?otype.links[s.link].target:""}</span></div></div>`;
+  }
+  if(s.kind==="order"){
+    const props = Object.keys(otype.properties);
+    return `<div class="step order" data-i="${i}"><div class="tag">↕ order by <button class="x">×</button></div>
+      <div class="row"><select data-k="property">${props.map(p=>opt(p,s.property)).join("")}</select>
+      <select data-k="direction">${["asc","desc"].map(d=>opt(d,s.direction)).join("")}</select></div></div>`;
+  }
+  // filter
+  const props = Object.keys(otype.properties);
+  const ops = ["eq","neq","in","lt","lte","gt","gte","between","contains","startsWith","endsWith","isNull"];
+  return `<div class="step filter" data-i="${i}"><div class="tag">▸ where <button class="x">×</button></div>
+    <div class="row">
+      <select data-k="property">${props.map(p=>opt(p,s.property)).join("")}</select>
+      <select data-k="op">${ops.map(o=>opt(o,s.op)).join("")}</select>
+      <input data-k="value" data-live="1" value="${s.value??""}" placeholder="value" style="width:120px"/>
+    </div></div>`;
+}
+function renderAggControls(){
+  const el=$("aggControls");
+  if(state.mode!=="aggregate"){ el.innerHTML=""; return; }
+  const t=resultType(); const props=Object.keys(ontology.objectTypes[t].properties);
+  const nums=props.filter(p=>ontology.objectTypes[t].properties[p].type==="number");
+  el.innerHTML = `<label style="margin:0">group by</label>
+    <select id="aggGroup">${props.map(p=>opt(p,state.agg.groupBy)).join("")}</select>
+    <select id="aggMetric">${["count","sum","avg","min","max"].map(m=>opt(m,state.agg.metric)).join("")}</select>
+    <select id="aggProp" ${state.agg.metric==="count"?"style=display:none":""}>${nums.map(p=>opt(p,state.agg.prop)).join("")}</select>`;
+  $("aggGroup").onchange=e=>{state.agg.groupBy=e.target.value;markStale();renderDesc();};
+  $("aggMetric").onchange=e=>{state.agg.metric=e.target.value;markStale();renderAggControls();renderDesc();};
+  const ap=$("aggProp"); if(ap) ap.onchange=e=>{state.agg.prop=e.target.value;markStale();renderDesc();};
+}
+
+function describeRecipe(set){
+  let s=`Start with all <b>${set.base.objectType}</b>`;
+  if(set.base.where) s+=` where ${filterText(set.base.where)}`;
+  (set.traverse||[]).forEach(h=>{ s+=`, then follow <b>${h.link}</b>`; if(h.where) s+=` keeping ${filterText(h.where)}`; });
+  if(set.orderBy) s+=`, ordered by ${set.orderBy.map(o=>`${o.property} ${o.direction}`).join(", ")}`;
+  return s+".";
+}
+function filterText(f){ if(f.and) return f.and.map(filterText).join(" and "); if(f.or) return f.or.map(filterText).join(" or ");
+  if(f.not) return "not ("+filterText(f.not)+")"; return `${f.property} ${f.op} ${JSON.stringify(f.value)}`; }
+function codeText(set){
+  let c=`client.objects("${set.base.objectType}")`;
+  if(set.base.where) c+=`\n  .where(${JSON.stringify(set.base.where)})`;
+  (set.traverse||[]).forEach(h=>{ c+=`\n  .traverse("${h.link}")`; if(h.where) c+=`\n  .where(${JSON.stringify(h.where)})`; });
+  (set.orderBy||[]).forEach(o=>{ c+=`\n  .orderBy("${o.property}", "${o.direction}")`; });
+  c += state.mode==="count"? `\n  .count();` : state.mode==="aggregate"? `\n  .aggregate(${JSON.stringify(aggSpec())});` : `\n  .fetchPage({ pageSize: 6 });`;
+  return c;
+}
+function renderDesc(){
+  const set=buildObjectSet(); const body=$("descBody");
+  if(state.tab==="recipe") body.innerHTML=`<div class="recipe">${describeRecipe(set)}</div>`;
+  else if(state.tab==="json") body.innerHTML=`<pre>${escapeHtml(JSON.stringify(set,null,2))}</pre>`;
+  else if(state.tab==="wire") body.innerHTML=`<pre>${escapeHtml(wireText(set))}</pre>`;
+  else body.innerHTML=`<pre>${escapeHtml(codeText(set))}</pre>`;
+}
+function wireText(set){
+  const verb = state.mode==="count"?"count":state.mode==="aggregate"?"aggregate":"load";
+  const reqBody = state.mode==="aggregate" ? { ...set, aggregation:aggSpec() }
+                : state.mode==="count" ? { base:set.base, where:set.where, traverse:set.traverse }
+                : { ...set, page:{ pageSize:6, pageToken:null } };
+  const resp = state.mode==="count" ? { count: (state.result&&state.result.kind==="count")? state.result.value : "…" }
+             : state.mode==="aggregate" ? { groups:"[ … ]" }
+             : { type:set.base.objectType, data:"[ … one page of objects … ]", total:"…", nextPageToken:null };
+  return `POST /api/v1/ontology/objects/${set.base.objectType}/${verb}\nContent-Type: application/json\n\n`
+    + JSON.stringify(reqBody, null, 2)
+    + `\n\n──────── 200 OK ────────\n\n`
+    + JSON.stringify(resp, null, 2);
+}
+
+function aggSpec(){ return { groupBy:state.agg.groupBy, metric:state.agg.metric, prop:state.agg.prop }; }
+function run(){
+  const set=buildObjectSet(); const c=ctx();
+  const tr=[]; const t0=performance.now();
+  const verb = state.mode==="count"?"count":state.mode==="aggregate"?"aggregate":"load";
+  tr.push({level:"wire", text:`POST /api/v1/ontology/objects/${set.base.objectType}/${verb}   role=${c.role}`});
+  const {type,rows}=evaluate(set,c,tr);
+  let summary;
+  if(state.mode==="count"){ state.result={kind:"count", value:rows.length, type}; tr.push({level:"project", text:`count() → ${rows.length}`}); summary=rows.length; }
+  else if(state.mode==="aggregate"){ const groups=aggregateRows(rows,type,c,aggSpec());
+    state.result={kind:"agg", groups, spec:aggSpec(), type};
+    tr.push({level:"project", text:`aggregate ${aggSpec().metric}${aggSpec().metric!=="count"?" of "+aggSpec().prop:""} by ${aggSpec().groupBy} → ${groups.length} groups`}); summary=`${groups.length} groups`; }
+  else {
+    const derived=Object.entries(ontology.objectTypes[type].properties).filter(([k,p])=>p.derived).map(([k])=>k);
+    const masked=Object.entries(ontology.objectTypes[type].properties).filter(([k,p])=>p.marking && !c.markings.includes(p.marking)).map(([k])=>k);
+    if(derived.length) tr.push({level:"project", text:`compute derived [${derived.join(", ")}]`});
+    if(masked.length) tr.push({level:"sec", text:`mask columns [${masked.join(", ")}] for role=${c.role}`});
+    const off=state.offset, size=6, data=rows.slice(off,off+size);
+    state.result={kind:"page", page:{type,data,total:rows.length,offset:off,pageSize:size,nextOffset:off+size<rows.length?off+size:null}, type};
+    tr.push({level:"project", text:`page → rows ${rows.length?off+1:0}–${off+data.length} of ${rows.length}`}); summary=`${data.length}/${rows.length} rows`;
+  }
+  const ms=(performance.now()-t0).toFixed(2);
+  tr.push({level:"done", text:`✓ ${verb} done in ${ms}ms`});
+  pushEvent(`${verb} ${set.base.objectType} → ${summary}  ·  ${ms}ms`, tr);
+  state.stale=false; renderResults(); renderConcept(); renderRunBtn();
+}
+function renderResults(){
+  const el=$("results"); const r=state.result;
+  if(!r){ el.innerHTML=`<div class="placeholder">Press <b>Run ▶</b> to materialize the description.</div>`; return; }
+  const c=ctx();
+  if(r.kind==="count"){ el.innerHTML=`<div class="count">${r.value}<small>${r.type} objects matching</small></div>`+ hiddenNote(); return; }
+  if(r.kind==="agg"){
+    const max=Math.max(1,...r.groups.map(g=>g.value));
+    el.innerHTML = `<div style="font-size:12px;color:var(--mut);margin-bottom:8px">${r.spec.metric}${r.spec.metric!=="count"?" of "+r.spec.prop:""} by ${r.spec.groupBy}</div>`+
+      r.groups.map(g=>`<div class="bar"><div class="lab">${g.key}</div><div class="track"><div class="fill" style="width:${(g.value/max*100).toFixed(1)}%"></div><div class="val">${g.value}</div></div></div>`).join("")+ hiddenNote();
+    return;
+  }
+  // page
+  const {data,total,offset,pageSize,nextOffset,type}=r.page;
+  const props=Object.keys(ontology.objectTypes[type].properties);
+  const isAlert = type==="Alert";
+  const errNote = lastError ? `<div class="note sec">✗ Action rejected: ${escapeHtml(lastError.msg)} The optimistic change was rolled back — nothing was written, no audit entry.</div>` : "";
+  const wopts = seed.Worker.map(w=>{ const bad=!propDef("Worker","certValid").derived(w,{}); return `<option value="${w.id}">${w.name}${bad?" — cert expired":""}</option>`; }).join("");
+  const rows=data.map(o=>{
+    const cells = props.map(p=>{ const pd=ontology.objectTypes[type].properties[p];
+      if(pd.marking && !c.markings.includes(pd.marking)) return `<td><span class="masked" title="hidden for ${c.role}">🔒 ${pd.marking}</span></td>`;
+      let v=getValue(o,type,p,c); if(typeof v==="boolean") v=v?"✓":"✗"; if(v==null) v="—";
+      if(pd.type==="timestamp") v=String(v).slice(0,16).replace("T"," ");
+      return `<td>${escapeHtml(String(v))}</td>`; }).join("");
+    let action="";
+    if(isAlert){ const st=getValue(o,type,"status",c);
+      action = pending.has(o.id) ? `<td>⏳ saving…</td>`
+        : st==="ack" ? `<td><span class="ackd">✓ acknowledged</span></td>`
+        : `<td><select class="asg">${wopts}</select> <button class="btn ack" data-pk="${o.id}">Ack</button></td>`; }
+    return `<tr>${cells}${action}</tr>`;
+  }).join("");
+  const header = props.map(p=>`<th>${ontology.objectTypes[type].properties[p].displayName}</th>`).join("") + (isAlert?"<th>Action</th>":"");
+  el.innerHTML = errNote + `<div class="scroll"><table><thead><tr>${header}</tr></thead><tbody>${rows||`<tr><td colspan="${props.length+(isAlert?1:0)}" class="placeholder">No matching objects.</td></tr>`}</tbody></table></div>`+
+    `<div class="pagi"><span>${total? (offset+1):0}–${offset+data.length} of ${total}</span>
+      <button class="btn ghost" id="prev" ${offset===0?"disabled":""}>‹ Prev</button>
+      <button class="btn ghost" id="next" ${nextOffset==null?"disabled":""}>Next ›</button></div>`+ hiddenNote();
+  const prev=$("prev"), next=$("next");
+  if(prev) prev.onclick=()=>{ state.offset=Math.max(0,offset-pageSize); run(); };
+  if(next) next.onclick=()=>{ state.offset=nextOffset; run(); };
+  el.querySelectorAll(".ack").forEach(b=> b.onclick=()=>{ const asg=b.closest("tr").querySelector(".asg").value; acknowledge(b.dataset.pk, asg); });
+}
+function hiddenNote(){
+  // compare against an all-seeing context to reveal what row/column policy removed
+  const set=buildObjectSet(); const god={role:"Supervisor",markings:["PII"]};
+  const hiddenRows = count(set,god) - count(set,ctx());
+  const type=resultType(); const maskedCols=Object.values(ontology.objectTypes[type].properties).filter(p=>p.marking && !ctx().markings.includes(p.marking)).map(p=>p.displayName);
+  let out="";
+  if(hiddenRows>0) out+=`<div class="note sec">🔒 Row-level security: <b>${hiddenRows}</b> ${type} object(s) are hidden from <b>${ctx().role}</b> by the row policy.</div>`;
+  if(maskedCols.length && state.result && state.result.kind==="page") out+=`<div class="note sec">🔒 Column-level security: <b>${maskedCols.join(", ")}</b> masked for <b>${ctx().role}</b> (missing the PII marking).</div>`;
+  return out;
+}
+function renderConcept(){
+  const set=buildObjectSet(); const msgs=[];
+  msgs.push(`This is a <b>description</b> — composable and reusable. Nothing is fetched until you Run it.`);
+  if(set.traverse&&set.traverse.length) msgs.push(`You <b>traversed a link</b> — the result is <b>another object set</b> (now of type ${resultType()}), which you keep filtering & ordering.`);
+  if(state.mode!=="page") msgs.push(`Same description, different <b>question</b>: you're asking for ${state.mode==="count"?"a count":"an aggregation"} instead of objects.`);
+  const t=resultType(); if(Object.values(ontology.objectTypes[t].properties).some(p=>p.derived)) msgs.push(`Tip: ${Object.entries(ontology.objectTypes[t].properties).filter(([k,p])=>p.derived).map(([k])=>k).join(", ")} are <b>derived</b> properties — computed, yet filterable & sortable like stored ones.`);
+  $("concept").innerHTML = msgs.join("<br><br>");
+}
+const pending = new Set();
+let lastError = null;
+function acknowledge(pk, assignee){
+  const k="Alert:"+pk; const worker=seed.Worker.find(w=>w.id===assignee);
+  optimistic[k] = { status:"ack", assigneeId:assignee };  // 1) optimistic apply — overlay, not yet committed
+  pending.add(pk); lastError=null;
+  pushEvent(`action acknowledgeAlert  ·  optimistic`, [
+    {level:"action", text:`acknowledgeAlert(alert=${pk}, assignee=${assignee})`},
+    {level:"action", text:`optimistic apply → optimistic["${k}"] = {status:"ack", assigneeId:"${assignee}"}`},
+    {level:"wire", text:`… awaiting server (simulated ~700ms round-trip) …`},
+  ]);
+  run();                                                  //    reflect immediately
+  setTimeout(()=>{                                        // 2) the "server" responds after a round-trip
+    pending.delete(pk); const t0=performance.now();
+    try {
+      applyAction("acknowledgeAlert", { alert:pk, assignee }, ctx());  // validate + check + commit to writeback + audit
+      delete optimistic[k];                                            //    success → the committed edit takes over
+      pushEvent(`action acknowledgeAlert  ·  ✓ committed  ·  ${(performance.now()-t0).toFixed(2)}ms`, [
+        {level:"action", text:`validate ok · check ok (${worker?worker.name:assignee} cert valid)`},
+        {level:"done", text:`commit 1 edit → writeback["${k}"] · audit appended`},
+      ]);
+      run(); renderAudit();
+    } catch(e){
+      delete optimistic[k];                                            // 3) ROLLBACK — discard the optimistic edit
+      lastError = { pk, msg:e.message };
+      pushEvent(`action acknowledgeAlert  ·  ✗ rejected → rollback`, [
+        {level:"action", text:`validate ok · running check…`},
+        {level:"error", text:`check FAILED: ${e.message}`},
+        {level:"action", text:`rollback → delete optimistic["${k}"] · no writeback · no audit`},
+      ]);
+      run();                                                           //    row reverts; show the rejection
+    }
+  }, 700);
+}
+function renderAudit(){
+  const el=$("audit"); if(!el) return;
+  if(!auditLog.length){ el.innerHTML=`<div class="placeholder">Run a query on <b>Alert</b>, then click <b>Ack</b> on a row to see an optimistic writeback + an audit entry.<br><br>To see a <b>rollback</b>: assign an alert to a worker marked <b>“cert expired”</b> — the server rejects it, the optimistic change reverts, and no audit entry is written.<br><br>Tip: as <b>Field Engineer</b> the high-severity alerts are hidden — switch to <b>Supervisor</b> to see all of them.</div>`; return; }
+  el.innerHTML = `<div class="note">Edits land in a <b>writeback overlay</b> on top of the base data — the seed is never mutated. An <b>action</b> is a governed, audited write; a function only computes.</div>`+
+    auditLog.map(a=>`<div class="auditrow"><span class="mono">${a.at}</span> · <b>${a.actor}</b> ran <b>${a.action}</b> → ${a.edits.map(e=>`${e.type} ${e.pk}: ${Object.entries(e.set).map(([k,v])=>k+"="+v).join(", ")}`).join("; ")}</div>`).join("");
+}
+function renderRunBtn(){ $("run").classList.toggle("stale", state.stale); $("run").textContent = state.stale? "Run ▶ (stale)":"Run ▶"; }
+function markStale(){ lastError=null; if(state.result){ state.stale=true; renderRunBtn(); } }
+
+function escapeHtml(s){ return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+/* ---------------- Engine console ---------------- */
+let engineLog = []; let opCount = 0;
+function fmtT(d){ return d.toLocaleTimeString("en-GB") + "." + String(d.getMilliseconds()).padStart(3,"0"); }
+function pushEvent(head, lines){ engineLog.unshift({ at:new Date(), head, lines }); if(engineLog.length>60) engineLog.length=60; opCount++; renderLog(); }
+function renderLog(){
+  const b=$("consoleBody"); if(!b) return;
+  b.innerHTML = engineLog.length
+    ? engineLog.map(e=>`<div class="ev"><div class="evh"><span class="t">${fmtT(e.at)}</span>  ${escapeHtml(e.head)}</div>`
+        + e.lines.map(l=>`<div class="ln lvl-${l.level}">${escapeHtml(l.text)}</div>`).join("") + `</div>`).join("")
+    : `<div class="t">— no operations yet — build an object set and press Run —</div>`;
+  const s=$("consoleStat"); if(s) s.textContent = `${opCount} ops`;
+}
+
+/* ---------------- Wiring ---------------- */
+function addStep(kind){
+  const t=resultType(); const o=ontology.objectTypes[t];
+  if(kind==="filter"){ const p=Object.keys(o.properties)[0]; state.steps.push({kind,property:p,op:"eq",value:""}); }
+  else if(kind==="traverse"){ const links=Object.keys(o.links); if(!links.length){ alert(`${t} has no links to traverse.`); return; } state.steps.push({kind,link:links[0]}); }
+  else { state.steps.push({kind:"order",property:Object.keys(o.properties)[0],direction:"asc"}); }
+  markStale(); renderBuilder(); renderDesc(); renderConcept();
+}
+$("baseType").onchange=e=>{ state.baseType=e.target.value; state.steps=[]; state.offset=0; markStale(); renderBuilder(); renderDesc(); renderConcept(); };
+$("role").onchange=e=>{ state.role=e.target.value; lastError=null; if(state.result) run(); renderConcept(); };
+$("mode").onchange=e=>{ state.mode=e.target.value; state.offset=0; markStale(); renderAggControls(); renderDesc(); };
+$("run").onclick=()=>{ state.offset=0; lastError=null; run(); };
+document.querySelectorAll("[data-add]").forEach(b=> b.onclick=()=>addStep(b.dataset.add));
+document.querySelectorAll("#descTabs .tab").forEach(t=> t.onclick=()=>{ state.tab=t.dataset.tab; document.querySelectorAll("#descTabs .tab").forEach(x=>x.classList.toggle("on",x===t)); renderDesc(); });
+$("clearLog").onclick=()=>{ engineLog=[]; opCount=0; renderLog(); };
+
+/* ---------------- Boot ---------------- */
+renderModel(); renderBuilder(); renderDesc(); renderConcept();
+// a friendly starting query
+state.steps=[{kind:"filter",property:"status",op:"eq",value:"alarm"}];
+renderBuilder(); renderDesc(); renderConcept(); renderAudit(); renderLog();
+
+/* ---- embed support: when inside an <iframe>, report height so the host can auto-fit ---- */
+function postHeight(){ try{ parent.postMessage({ type:"onto-playground-height", height: document.documentElement.scrollHeight }, "*"); }catch(e){} }
+if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
+window.addEventListener("load", postHeight);
+</script>
+</body>
+</html>
