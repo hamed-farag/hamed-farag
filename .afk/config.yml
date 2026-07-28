@@ -1,0 +1,30 @@
+version: 1
+
+image: node:22                     # your repo's toolchain — reuse the CI image where one exists
+
+commands:
+  install: corepack enable && pnpm install --frozen-lockfile                  # CI-appropriate; add --ignore-scripts if a prepare hook wires git hooks
+  test: pnpm exec next build                   # the verify oracle AFK runs to check the change (no secrets in v0)
+  lint: pnpm lint
+  build: pnpm exec next build
+
+paths:
+  allowed: ["src/**", "public/**", "data/**", "README.md"]   # the only paths the agent may write
+  blocked: []                                               # never writable, on top of the platform deny list
+  ignore: ["**/*.lock", "pnpm-lock.yaml"]                   # never read — keeps the context lean
+
+limits:
+  maxCost: 2.00                    # hard $ ceiling — the run stops dead at the cap
+  maxFilesChanged: 10               # blast radius: no sprawling rewrites
+  maxDiffLines: 500
+  maxIterations: 10
+  timeoutMinutes: 20
+
+screenshot:
+  enabled: false
+
+model:
+  default: moonshotai/kimi-k2.5   # from the allow-list; a request may override per task
+
+pr:
+  labels: ["afk"]                  # AFK opens a draft PR with this label — it never merges
