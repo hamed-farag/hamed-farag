@@ -30,7 +30,7 @@ import {
 
 export const metadata: Metadata = generateCortexPageMetadata();
 
-const REPO = "https://github.com/hamedafarag/Cortex";
+const REPO = "https://github.com/hamed-farag/cortex";
 const STORE =
   "https://chromewebstore.google.com/detail/cortex-%E2%80%94-ai-review-assist/hlfjhmhgkpibcjpflejijbcbpapinifj";
 
