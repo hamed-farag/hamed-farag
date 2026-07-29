@@ -9,7 +9,7 @@ commands:
   build: pnpm exec next build
 
 paths:
-  allowed: ["src/**", "public/**", "data/**", "README.md"]   # the only paths the agent may write
+  allowed: ["src/**", "public/**", "data/**", "README.md", "pnpm-workspace.yaml"]   # the only paths the agent may write
   blocked: []                                               # never writable, on top of the platform deny list
   ignore: ["**/*.lock", "pnpm-lock.yaml"]                   # never read — keeps the context lean
 
