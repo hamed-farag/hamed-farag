@@ -35,6 +35,14 @@ const works: IWork[] = [
     image: "/works/bragbit.png",
     link: "https://bragbit.backtick.site",
   },
+  {
+    id: "afkgnt",
+    title: "AFKGNT — Ship while you're away from keyboard.",
+    description:
+      "AFK dispatches an autonomous coding agent against your own repositories under hard, code-enforced guardrails — then hands you a reviewed draft pull request with before/after screenshots. Assign the work. Walk away. Come back to PRs.",
+    image: "/works/afkgnt.png",
+    link: "https://afkgnt.backtick.site/",
+  },
 ];
 
 export function getWorks() {
