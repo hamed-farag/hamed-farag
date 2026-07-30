@@ -27,6 +27,14 @@ const works: IWork[] = [
     image: "/works/hamedfarag-dev.png",
     link: "https://www.hamedfarag.dev",
   },
+  {
+    id: "bragbit",
+    title: "BragBit — Brag-Document Tracker",
+    description:
+      "An open-source, self-hostable brag-document tracker for developers — log wins in 30 seconds, import your merged PRs and Linear issues, and share a read-only timeline before review season. Built with Next.js, Postgres, and Drizzle, with capture straight from your AI assistant over MCP.",
+    image: "/works/bragbit.png",
+    link: "https://bragbit.backtick.site",
+  },
 ];
 
 export function getWorks() {
