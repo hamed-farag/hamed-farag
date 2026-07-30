@@ -1,0 +1,137 @@
+---
+id: ontology-6
+title: "The Ontology, Part 6: The Two Apps"
+date: "07-30-2026"
+description: "Part 6 of the beginner's guide to ontologies — the frontend, at last. A frontend on an ontology is just the read and write models rendered. There are two apps: a Builder that edits the rulebook (definitions) and a Client that edits the data — and because properties are typed, the Client renders itself from the definition. One shared foundation, two apps, with a live demo."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*This is part 6 — the frontend, finally. The good news: there's almost nothing new to learn. A frontend on an ontology is just the pieces you already have, wired to pixels — the read model from [part 3](/posts/ontology-3), the write model from [part 5](/posts/ontology-5), and the typed building blocks from [part 4](/posts/ontology-4). This part is the mental model that ties them together: an ontology has two apps, and once you see why, the rest falls into place. There's a live demo of both apps below.*
+
+---
+
+## A frontend is just the models, rendered
+
+Before anything else, the reframe that makes this whole topic small. You've spent five parts building a data layer: typed objects, an object-set query model for reading, an action model for writing, security that travels with every call. A frontend doesn't add a new system on top of that — it *renders* it.
+
+- A table on screen? That's [part 3](/posts/ontology-3)'s `fetchPage` with some `<tr>` tags around it.
+- A save button? That's [part 5](/posts/ontology-5)'s action, with the optimistic update and rollback you already saw.
+- A filter dropdown, a detail card, a chart — each is one of the read or write operations you already know, wearing a UI.
+
+So the only real question this part answers is: *what consumes those operations, and how?* And the first surprising answer is that it's not one app. It's two.
+
+## Two planes, two apps
+
+Think back to where the ontology's pieces live. There are two very different kinds of thing in the system:
+
+- The **definitions** — the *rulebook*. Object types, their properties and types, links, actions, security policies. This changes rarely, and only a few people touch it.
+- The **data** — the *instances*. The actual customers, orders, alerts. This changes constantly, and lots of people touch it.
+
+These two planes call for two different frontends, and the cleanest way to tell them apart is *which plane each one edits*.
+
+<svg width="100%" viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two apps over two planes: the Builder edits definitions, the Client edits data" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="24" width="270" height="58" rx="11" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="175" y="49" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Builder app</text>
+    <text x="175" y="69" font-size="11.5" fill="#5B6675" text-anchor="middle">internal modelers — edits the rulebook</text>
+    <rect x="370" y="24" width="270" height="58" rx="11" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="505" y="49" font-size="14" font-weight="600" fill="#1F2733" text-anchor="middle">Client app</text>
+    <text x="505" y="69" font-size="11.5" fill="#5B6675" text-anchor="middle">end users — edits the data</text>
+    <rect x="40" y="168" width="270" height="58" rx="11" fill="#FBFCFE" stroke="#C3CCDA"/>
+    <text x="175" y="193" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Definition plane</text>
+    <text x="175" y="212" font-size="11" fill="#5B6675" text-anchor="middle">types · properties · links · policies</text>
+    <rect x="370" y="168" width="270" height="58" rx="11" fill="#FBFCFE" stroke="#C3CCDA"/>
+    <text x="505" y="193" font-size="13" font-weight="600" fill="#1F2733" text-anchor="middle">Data plane</text>
+    <text x="505" y="212" font-size="11" fill="#5B6675" text-anchor="middle">the actual objects (instances)</text>
+    <line x1="175" y1="82" x2="175" y2="166" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#a1)"/>
+    <line x1="505" y1="82" x2="505" y2="166" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#a1)"/>
+    <text x="192" y="128" font-size="11" fill="#5B6675" text-anchor="start">edits</text>
+    <text x="522" y="128" font-size="11" fill="#5B6675" text-anchor="start">edits</text>
+  </g>
+</svg>
+
+The everyday version of this split is a **spreadsheet**. Setting up the columns — naming them, deciding this one is a date and that one is a dropdown of three choices — is the *builder*. Typing values into the rows is the *client*. Almost everyone only ever fills in rows; a few people design the sheet. (If you come from databases, it's the same line as schema-vs-rows, or DDL-vs-DML — the builder changes the shape, the client changes the contents.)
+
+> **👩‍💻 Mai (junior):** Why not just build two normal apps and be done? Why make a thing of it?
+>
+> **👨‍🏫 Hamed (mentor):** Because they're not really two separate apps — they're two faces of *one* system, and missing that leads you to build everything twice. The Builder writes a definition; the Client turns around and *reads that same definition* to know what to show. They share a spine. Name the split and you get to build that spine once.
+
+## The shared foundation
+
+Here's that spine. Because both apps talk to the same ontology, they stand on one shared foundation — three pieces, built once:
+
+<svg width="100%" viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two apps sitting on one shared foundation of data client, metadata contract, and component kit" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="70" y="20" width="220" height="50" rx="11" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="180" y="50" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">Builder app</text>
+    <rect x="390" y="20" width="220" height="50" rx="11" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="500" y="50" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="middle">Client app</text>
+    <rect x="70" y="96" width="540" height="92" rx="12" fill="#FBFCFE" stroke="#C3CCDA"/>
+    <text x="340" y="118" font-size="11" font-weight="600" fill="#5B6675" text-anchor="middle" letter-spacing="0.5">SHARED FOUNDATION</text>
+    <rect x="90" y="130" width="160" height="44" rx="9" fill="#fff" stroke="#D7DEE8"/>
+    <text x="170" y="150" font-size="12" font-weight="600" fill="#1F2733" text-anchor="middle">typed data client</text>
+    <text x="170" y="165" font-size="10.5" fill="#5B6675" text-anchor="middle">query + actions</text>
+    <rect x="260" y="130" width="160" height="44" rx="9" fill="#fff" stroke="#D7DEE8"/>
+    <text x="340" y="150" font-size="12" font-weight="600" fill="#1F2733" text-anchor="middle">metadata contract</text>
+    <text x="340" y="165" font-size="10.5" fill="#5B6675" text-anchor="middle">the self-description</text>
+    <rect x="430" y="130" width="160" height="44" rx="9" fill="#fff" stroke="#D7DEE8"/>
+    <text x="510" y="150" font-size="12" font-weight="600" fill="#1F2733" text-anchor="middle">component kit</text>
+    <text x="510" y="165" font-size="10.5" fill="#5B6675" text-anchor="middle">AutoField · ObjectTable</text>
+    <line x1="180" y1="70" x2="180" y2="94" stroke="#8A93A1" stroke-width="1.5"/>
+    <line x1="500" y1="70" x2="500" y2="94" stroke="#8A93A1" stroke-width="1.5"/>
+    <rect x="70" y="210" width="540" height="30" rx="9" fill="#F6F8FB" stroke="#C3CCDA"/>
+    <text x="340" y="230" font-size="11.5" fill="#5B6675" text-anchor="middle">the ontology — definition plane · data plane</text>
+  </g>
+</svg>
+
+The **typed data client** is the read and write models from Parts 3 and 5 in code form — `fetchPage`, `count`, actions with their optimistic/rollback behavior. The **metadata contract** is the ontology describing *itself* at runtime: "the `Asset` type has a `status` property that's an enum of these three values." The **component kit** is a small set of renderers — `AutoField` for inputs, `ObjectTable` for tables — that read that metadata and draw the right thing.
+
+Build those three once, and each app is thin on top. The Builder is mostly forms over the definition plane; the Client is mostly the kit pointed at the data plane. Neither reinvents how to talk to the ontology.
+
+## The trick that makes it work: typed data renders itself
+
+This is the idea worth slowing down for, because it's *why* one foundation can serve two apps. Remember from [part 4](/posts/ontology-4) that every property has a **type** — text, number, date, enum, location. And the ontology exposes that typing at runtime. Put those together and a component can ask "what am I rendering?" and pick the right widget on its own:
+
+- a `date` property → a date picker, and in a table, a formatted date
+- an `enum` → a dropdown of exactly its allowed values
+- a `boolean` → a toggle, shown as yes/no in a table
+- a `location` → a map pin (this is Part 2's `ILocatable` paying off — it only works because `location` is a real geo type)
+- a to-many link → an expandable list; a to-one → a single linked card
+
+A renderer built this way — call it `AutoField` — is never written *per screen*. It's written once, against the *types*, and it works for any object you point it at. That single fact is the engine of the whole frontend. It's what lets the same `ObjectTable` show assets in the Client and preview rows in the Builder. And it's what makes the Builder's preview pane *literally the same renderer the end user gets* — just aimed at an in-progress definition.
+
+Enough words. Here are both apps, sharing one definition. Edit the rulebook on the left; the data app on the right rebuilds itself. Change a property's **type** and watch its input and its table cell change with it.
+
+<figure style="margin:1.75rem 0">
+  <iframe
+    id="onto-pg"
+    src="/demos/ontology-two-apps.html"
+    title="The Two Apps — a Builder and a Client over one shared ontology definition"
+    loading="lazy"
+    style="width:100%;height:1180px;border:1px solid #E2E7EF;border-radius:12px;background:#fff">
+  </iframe>
+  <figcaption style="font-size:0.85rem;color:#5B6675;text-align:center;margin-top:0.5rem">
+    Two apps, one shared definition. <a href="/demos/ontology-two-apps.html" target="_blank" rel="noopener">Open full screen ↗</a>
+  </figcaption>
+</figure>
+
+> **👩‍💻 Mai:** When I switched `criticality` from a number to an enum, the form turned into a dropdown and I never touched the form code. That's the metadata thing.
+>
+> **👨‍🏫 Hamed:** That's the whole game. The form is a function of the definition. The Builder changed one fact about a property's type; the Client read the new definition and re-rendered itself. Nobody hand-wrote "if it's an enum, show a dropdown" for *that* field — `AutoField` does it for *every* field, because it works off the type, not the field name.
+
+## One thing the UI does *not* do: enforce security
+
+A quick but important guardrail, since one of these apps faces customers. Everything from [part 1](/posts/ontology-1) still holds: security is enforced on the **server**, on every read and write. The frontend's job is only to *reflect* it. If a caller may not see a column, the data client never returns it — so the UI simply has nothing to draw. The component kit reads the visibility metadata so it doesn't render a control for a field the server would reject anyway, but that's a courtesy to the user, not a security boundary.
+
+> **👩‍💻 Mai:** So if I hide a column in the Client, that's the security working?
+>
+> **👨‍🏫 Hamed:** No — and this is the trap to never fall into. By the time the data reaches your component, the server already removed what the caller can't see. Your hiding is cosmetic; the real gate ran long before. A frontend that *enforces* permissions is a frontend with a hole in it. Reflect, never enforce.
+
+## The one-paragraph summary
+
+A frontend on an ontology is the read and write models from Parts 3 and 5, rendered — there's no new system underneath. But there isn't one app; there are **two**, split by which plane they edit: a **Builder** that edits the *definitions* (the rulebook — types, properties, policies) and a **Client** that edits the *data* (the instances). Because they share an ontology, they share one **foundation**: a typed data client, the runtime metadata contract, and a component kit. The engine that makes that foundation serve both apps is **typed-data-renders-itself** — because every property has a type the ontology exposes, a component like `AutoField` can choose the right widget on its own, so the Client renders itself from whatever the Builder defined. And throughout, the UI only ever *reflects* the server's security; it never enforces it.
+
+---
+
+*Series so far: [part 1](/posts/ontology-1) the big picture · [part 2](/posts/ontology-2) reuse &amp; agents · [part 3](/posts/ontology-3) how you read · [part 4](/posts/ontology-4) objects, properties, links · [part 5](/posts/ontology-5) how you change it. Next, the concrete half of the frontend: building a single screen — how the data-layer hooks wrap the read and write models, the component kit by property type, and the choice between a bespoke client and a config-driven one.*
