@@ -1,0 +1,185 @@
+---
+id: brag-document
+title: Your Career Needs Version Control
+date: "07-22-2026"
+description: Why developers forget their best work, what a brag document is, and how BragBit makes keeping one take 30 seconds.
+tags: ["career", "brag-document", "productivity"]
+---
+
+> "The palest ink is better than the best memory." — Chinese proverb
+
+# Introduction
+
+## "So, what did you do this year?"
+
+It's review season. Your manager leans in and asks the question every engineer dreads: _"So, what did you do this year?"_ — and your mind goes completely blank.
+
+You shipped a hundred things. You can name three, and two of them happened last month. The flaky test suite you spent a week making reliable? Gone. The incident you quietly prevented at 2 a.m.? Gone. The junior you unblocked every single morning until they got good? That never had a ticket, so as far as the record is concerned, it never happened.
+
+Here's the strange part: we are _fluent_ at describing other people's work. We write thoughtful code reviews, we explain a teammate's PR back to them better than they can. But asked to account for our own twelve months, we freeze. The work that was hardest — the glue work, the prevention, the mentoring — is exactly the work that leaves the least evidence behind.
+
+## Your git history is an alibi, not an argument
+
+"But it's all in git," developers love to say. "My PRs are right there. My commits are timestamped and signed."
+
+They are. And they prove almost nothing.
+
+`git log` records _what code changed_, not _what it was worth_. A commit message says `fix: debounce the search input`. It does not say _cart abandonment dropped twelve percent_, or _this killed the number-one support complaint of the quarter_. Your git history is an **alibi** — proof you were at the keyboard. It is not an **argument** for your promotion.
+
+The same goes for the rest of it. Jira is organized around tickets. Slack is organized around the day it was sent. GitHub is organized around the repo. None of these systems are organized around _you_, and none of them are building your case. Nobody is keeping score on your behalf. That job is unassigned, and it's yours.
+
+## You are an unreliable narrator
+
+The reason this matters is uncomfortable: when it comes to your own work, you are an unreliable narrator.
+
+In her now-classic essay on the subject, [Julia Evans](https://jvns.ca/blog/brag-documents/) puts it plainly — most people simply forget what they accomplished six months ago, and even a great manager can't remember everything you did. Then recency bias does the rest: a review held in December reflects the last six weeks, not the last twelve months. If your best work shipped in Q1, it's effectively invisible. So you either undersell yourself out of honesty, or you scramble the night before and inflate. Both are bad outcomes, and both come from the same root cause.
+
+> The fix is not a better memory. Nobody has one. The fix is to write it down _as it happens_, while it's cheap.
+
+That written record has a name.
+
+# What a brag document actually is
+
+A **brag document** is a running log of your wins — shipped features, projects, praise you received, metrics you moved, people you mentored, the messy "company-building" work that never had a ticket. You keep it all year, and you bring it to your review, to your manager, and eventually to your next interview.
+
+The term comes from Julia Evans, and the idea has since grown a small ecosystem of its own. If you want the canonical reading list:
+
+## The originals
+
+- [jvns.ca/blog/brag-documents](https://jvns.ca/blog/brag-documents/) — the essay that named the thing. Read this one first.
+- [bragdocs.com](https://www.bragdocs.com/) — _"when you're in the thick of a project it's impossible to find the time to sit and write about it. But when it comes to your performance review or job interview, you're stuck with a bad memory and a blank page."_
+- [bragbook.io/what-is-a-brag-document](https://bragbook.io/what-is-a-brag-document) — _"career growth requires self-advocacy, and self-advocacy requires evidence."_
+
+## The formula
+
+Every good brag entry follows one shape, and once you see it you can't unsee it:
+
+**what you did + why it mattered + the measurable result.**
+
+The difference is everything. Compare:
+
+- ❌ _Refactored the auth flow._
+- ✅ _Migrated auth to a maintained library, cutting login p95 from 800ms to 120ms and removing our last dependency on the deprecated session service._
+
+The first is a chore. The second is a case. Same work — only one of them survives contact with a promotion committee.
+
+## Who it's really for
+
+A brag document quietly serves three people:
+
+- **Future-you at review time**, who otherwise faces the blank page.
+- **Your manager**, who has to advocate for you _up_ the chain and can only do it with evidence. A good manager still can't remember everything you did — the brag document is the ammunition you hand them.
+- **Future-you in an interview**, a year from now, trying to remember why the last role mattered.
+
+# Why most brag documents die
+
+Here's the part most articles skip, and it's the only part that matters: almost everyone agrees you should keep a brag document, and almost nobody actually does.
+
+It's not a discipline problem. It's a tooling problem.
+
+The default tool is a Google Doc you open twice a year. By the time you've found it, switched tabs, and scrolled to the bottom, the thought that made you want to log a win has already evaporated. There's no structure, so six months in it's an unreadable wall of text. And — the quiet dealbreaker — **career evidence is sensitive.** Salary arguments, promotion cases, screenshots of someone praising you. Do you really want all of that sitting in a doc owned by your employer's Google Workspace, readable by an admin, and gone the day your account is deactivated?
+
+> A brag document only works under two conditions: updating it has to be _cheaper_ than the urge to skip it, and you have to trust it enough to put the real, sensitive stuff in. Most tools fail at least one. The idea is great; the medium betrays it.
+
+That gap is the entire reason I built the next thing.
+
+# Enter BragBit
+
+I built [BragBit](https://bragbit.backtick.site) because my own brag document kept dying in exactly the ways above. It's an open-source, self-hostable brag-document tracker for developers, and every feature in it exists to fix one of the failure modes I just described.
+
+Eight things it does, each pointed at a specific reason brag documents die:
+
+- Sub-30-second capture
+- Capture from inside the AI assistant you already use
+- Import the PRs and issues you already shipped
+- A timeline instead of a wall of text
+- A share link, not a vibe
+- Proof, attached
+- A nudge so you don't forget
+- Your evidence, on infrastructure you trust
+
+## Capture in under 30 seconds
+
+Press <kbd>N</kbd> from anywhere, type a title, save. That's a logged win. The date defaults to today; everything else is optional. If you're staring at a blank line, an action-verb template gets you moving.
+
+This is the whole bet. If logging a win costs _less_ than the urge to skip it, the document survives the year. Friction is the thing that kills brag documents, so friction is the thing BragBit attacks first.
+
+![Logging a brag in seconds](/posts/bragbit/capture.webp)
+
+## Don't even open BragBit
+
+Thirty seconds is fast. It's still a context switch — and the win happened _while you were in the middle of something else_. That's the moment the thought evaporates.
+
+So BragBit speaks [MCP](https://modelcontextprotocol.io). Connect the AI assistant you already have open — Claude, or any MCP client — and the capture happens where you already are:
+
+> **You:** _Brag: shipped the realtime crew heatmap, cut crew-location time 22 → 5 min._
+>
+> **Claude:** _Logged "Shipped the realtime crew heatmap" to your 2026 Wins. ✓_
+
+Your assistant writes it up using **the formula from earlier** — what you did + why it mattered + the measurable result — because that is literally what the tool asks it for. The entry you'd have dashed off badly at 6pm on a Friday, drafted properly, in the window you were already typing in.
+
+Two details I'd want to know if I were reading this:
+
+**BragBit ships no AI.** No keys, no model, no vendor in the middle, no "AI features" you're paying for. The intelligence is the assistant _you already chose and already trust_ — BragBit just gives it a narrow door. Your career log isn't being fed to anything.
+
+**The door is narrow on purpose.** Connecting is paste-your-instance-URL and click **Authorize** — there's no token to copy. The assistant gets exactly two abilities: add a win, and list your documents. It **cannot read your existing brags**, edit them, or delete them. Every connected app is listed in Settings, revocable in one click.
+
+That last part isn't an oversight. A tool that can _read_ your career log into an AI client is a much bigger privacy question than one that can only append to it — so it isn't in the default scope, and today it isn't there at all.
+
+## Turn your git history into an argument
+
+Earlier I called your git history an _alibi_ — proof you were at the keyboard, not proof the work mattered. BragBit can pull that alibi in and help you make the argument out of it.
+
+Connect GitHub — a read-only token, or one click of OAuth — and BragBit imports the pull requests you've **merged**. Connect **Linear** the same way and it pulls the issues you've **completed**. Either way it doesn't dump them onto your timeline: they land in a **review queue**, each one the raw _what_ — title, date, a link back to the source — waiting on a decision.
+
+You keep the ones that count. Approving drops a win into the document you pick, source PR already linked, and leaves you to add the part `git log` never recorded — _why it mattered, and the number that moved_. The rest you dismiss. Nothing is logged until you say so.
+
+It reads only your merged PRs (and completed issues) and nothing else; tokens are encrypted at rest, and you can disconnect in a click. No AI, no auto-posting, no "we'll summarize it for you" — just the work you already shipped, handed back as a stack of drafts to turn into evidence.
+
+## A timeline, not a wall of text
+
+Your wins render as a **month-grouped timeline** — newest first, with category colors (an eight-color taxonomy), tags, a shipped/in-progress marker on each entry, and full-text search across everything. Filter by category, tag, or date range and the URL updates, so a filtered view is shareable.
+
+The point is that at review time you can read an entire year of your own work in about thirty seconds, instead of archaeology through a text dump.
+
+![The month-grouped timeline](/posts/bragbit/timeline.webp)
+
+## Share a link, not a vibe
+
+When the review comes, open **Share** and BragBit mints a read-only, workspace-branded link to a clean timeline — no login required for whoever opens it. You can rotate it (which instantly kills the old URL), stop sharing, or put a password on it.
+
+The detail I care about most: **anything you marked private is filtered out server-side.** The salary note you wrote for future-you never leaks into the link you send your manager. You hand over a polished case, not a messy doc you have to redact by hand.
+
+![The share dialog — a read-only link with an optional password, plus controls to rotate or stop sharing](/posts/bragbit/share.webp)
+
+## Proof, attached
+
+Adjectives lose; evidence wins. So you can attach files of any type to a brag — the praise email, the PDF, the before/after dashboard screenshot — plus labeled links to the PR or the doc. Attachments are private, streamed through an authorizing route rather than a public URL, so the screenshot of your director thanking you doesn't end up indexable on the open web.
+
+## A nudge so you don't forget
+
+The real failure mode was never that you couldn't write the entry. It's that you forgot to. So BragBit can email you a weekly _"what did you ship this week?"_ reminder, on the day and in the time zone you choose, with a one-tap link straight to the log box (and one-click unsubscribe). A dashboard heatmap and a week streak make the habit visible, the way a contribution graph does.
+
+![The dashboard heatmap and week streak](/posts/bragbit/dashboard.webp)
+
+> Personally, this is the feature that changed everything for me. I don't have to _remember_ to keep a brag document anymore — it taps me on the shoulder every Friday, and logging the week takes a minute.
+
+## Your evidence, on infrastructure you trust
+
+And the sensitivity problem. BragBit is AGPL-licensed and self-hostable with a single `docker compose up` — it runs on Postgres _you_ control, not a vendor that might fold or a corporate Workspace you'll lose access to. There are no entry caps, and you can export everything to Markdown, PDF, or JSON at any time, so you can always walk away with the whole record.
+
+And it scales past you: the same one-command stack runs in **organization mode**, where a whole team self-hosts a single instance and members join by invitation — owners and admins manage branding and membership but, by design, never read anyone else's brag content. The privacy promise doesn't weaken when the tool goes team-wide.
+
+Career evidence is the last thing you want renting space in someone else's database. The tagline on [the repo](https://github.com/hamed-farag/bragbit) is the whole philosophy: **your promotion evidence, on your own Postgres.**
+
+# Conclusion
+
+You already version-control your code without thinking about it. Every change captured, attributed, timestamped, with a message explaining _why_. You would never ship a serious project any other way.
+
+Your career runs on the opposite discipline — pure memory, the least reliable storage medium you own — and then once a year you're shocked when the diff comes back empty.
+
+A brag document is `git log` for the human behind the commits. The hard part was never the writing; it was the friction of keeping it up, and the worry about where the sensitive parts live. Remove both, and the habit finally sticks.
+
+So start today. One win, one line, thirty seconds. Open a plain text file if that's all you've got. Future-you — staring down that blank page in December — will be grateful you did.
+
+> Note: I built BragBit after one too many reviews where I'd shipped a genuinely great year and could only remember last month. It's open-source — kick the tires, self-host it, or just start a text file tonight. The tool matters less than the habit; the habit is the whole game. Cheers! ✌🏼
