@@ -1,0 +1,169 @@
+---
+id: ontology-7
+title: "The Ontology, Part 7: Building a Screen"
+date: "06-09-2026"
+description: "Part 7 of the beginner's guide to ontologies — the concrete half of the frontend. A screen is a handful of hooks, and each hook is a read or write you already know: useObjects is part 3's fetchPage, useAction is part 5's optimistic action. The component kit by property type, where reads and writes meet, and bespoke vs config-driven clients."
+tags: ["ontology", "architecture", "tutorial"]
+---
+
+*This is part 7, and it's the one where everything connects. [Part 6](/posts/ontology-6) gave the frontend's shape — two apps on one foundation, with components that render themselves from typed metadata. This part builds an actual screen, and the punchline is that there's still nothing new: the hooks you reach for are the read model from [part 3](/posts/ontology-3) and the write model from [part 5](/posts/ontology-5), wrapped just enough for a component to use. Learn how one screen is wired and you've learned them all.*
+
+---
+
+## A screen is a handful of hooks
+
+Picture an ordinary operations screen: a header with a count badge, a filter, a table of objects, a detail card when you click a row, and a button that does something. It feels like a lot. It isn't — each region is one **hook**, and each hook is one of the operations you already know.
+
+<svg width="100%" viewBox="0 0 680 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A screen broken into regions, each labelled with the hook it uses" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="40" y="22" width="600" height="212" rx="13" fill="#FBFCFE" stroke="#C3CCDA"/>
+    <rect x="40" y="22" width="600" height="44" rx="13" fill="#F6F8FB" stroke="#C3CCDA"/>
+    <text x="60" y="50" font-size="13.5" font-weight="600" fill="#1F2733" text-anchor="start">Assets</text>
+    <rect x="360" y="33" width="118" height="24" rx="12" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="419" y="49" font-size="11" fill="#2F77C7" text-anchor="middle">12 active · useCount</text>
+    <rect x="492" y="32" width="130" height="26" rx="7" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="557" y="49" font-size="11" fill="#9a6a16" text-anchor="middle">Acknowledge · useAction</text>
+    <rect x="56" y="82" width="120" height="138" rx="9" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="116" y="106" font-size="11.5" font-weight="600" fill="#1F2733" text-anchor="middle">filter</text>
+    <text x="116" y="124" font-size="10" fill="#5B6675" text-anchor="middle">builds the</text>
+    <text x="116" y="137" font-size="10" fill="#5B6675" text-anchor="middle">object set</text>
+    <rect x="190" y="82" width="290" height="138" rx="9" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="335" y="106" font-size="11.5" font-weight="600" fill="#1F2733" text-anchor="middle">table · useObjects</text>
+    <line x1="206" y1="124" x2="464" y2="124" stroke="#CBD5E1" stroke-width="1"/>
+    <line x1="206" y1="150" x2="464" y2="150" stroke="#CBD5E1" stroke-width="1"/>
+    <line x1="206" y1="176" x2="464" y2="176" stroke="#CBD5E1" stroke-width="1"/>
+    <line x1="206" y1="202" x2="464" y2="202" stroke="#CBD5E1" stroke-width="1"/>
+    <rect x="494" y="82" width="130" height="138" rx="9" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="559" y="106" font-size="11.5" font-weight="600" fill="#1F2733" text-anchor="middle">detail card</text>
+    <text x="559" y="124" font-size="10" fill="#5B6675" text-anchor="middle">useObject</text>
+    <text x="559" y="138" font-size="10" fill="#5B6675" text-anchor="middle">useLinks</text>
+    <text x="340" y="264" font-size="11.5" fill="#5B6675" text-anchor="middle">Every region is one hook — and every hook is a part 3 read or a part 5 write.</text>
+  </g>
+</svg>
+
+The hooks line up one-for-one with the model you already have:
+
+- `useObjects(set)` — a page of an object set. This is [part 3](/posts/ontology-3)'s `fetchPage`.
+- `useObject(type, pk)` — one object by key. Part 3's fetch-by-id.
+- `useLinks(object, link)` — the linked objects. Part 3's traversal.
+- `useCount(set)` and `useAggregation(set, spec)` — Part 3's count and aggregate.
+- `useAction(name)` — invoke an action. This is [part 5](/posts/ontology-5)'s write lifecycle.
+
+> **👩‍💻 Mai (junior):** So the hooks aren't really new concepts?
+>
+> **👨‍🏫 Hamed (mentor):** Not one. They're the same operations from Parts 3 and 5, wrapped in the things a *component* needs that a raw call doesn't — a loading state, an error state, caching so two components asking the same question don't fetch twice, and a refetch when the data changes. The data ideas are all behind you. This part is just the thin adapter between them and the screen.
+
+## Reading: `useObjects` is `fetchPage` with a loading state
+
+Here's the list. You build an object set exactly as in Part 3, hand it to `useObjects`, and get back the page plus the states a UI needs:
+
+```tsx
+function AssetList() {
+  // an object set — straight from part 3
+  const criticalActive = client.objects(Asset)
+    .where({ status: { eq: "active" }, criticality: { gte: 4 } })
+    .orderBy("criticality", "desc");
+
+  const { data, isLoading, error, fetchMore } = useObjects(criticalActive, { pageSize: 25 });
+
+  if (isLoading) return <Spinner />;
+  if (error)     return <ErrorBanner error={error} />;
+  return <ObjectTable rows={data} onEndReached={fetchMore} />;
+}
+```
+
+Two things to notice. The query is *just* a Part 3 object set — `useObjects` adds nothing to *what* you're asking, only the bookkeeping around asking it. And the result goes into `ObjectTable`, the metadata-driven kit component from [part 6](/posts/ontology-6): it reads each column's *type* to format cells — dates formatted, enums as chips, booleans as yes/no — so you write zero per-column code. The whole read path is **object set → `useObjects` → `ObjectTable`**, and every piece in that chain you've already met.
+
+## Writing: `useAction` is the action lifecycle, optimism included
+
+Now the button. `useAction` wraps Part 5's entire write story — including the optimistic update and rollback you watched in the playground — behind a `run()` call:
+
+```tsx
+function AcknowledgeButton({ alert }) {
+  const ack = useAction("acknowledgeAlert");
+  return (
+    <button disabled={ack.isPending}
+            onClick={() => ack.run({ alert: alert.id, assignee: currentUser.id })}>
+      {ack.isPending ? "Acknowledging…" : "Acknowledge"}
+    </button>
+  );
+}
+```
+
+The component does almost nothing — it calls `run()`. Underneath, the hook performs the lifecycle from Part 5: it applies the edit **optimistically** so the UI flips at once, sends the action to the server to be **validated and checked**, and then either **commits** it (with the audit entry) or **rolls back** and surfaces the error. The component never spells any of that out; it lives in the hook, once, for every action.
+
+## Where reads and writes meet
+
+There's one more move the write hook makes, and it's the quiet hinge of the whole frontend. After an action commits, the object sets that touched those objects are **invalidated** — so every `useObjects` on screen showing the changed data **refetches**. Acknowledge an alert and the table updates, the count badge in the header drops by one, and a detail card open elsewhere refreshes — all without wiring those screens together.
+
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An action commit invalidates the on-screen object sets, which refetch and update the UI" style="max-width:680px;height:auto;display:block;margin:1.5rem auto">
+  <defs><marker id="s2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#8A93A1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <rect x="20" y="48" width="150" height="54" rx="10" fill="#FBF6EC" stroke="#C8861E"/>
+    <text x="95" y="72" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">useAction</text>
+    <text x="95" y="89" font-size="10.5" fill="#5B6675" text-anchor="middle">commits (part 5)</text>
+    <rect x="205" y="48" width="150" height="54" rx="10" fill="#F4F2FC" stroke="#6B5FD0"/>
+    <text x="280" y="72" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">invalidate</text>
+    <text x="280" y="89" font-size="10.5" fill="#5B6675" text-anchor="middle">affected sets</text>
+    <rect x="390" y="48" width="150" height="54" rx="10" fill="#EEF7F8" stroke="#1F9AA8"/>
+    <text x="465" y="72" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">useObjects</text>
+    <text x="465" y="89" font-size="10.5" fill="#5B6675" text-anchor="middle">refetch (part 3)</text>
+    <rect x="575" y="48" width="90" height="54" rx="10" fill="#F6F8FB" stroke="#2F77C7"/>
+    <text x="620" y="72" font-size="12.5" font-weight="600" fill="#1F2733" text-anchor="middle">UI</text>
+    <text x="620" y="89" font-size="10.5" fill="#5B6675" text-anchor="middle">updates</text>
+    <line x1="170" y1="75" x2="203" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#s2)"/>
+    <line x1="355" y1="75" x2="388" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#s2)"/>
+    <line x1="540" y1="75" x2="573" y2="75" stroke="#8A93A1" stroke-width="1.5" marker-end="url(#s2)"/>
+    <text x="340" y="130" font-size="11.5" fill="#5B6675" text-anchor="middle">This is where the write model meets the read model — a commit ripples back into every list watching it.</text>
+  </g>
+</svg>
+
+> **👩‍💻 Mai:** So I never manually update the table after the button runs?
+>
+> **👨‍🏫 Hamed:** Right — and you shouldn't. The action is the source of truth; the lists just *watch* the data and re-read when it changes. If you hand-patched the table yourself, you'd have two copies of the truth drifting apart. Let the write commit and let the reads refetch. They meet at invalidation, and the screen stays honest.
+
+## The kit you arrange
+
+Building a screen, then, is mostly *arranging* a few kit components and pointing them at object sets and actions. You met two in Part 6; the full handful:
+
+- `AutoField` — a form input chosen from a property's type.
+- `ObjectTable` — a table whose cells format by type.
+- `ObjectCard` — a detail view of one object.
+- `LinkField` — renders a link by its **cardinality** (from [part 4](/posts/ontology-4)): a to-one link becomes a single picker, a to-many becomes a multi-select or an embedded list.
+
+Every one of these is already type-aware and security-aware, so you rarely drop down to raw inputs. A screen is these pieces, composed, over the hooks above.
+
+## Two ways to assemble it: bespoke or config-driven
+
+Here's the last open choice, and it's about *who* arranges the pieces.
+
+**Bespoke** is what you've seen — a developer writes the screen in code, like the `AssetList` above. Total control over layout, branding, and flow. This is the right call for the polished, customer-facing surface where the experience matters.
+
+**Config-driven** flips it: a generic renderer reads a **view-spec** — data that says *which* kit components go where, bound to which object sets and actions — and renders the screen with no per-screen code.
+
+```json
+{
+  "screen": "Assets",
+  "blocks": [
+    { "kind": "table",  "objectSet": { "base": "Asset", "where": { "status": "active" } },
+      "columns": ["name", "status", "criticality"] },
+    { "kind": "action", "action": "acknowledgeAlert", "label": "Acknowledge" }
+  ]
+}
+```
+
+That view-spec is exactly what the Builder's app-editor from Part 6 produces — which is why the Builder's *preview* can be the very same renderer the end user gets, just pointed at an in-progress spec. The two approaches aren't rivals: they consume the *same* hooks and the *same* kit. One reads its layout from a file; the other has it written in JSX.
+
+> **👩‍💻 Mai:** So config-driven is just bespoke where the arrangement comes from data instead of code?
+>
+> **👨‍🏫 Hamed:** That's the cleanest way to see it. Same foundation, two front doors. In practice you mix them — config-driven for the internal operational dashboards people assemble themselves, bespoke for the customer-facing product that needs to look and feel deliberate. Because both stand on the one foundation, it's never an either/or you're locked into.
+
+---
+
+## The one-paragraph summary
+
+A screen is assembled from **hooks**, and each hook is a read or write you already know, wrapped for a component's needs — loading, error, cache, refetch. `useObjects` is [part 3](/posts/ontology-3)'s `fetchPage`; `useAction` is [part 5](/posts/ontology-5)'s optimistic action. Reads flow **object set → `useObjects` → `ObjectTable`**, which formats cells by type; writes flow **button → `useAction` → optimistic apply → commit-or-rollback**, after which the on-screen sets **invalidate and refetch** — so reads and writes meet at invalidation and the screen never drifts. You compose from a small, type- and security-aware **kit** (`AutoField`, `ObjectTable`, `ObjectCard`, `LinkField`), and you do that composing either in code (**bespoke**) or from a **view-spec** (**config-driven**) — the same foundation behind both doors. That's the entire frontend: not a new system, just the read and write models, rendered.
+
+---
+
+*That closes the core of the series — the model, how you read it, its building blocks, how you change it, and how you build on it: [part 1](/posts/ontology-1) · [part 2](/posts/ontology-2) · [part 3](/posts/ontology-3) · [part 4](/posts/ontology-4) · [part 5](/posts/ontology-5) · [part 6](/posts/ontology-6). One optional epilogue remains for the curious — how the model itself evolves over time: versioning, branching, and migrations without breaking the apps standing on it.*

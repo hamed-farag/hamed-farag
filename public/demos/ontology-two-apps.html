@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Two Apps — Builder &amp; Client on one ontology</title>
+    <style>
+        :root {
+            --bg: #F4F6FA;
+            --card: #fff;
+            --ink: #1F2733;
+            --sub: #5B6675;
+            --line: #E2E7EF;
+            --pur: #6B5FD0;
+            --pur-bg: #F4F2FC;
+            --teal: #1F9AA8;
+            --teal-bg: #EEF7F8;
+            --amber: #C8861E;
+            --blue: #2F77C7;
+            --ok: #2E9A57;
+            --okbg: #EAF6EE;
+            --muted: #9AA7B6;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.45
+        }
+
+        .wrap {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 18px
+        }
+
+        header.intro {
+            margin: 2px 4px 14px
+        }
+
+        header.intro h1 {
+            font-size: 18px;
+            margin: 0 0 4px
+        }
+
+        header.intro p {
+            margin: 0;
+            color: var(--sub);
+            font-size: 13px;
+            max-width: 760px
+        }
+
+        .apps {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px
+        }
+
+        @media(max-width:880px) {
+            .apps {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden
+        }
+
+        .phead {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .badge {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 6px
+        }
+
+        .panel.builder .badge {
+            background: var(--pur-bg);
+            color: var(--pur);
+            border: 1px solid var(--pur)
+        }
+
+        .panel.client .badge {
+            background: var(--teal-bg);
+            color: var(--teal);
+            border: 1px solid var(--teal)
+        }
+
+        .phead .sub {
+            color: var(--sub);
+            font-size: 12px
+        }
+
+        .pbody {
+            padding: 14px
+        }
+
+        .typename {
+            font-size: 12.5px;
+            color: var(--sub);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .typename input {
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 13px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 4px 8px;
+            font-family: var(--sans)
+        }
+
+        .prow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 0;
+            border-bottom: 1px dashed var(--line)
+        }
+
+        .prow .pname {
+            flex: 1 1 120px;
+            min-width: 90px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 5px 8px;
+            font-family: var(--sans);
+            font-size: 13px
+        }
+
+        .prow select {
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 5px 6px;
+            font-family: var(--sans);
+            font-size: 12.5px;
+            background: #fff
+        }
+
+        .prow .req {
+            font-size: 11.5px;
+            color: var(--sub);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap
+        }
+
+        .prow .x {
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--muted);
+            border-radius: 7px;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-size: 12px
+        }
+
+        .prow .x:hover {
+            color: #C0564B;
+            border-color: #E3B7B1
+        }
+
+        .enumopts {
+            flex: 1 1 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 5px 8px;
+            font-family: var(--mono);
+            font-size: 12px;
+            background: #FCFAFF
+        }
+
+        .add {
+            margin-top: 10px;
+            border: 1px dashed var(--pur);
+            background: var(--pur-bg);
+            color: var(--pur);
+            border-radius: 9px;
+            padding: 7px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12.5px
+        }
+
+        .add:hover {
+            filter: brightness(.98)
+        }
+
+        /* client form */
+        .formnote {
+            font-size: 11.5px;
+            color: var(--sub);
+            background: var(--teal-bg);
+            border: 1px solid #CFE7EA;
+            border-radius: 9px;
+            padding: 8px 10px;
+            margin-bottom: 12px
+        }
+
+        .frow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 9px
+        }
+
+        .frow label.flbl {
+            flex: 0 0 120px;
+            font-size: 12.5px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .frow .req-star {
+            color: #C0564B
+        }
+
+        .frow .ftype {
+            font-size: 10px;
+            color: var(--muted);
+            font-family: var(--mono)
+        }
+
+        .fctl {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .fctl input[type=text],
+        .fctl input[type=number],
+        .fctl input[type=date],
+        .fctl select {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 6px 8px;
+            font-family: var(--sans);
+            font-size: 13px;
+            background: #fff
+        }
+
+        .fctl.miss input,
+        .fctl.miss select {
+            border-color: #C0564B;
+            background: #FDF3F2
+        }
+
+        .geo {
+            display: flex;
+            gap: 6px;
+            width: 100%
+        }
+
+        .geo input {
+            width: 50%
+        }
+
+        .switch {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12.5px;
+            color: var(--sub)
+        }
+
+        .addrec {
+            margin-top: 6px;
+            border: none;
+            background: var(--teal);
+            color: #fff;
+            border-radius: 9px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px
+        }
+
+        .addrec:hover {
+            filter: brightness(.96)
+        }
+
+        .vmsg {
+            font-size: 12px;
+            color: #C0564B;
+            margin-top: 8px;
+            min-height: 16px
+        }
+
+        /* table */
+        .tbl-wrap {
+            margin-top: 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: auto
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12.5px
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap
+        }
+
+        th {
+            background: #F8FAFC;
+            color: var(--sub);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .03em
+        }
+
+        tr:last-child td {
+            border-bottom: none
+        }
+
+        .chip {
+            display: inline-block;
+            background: #EEF1F6;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 1px 9px;
+            font-size: 11.5px
+        }
+
+        .chip.ok {
+            background: var(--okbg);
+            border-color: #BfE3CC;
+            color: var(--ok)
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .tcap {
+            font-size: 11.5px;
+            color: var(--sub);
+            margin: 8px 2px 0
+        }
+
+        /* foundation */
+        .foundation {
+            margin-top: 18px;
+            background: #0E1422;
+            border: 1px solid #1d2738;
+            border-radius: 14px;
+            color: #cdd6e4;
+            padding: 14px 16px
+        }
+
+        .foundation .ft {
+            font-size: 11px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #8aa0c0;
+            margin-bottom: 8px
+        }
+
+        .foundation .pieces {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px
+        }
+
+        .foundation .piece {
+            font-family: var(--mono);
+            font-size: 12px;
+            background: #131b2b;
+            border: 1px solid #25324a;
+            border-radius: 8px;
+            padding: 5px 10px;
+            color: #aeb9cc
+        }
+
+        .foundation .piece b {
+            color: #e8ecf3;
+            font-weight: 600
+        }
+
+        details.def {
+            margin-top: 10px
+        }
+
+        details.def summary {
+            cursor: pointer;
+            color: #8aa0c0;
+            font-size: 12px;
+            font-family: var(--mono)
+        }
+
+        details.def pre {
+            margin: 8px 0 0;
+            background: #0a0f1a;
+            border: 1px solid #1d2738;
+            border-radius: 8px;
+            padding: 10px;
+            overflow: auto;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: #cdd6e4;
+            max-height: 280px
+        }
+
+        .arrow {
+            color: #6fa8ff;
+            font-family: var(--mono);
+            font-size: 12px;
+            margin: 0 6px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="intro">
+            <h1>One ontology, two apps</h1>
+            <p>The <b>Builder</b> writes the rulebook — object types, properties, their types. The <b>Client</b> fills
+                in the data — and it isn't hand-coded: every field and column is chosen from the definition the Builder
+                produces. Change a property's type on the left and watch the right side rebuild itself. Both apps stand
+                on one shared foundation.</p>
+        </header>
+
+        <div class="apps">
+            <section class="panel builder">
+                <div class="phead"><span class="badge">Builder</span><span class="sub">edits the <b>definition</b> plane
+                        — the schema</span></div>
+                <div class="pbody" id="builder"></div>
+            </section>
+            <section class="panel client">
+                <div class="phead"><span class="badge">Client</span><span class="sub">edits the <b>data</b> plane — the
+                        instances</span></div>
+                <div class="pbody" id="client"></div>
+            </section>
+        </div>
+
+        <div class="foundation">
+            <div class="ft">⚙ shared foundation — built once, used by both apps</div>
+            <div class="pieces">
+                <span class="piece"><b>metadata contract</b> · the definition below</span>
+                <span class="piece"><b>AutoField()</b> · type → form widget</span>
+                <span class="piece"><b>ObjectTable()</b> · type → table cell</span>
+            </div>
+            <div style="font-size:12px;color:#8aa0c0">The Builder writes this definition <span class="arrow">→</span>
+                the Client reads it to render itself. Same metadata, two apps.</div>
+            <details class="def" open>
+                <summary>definition (what the Builder produces / the Client consumes)</summary>
+                <pre id="defjson"></pre>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        //<<HELPERS_START>>
+        function esc(s) {return String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));}
+        function parseEnum(s) {return s.split(",").map(x => x.trim()).filter(Boolean);}
+
+        // AutoField: choose a form widget purely from a property's TYPE (the metadata-driven idea)
+        function AutoField(prop, draft) {
+            const v = draft[prop.name];
+            const set = `setDraft('${prop.name}',`;
+            switch (prop.type) {
+                case "number": return `<input type="number" step="any" value="${v ?? ""}" oninput="${set} this.value===''?null:Number(this.value))">`;
+                case "boolean": return `<label class="switch"><input type="checkbox" ${v ? "checked" : ""} onchange="${set} this.checked); this.nextElementSibling.textContent=this.checked?'yes':'no'"> <span>${v ? "yes" : "no"}</span></label>`;
+                case "date": return `<input type="date" value="${v ?? ""}" oninput="${set} this.value||null)">`;
+                case "enum": return `<select onchange="${set} this.value||null)"><option value="">—</option>${(prop.options || []).map(o => `<option ${v === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+                case "geo": {const g = v || {}; return `<span class="geo"><input type="number" step="any" placeholder="lat" value="${g.lat ?? ""}" oninput="setGeo('${prop.name}','lat',this.value)"><input type="number" step="any" placeholder="lng" value="${g.lng ?? ""}" oninput="setGeo('${prop.name}','lng',this.value)"></span>`;}
+                default: return `<input type="text" value="${esc(v ?? "")}" oninput="${set} this.value||null)">`;
+            }
+        }
+
+        // ObjectTable cell: format a value purely from its property TYPE
+        function formatCell(prop, val) {
+            if (val == null || val === "") return `<span class="muted">—</span>`;
+            switch (prop.type) {
+                case "boolean": return val ? `<span class="chip ok">yes</span>` : `<span class="chip">no</span>`;
+                case "enum": return `<span class="chip">${esc(String(val))}</span>`;
+                case "geo": return (val && val.lat != null && val.lng != null) ? esc(val.lat + ", " + val.lng) : `<span class="muted">—</span>`;
+                case "number": return esc(String(val));
+                default: return esc(String(val));
+            }
+        }
+
+        // required validation, also driven by metadata
+        function validateRecord(schema, draft) {
+            const missing = [];
+            for (const p of schema.properties) {
+                if (!p.required) continue;
+                const v = draft[p.name];
+                const empty = v == null || v === "" || (p.type === "geo" && (!v || v.lat == null || v.lng == null));
+                if (empty) missing.push(p.name);
+            }
+            return missing;
+        }
+        //<<HELPERS_END>>
+
+        const TYPES = ["text", "number", "boolean", "date", "enum", "geo"];
+        const TYPE_LABEL = {text: "Text", number: "Number", boolean: "True / False", date: "Date", enum: "Enum (fixed set)", geo: "Location (geo)"};
+
+        let schema = {
+            typeName: "Asset",
+            properties: [
+                {name: "name", type: "text", required: true},
+                {name: "status", type: "enum", required: true, options: ["active", "maintenance", "retired"]},
+                {name: "purchasedAt", type: "date", required: false},
+                {name: "criticality", type: "number", required: false},
+                {name: "onSite", type: "boolean", required: false},
+            ],
+        };
+        let data = [
+            {name: "Crane 7", status: "active", purchasedAt: "2024-03-12", criticality: 5, onSite: true},
+            {name: "Generator B", status: "maintenance", purchasedAt: "2023-11-01", criticality: 3, onSite: false},
+        ];
+        let draft = {};
+
+        const $ = id => document.getElementById(id);
+
+        /* ---------- Builder app: edits the DEFINITION ---------- */
+        function renderBuilder() {
+            const rows = schema.properties.map((p, i) => `
+    <div class="prow">
+      <input class="pname" value="${esc(p.name)}" oninput="renameProp(${i}, this.value)" aria-label="property name">
+      <select onchange="changeType(${i}, this.value)" aria-label="property type">${TYPES.map(t => `<option value="${t}" ${p.type === t ? "selected" : ""}>${TYPE_LABEL[t]}</option>`).join("")}</select>
+      <label class="req"><input type="checkbox" ${p.required ? "checked" : ""} onchange="toggleReq(${i}, this.checked)">required</label>
+      <button class="x" onclick="removeProp(${i})" title="remove">✕</button>
+      ${p.type === "enum" ? `<input class="enumopts" value="${esc((p.options || []).join(', '))}" placeholder="comma, separated, values" oninput="setEnum(${i}, this.value)" aria-label="enum options">` : ""}
+    </div>`).join("");
+            $("builder").innerHTML =
+                `<div class="typename">Object type:<input value="${esc(schema.typeName)}" oninput="renameType(this.value)" aria-label="object type name"></div>`
+                + rows
+                + `<button class="add" onclick="addProp()">+ add property</button>`;
+        }
+
+        function renameType(v) {schema.typeName = v; renderTable(); renderDef();}
+        function renameProp(i, v) {
+            const old = schema.properties[i].name; if (v === old) return;
+            schema.properties[i].name = v;
+            for (const r of data) {if (old in r) {r[v] = r[old]; delete r[old];} }   // migrate data keys
+            if (old in draft) {draft[v] = draft[old]; delete draft[old];}
+            renderClientForm(); renderTable(); renderDef();                        // not renderBuilder → keep focus
+        }
+        function changeType(i, t) {
+            const p = schema.properties[i]; p.type = t;
+            if (t === "enum" && !p.options) p.options = ["one", "two", "three"];
+            renderBuilder(); renderClient();                                       // structural → full rerender ok
+        }
+        function toggleReq(i, on) {schema.properties[i].required = on; renderClientForm(); renderDef();}
+        function setEnum(i, v) {schema.properties[i].options = parseEnum(v); renderClientForm(); renderDef();}   // keep focus in enum field
+        function removeProp(i) {const n = schema.properties[i].name; schema.properties.splice(i, 1); for (const r of data) delete r[n]; delete draft[n]; renderBuilder(); renderClient();}
+        function addProp() {
+            let n = "field", k = 1; const names = new Set(schema.properties.map(p => p.name));
+            while (names.has(n + k)) k++;
+            schema.properties.push({name: n + k, type: "text", required: false});
+            renderBuilder(); renderClient();
+        }
+
+        /* ---------- Client app: edits the DATA, rendered from the definition ---------- */
+        function setDraft(name, val) {draft[name] = val;}
+        function setGeo(name, k, val) {const g = draft[name] || {}; g[k] = val === "" ? undefined : Number(val); draft[name] = g;}
+
+        function renderClient() {renderClientForm(); renderTable(); renderDef();}
+
+        function renderClientForm() {
+            const fields = schema.properties.map(p => `
+    <div class="frow">
+      <label class="flbl">${esc(p.name)}${p.required ? '<span class="req-star">*</span>' : ''}</label>
+      <div class="fctl" data-prop="${esc(p.name)}">${AutoField(p, draft)}<span class="ftype">${p.type}</span></div>
+    </div>`).join("");
+            $("client").innerHTML =
+                `<div class="formnote">This form is not hand-coded. <b>AutoField()</b> picks each widget from the property's type in the definition — change a type on the left and the matching control here changes too.</div>`
+                + `<div class="typename" style="margin-bottom:8px">New ${esc(schema.typeName)}</div>`
+                + fields
+                + `<button class="addrec" onclick="addRecord()">+ add ${esc(schema.typeName)}</button>`
+                + `<div class="vmsg" id="vmsg"></div>`
+                + `<div class="tbl-wrap" id="tblwrap"></div>`
+                + `<div class="tcap"><b>ObjectTable</b> — same definition, rendered as rows. Cells are formatted by type (dates, enums as chips, booleans as yes/no).</div>`;
+            renderTable();
+        }
+
+        function addRecord() {
+            const missing = validateRecord(schema, draft);
+            document.querySelectorAll('.fctl').forEach(el => el.classList.remove('miss'));
+            if (missing.length) {
+                missing.forEach(n => {const el = document.querySelector(`.fctl[data-prop="${CSS.escape(n)}"]`); if (el) el.classList.add('miss');});
+                $("vmsg").textContent = "Required: " + missing.join(", ");
+                return;
+            }
+            const rec = {}; for (const p of schema.properties) {if (draft[p.name] != null && draft[p.name] !== "") rec[p.name] = draft[p.name];}
+            data.push(rec); draft = {};
+            renderClientForm();
+        }
+
+        function renderTable() {
+            const wrap = $("tblwrap"); if (!wrap) return;
+            if (!data.length) {wrap.innerHTML = `<div style="padding:14px;color:var(--muted);font-size:12.5px">No ${esc(schema.typeName)} records yet.</div>`; return;}
+            const head = schema.properties.map(p => `<th>${esc(p.name)}</th>`).join("");
+            const body = data.map(r => `<tr>${schema.properties.map(p => `<td>${formatCell(p, r[p.name])}</td>`).join("")}</tr>`).join("");
+            wrap.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+        }
+
+        function renderDef() {
+            const def = {objectType: schema.typeName, properties: schema.properties};
+            const el = $("defjson"); if (el) el.textContent = JSON.stringify(def, null, 2);
+        }
+
+        /* ---------- boot ---------- */
+        renderBuilder(); renderClient();
+
+        /* embed support: report height so a host page can auto-fit the iframe */
+        function postHeight() {try {parent.postMessage({type: "onto-twoapps-height", height: document.documentElement.scrollHeight}, "*");} catch (e) { } }
+        if (window.ResizeObserver) {new ResizeObserver(postHeight).observe(document.body);}
+        window.addEventListener("load", postHeight);
+    </script>
+</body>
+
+</html>
