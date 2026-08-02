@@ -30,11 +30,11 @@ export async function AboutCard() {
                 </AvatarFallback>
               </Avatar>
             </div>
-            <article className="whitespace-nowrap text-center mb-3">
+            <article className="text-center mb-3">
               <h3 className="block font-display font-bold gradient-text">
                 {user.name}
               </h3>
-              <span className="block text-sm text-muted-foreground">
+              <span className="block text-sm text-muted-foreground whitespace-normal">
                 {user.jobTitle}
               </span>
             </article>
