@@ -222,13 +222,17 @@ function generateWorksPageMetadata(): Metadata {
 
 function generateHirePageMetadata(): Metadata {
   const description =
-    "Work with Hamed Farag — frontend architecture, React/Next.js development, performance, and technical consulting.";
+    "Work with Hamed Farag — AI-native frontend architecture, React/Next.js development, LLM integration, agentic UI, and technical consulting.";
   const url = `${siteMetadata.siteUrl}/hire`;
   return {
     title: "Hire Me",
     description,
     keywords: [
       "hire frontend engineer",
+      "AI frontend engineer",
+      "LLM integration",
+      "agentic UI",
+      "MCP",
       "frontend consultant",
       "React developer",
       "Next.js developer",

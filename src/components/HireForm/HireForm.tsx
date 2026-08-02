@@ -7,6 +7,7 @@ import {
   Gauge,
   GraduationCap,
   Boxes,
+  Bot,
   Check,
   Send,
 } from "lucide-react";
@@ -18,6 +19,7 @@ import { cn } from "@lib/utils/tailwindUtils";
 import { hireServices } from "@configs/hireServices";
 
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
+  "ai-agentic-integration": <Bot className="h-5 w-5" />,
   "frontend-architecture": <Layers className="h-5 w-5" />,
   "react-next-development": <Code2 className="h-5 w-5" />,
   performance: <Gauge className="h-5 w-5" />,

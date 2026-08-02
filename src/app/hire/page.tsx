@@ -17,13 +17,13 @@ const SKILLS = [
   "React",
   "Next.js",
   "TypeScript",
-  "JavaScript",
-  "Node.js",
-  "Frontend Architecture",
-  "Micro-frontends",
+  "AI / LLM Integration",
+  "Agentic UI & MCP",
   "Design Systems",
+  "Micro-frontends",
+  "Frontend Architecture",
   "Tailwind CSS",
-  "Testing",
+  "Node.js",
   "Performance",
   "CI/CD",
 ];
@@ -58,9 +58,13 @@ export default function HirePage() {
           <span className="gradient-text">Let&apos;s build something</span>
         </h1>
         <p className="text-muted-foreground my-0 max-w-xl leading-relaxed">
-          I&apos;m {siteMetadata.author}, a {siteMetadata.jobTitle} who helps
-          teams ship fast, maintainable frontends. Pick what you need below,
-          tell me about your project, and I&apos;ll get back to you.
+          I&apos;m {siteMetadata.author}, a Lead AI Frontend Engineer /
+          Frontend Architect who helps teams ship fast, maintainable,
+          AI-native frontends. With 15 years across frontend and backend, I
+          now focus on the AI and agentic transformation of software — from
+          LLM integrations and MCP servers to design systems that AI coding
+          agents can consume directly. Pick what you need below, tell me about
+          your project, and I&apos;ll get back to you.
         </p>
       </section>
 

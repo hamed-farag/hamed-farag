@@ -7,6 +7,12 @@ export type THireService = {
 // Plain data — shared between the client form and the page's structured data.
 export const hireServices: THireService[] = [
   {
+    id: "ai-agentic-integration",
+    label: "AI, Agentic & LLM Integration",
+    description:
+      "LLM-powered features, MCP servers, agent orchestration, and AI-native frontend architecture.",
+  },
+  {
     id: "frontend-architecture",
     label: "Frontend Architecture",
     description: "Scalable structure, micro-frontends, and design systems.",
