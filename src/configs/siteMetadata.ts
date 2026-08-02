@@ -5,10 +5,10 @@ const siteMetadata = {
   title: "Hamed Farag's Space",
   author: "Hamed Farag",
   authorAvatar: "/hf-avatar.jpg",
-  jobTitle: "Lead Frontend Engineer",
+  jobTitle: "Lead AI Frontend Engineer / Frontend Architect",
   headerTitle: "HF",
   description:
-    "Personal technical blog by Hamed Farag — articles on frontend engineering, React, architecture, and building for the web.",
+    "Personal technical blog by Hamed Farag — articles on frontend engineering, AI-native architecture, LLM integration, agentic UI, React, and building for the web.",
   language: "en-us",
   siteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || "",
   siteLogo: "/hg_logo.png",
@@ -39,6 +39,9 @@ function generateSiteMetadata(): Metadata {
     description: siteMetadata.description,
     keywords: [
       "frontend engineering",
+      "AI-native frontend",
+      "LLM integration",
+      "agentic UI",
       "React",
       "Next.js",
       "JavaScript",
