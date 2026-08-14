@@ -1,4 +1,1 @@
-.main {
-  @apply w-11/12 md:w-2/3 mx-auto pt-20 md:pt-24 pb-12;
-  max-width: 68.75rem;
-}
+.main { min-height: 70vh; }

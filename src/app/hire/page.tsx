@@ -1,8 +1,6 @@
-import { Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 
 import { HireForm } from "@components/HireForm";
-
 import { hireServices } from "@configs/hireServices";
 import {
   siteMetadata,
@@ -13,79 +11,41 @@ import {
 
 export const metadata: Metadata = generateHirePageMetadata();
 
-const SKILLS = [
-  "React",
-  "Next.js",
-  "TypeScript",
-  "AI / LLM Integration",
-  "Agentic UI & MCP",
-  "Design Systems",
-  "Micro-frontends",
-  "Frontend Architecture",
-  "Tailwind CSS",
-  "Node.js",
-  "Performance",
-  "CI/CD",
-];
+const skills = ["React", "Next.js", "TypeScript", "LLM integration", "Agentic UI + MCP", "Design systems", "Micro-frontends", "Frontend architecture", "Performance", "Technical direction"];
 
 export default function HirePage() {
   return (
-    <div className="animate-reveal">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateHireJSONLD(hireServices)),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
-            generateBreadcrumbJSONLD([
-              { name: "Home", url: siteMetadata.siteUrl },
-              { name: "Hire Me", url: `${siteMetadata.siteUrl}/hire` },
-            ])
-          ),
-        }}
-      />
-      {/* Pitch / intro */}
-      <section className="relative mb-12">
-        <span className="inline-flex items-center gap-1.5 text-xs font-display font-semibold tracking-wider uppercase px-3 py-1 rounded-full border border-border/60 text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5" />
-          Available for select work
-        </span>
-        <h1 className="font-display mt-4 mb-3">
-          <span className="gradient-text">Let&apos;s build something</span>
-        </h1>
-        <p className="text-muted-foreground my-0 max-w-xl leading-relaxed">
-          I&apos;m {siteMetadata.author}, a Lead AI Frontend Engineer /
-          Frontend Architect who helps teams ship fast, maintainable,
-          AI-native frontends. With 15 years across frontend and backend, I
-          now focus on the AI and agentic transformation of software — from
-          LLM integrations and MCP servers to design systems that AI coding
-          agents can consume directly. Pick what you need below, tell me about
-          your project, and I&apos;ll get back to you.
-        </p>
-      </section>
+    <div className="hire-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateHireJSONLD(hireServices)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify(generateBreadcrumbJSONLD([
+          { name: "Home", url: siteMetadata.siteUrl },
+          { name: "Hire Me", url: `${siteMetadata.siteUrl}/hire` },
+        ])),
+      }} />
 
-      {/* Skills / tech stack */}
-      <section className="mb-12 animate-reveal-delay-1">
-        <h2 className="font-display text-lg mb-4">Tech I work with</h2>
-        <div className="flex flex-wrap gap-2">
-          {SKILLS.map((skill) => (
-            <span
-              key={skill}
-              className="text-xs font-display font-semibold px-3.5 py-1.5 rounded-full border border-border/60 text-muted-foreground transition-all duration-300 hover:scale-105 hover:border-primary hover:text-primary cursor-default"
-            >
-              {skill}
-            </span>
-          ))}
+      <section className="hire-hero">
+        <div>
+          <p className="availability"><span /> AVAILABLE FOR SELECT WORK</p>
+          <h1>Bring the hard<br />frontend <em>problem.</em></h1>
+        </div>
+        <div>
+          <p>I help teams shape and ship AI-native products, architecture, and developer systems that need to be fast now—and understandable later.</p>
+          <a href={`mailto:${siteMetadata.email}`}>{siteMetadata.email.toUpperCase()} ↗</a>
         </div>
       </section>
 
-      {/* Interactive contact form */}
-      <section className="animate-reveal-delay-2">
-        <div className="card-whimsy border border-border/50 p-6 md:p-8">
+      <div className="skills-tape" aria-label="Technical capabilities">{skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
+
+      <section className="hire-form-section" id="contact">
+        <div className="hire-form-intro">
+          <p className="section-kicker"><span>●</span> PROJECT_INTAKE.FRM</p>
+          <h2>Give me the<br /><em>rough version.</em></h2>
+          <p>The ambitious brief, the messy architecture diagram, or the half-formed idea is enough. Pick the areas that matter and tell me where you&apos;re trying to go.</p>
+          <dl><div><dt>01</dt><dd>YOU SEND THE CONTEXT</dd></div><div><dt>02</dt><dd>I REPLY WITH QUESTIONS</dd></div><div><dt>03</dt><dd>WE SHAPE THE RIGHT ENGAGEMENT</dd></div></dl>
+        </div>
+        <div className="hire-form-window">
+          <div className="window-bar"><div aria-hidden="true"><span /><span /><span /></div><strong>NEW_PROJECT.MESSAGE</strong><b>×</b></div>
           <HireForm email={siteMetadata.email} />
         </div>
       </section>

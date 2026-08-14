@@ -1,0 +1,1 @@
+export { ArchitectureLab } from "./ArchitectureLab";

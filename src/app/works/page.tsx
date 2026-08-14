@@ -1,9 +1,6 @@
-import { Layers } from "lucide-react";
 import type { Metadata } from "next";
 
-import { EmptyCard } from "@components/EmptyCard";
 import { WorkCard } from "@components/WorkCard";
-
 import { getWorks } from "@services/work";
 import {
   generateWorksPageMetadata,
@@ -12,70 +9,43 @@ import {
   siteMetadata,
 } from "@configs/siteMetadata";
 
-import { IWork } from "@interfaces/work";
-
 export const metadata: Metadata = generateWorksPageMetadata();
+
+const principles = [
+  ["01", "Make the invisible visible", "Architecture should be inspectable: clear boundaries, explicit contracts, and evidence for every important decision."],
+  ["02", "Prototype the risky part", "I build the smallest real system that answers the hard question—not the biggest demo that avoids it."],
+  ["03", "Design for the next builder", "The system should help the next developer—or agent—make a correct move without reading your mind."],
+];
 
 export default function WorksPage() {
   const works = getWorks();
 
   return (
-    <div className="animate-reveal">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateWorksJSONLD(works)),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
-            generateBreadcrumbJSONLD([
-              { name: "Home", url: siteMetadata.siteUrl },
-              { name: "My Works", url: `${siteMetadata.siteUrl}/works` },
-            ])
-          ),
-        }}
-      />
-      {/* Hero */}
-      <section className="relative mb-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <h1 className="font-display mb-2">
-              <span className="gradient-text">My Works</span>
-            </h1>
-            <p className="text-muted-foreground my-0 max-w-lg">
-              A selection of projects, experiments, and things I&apos;ve built.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Layers className="w-4 h-4" />
-            <span className="font-display font-semibold">{works.length}</span>
-            <span>{works.length === 1 ? "project" : "projects"}</span>
-          </div>
+    <div className="page-shell works-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateWorksJSONLD(works)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify(generateBreadcrumbJSONLD([
+          { name: "Home", url: siteMetadata.siteUrl },
+          { name: "My Works", url: `${siteMetadata.siteUrl}/works` },
+        ])),
+      }} />
+
+      <section className="page-hero">
+        <div>
+          <p className="section-kicker"><span>●</span> WORK_INDEX.DAT / {String(works.length).padStart(2, "0")} PROJECTS</p>
+          <h1>Products, systems,<br />and useful <em>experiments.</em></h1>
         </div>
+        <p>Selected work across AI review, agent orchestration, developer experience, frontend architecture, and tools that make good engineering easier to repeat.</p>
       </section>
 
-      {/* Works grid */}
-      {works.length === 0 ? (
-        <EmptyCard
-          title="No works yet!"
-          placeholder="Projects are on the way — check back soon."
-          height={350}
-        />
-      ) : (
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-reveal-delay-1">
-          {works.map((work: IWork, index: number) => (
-            <article
-              key={work.id}
-              className={`animate-reveal-delay-${(index % 4) + 1}`}
-            >
-              <WorkCard work={work} />
-            </article>
-          ))}
-        </section>
-      )}
+      <section className="works-editorial-grid" aria-label="Selected projects">
+        {works.map((work, index) => <WorkCard work={work} index={index + 1} key={work.id} />)}
+      </section>
+
+      <section className="work-principles" aria-labelledby="principles-title">
+        <div><p className="section-kicker"><span>●</span> THE OPERATING PRINCIPLES</p><h2 id="principles-title">How the work<br /><em>gets made.</em></h2></div>
+        <div>{principles.map(([number, title, copy]) => <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div>
+      </section>
     </div>
   );
 }

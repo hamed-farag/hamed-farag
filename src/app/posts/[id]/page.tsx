@@ -49,7 +49,7 @@ export default async function PostPage({ params }: Props) {
   const { htmlContent, postData, headings } = post;
 
   return (
-    <section className="animate-reveal">
+    <section className="post-detail page-shell animate-reveal">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -71,7 +71,7 @@ export default async function PostPage({ params }: Props) {
           ),
         }}
       />
-      <section className="text-center mb-10">
+      <section className="post-detail-hero text-center mb-10">
         <span
           className="text-xs font-display font-bold tracking-wider uppercase block mb-4"
           style={{ color: "var(--color-secondary)" }}

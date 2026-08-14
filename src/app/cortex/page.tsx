@@ -137,7 +137,7 @@ const SHOWCASE = [
 
 export default function CortexPage() {
   return (
-    <div className="animate-reveal">
+    <div className="cortex-page page-shell animate-reveal">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(generateCortexJSONLD()) }}

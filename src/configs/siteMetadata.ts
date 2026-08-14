@@ -10,7 +10,7 @@ const siteMetadata = {
   description:
     "Personal technical blog by Hamed Farag — articles on frontend engineering, AI-native architecture, LLM integration, agentic UI, React, and building for the web.",
   language: "en-us",
-  siteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || "",
+  siteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || "https://www.hamedfarag.dev",
   siteLogo: "/hg_logo.png",
   socialBanner: "/social-banner.png",
   siteRepo: "https://github.com/hamed-farag/hamed-farag",
