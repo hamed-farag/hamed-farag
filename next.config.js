@@ -1,4 +1,6 @@
 const nextConfig = {
+  // Keep `next build` from replacing files used by a running dev server.
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   images: {
     remotePatterns: [
       {

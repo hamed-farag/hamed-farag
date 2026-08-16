@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -12,6 +13,10 @@ import {
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   const isDark = resolvedTheme === "dark";
 
   return (
@@ -19,7 +24,7 @@ export function ThemeToggle() {
       <DropdownMenuTrigger asChild>
         <button className="theme-machine" aria-label="Choose color theme">
           <span aria-hidden="true"><i /><i /><i /></span>
-          <b>{isDark ? "LIGHT" : "DARK"}</b>
+          <b>{mounted ? (isDark ? "LIGHT" : "DARK") : "THEME"}</b>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="theme-menu">

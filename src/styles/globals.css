@@ -389,7 +389,8 @@
 }
 
 @media (max-width: 980px) {
-  .portfolio-hero { grid-template-columns: 1fr; }
+  .portfolio-hero { grid-template-columns: minmax(0, 1fr); }
+  .portfolio-hero > * { min-width: 0; }
   .hero-copy-panel { min-height: 650px; border-right: 0; }
   .profile-window { min-height: 680px; margin: 0; border-width: 2px 0 0; box-shadow: none; transform: none; }
   .positioning-section { grid-template-columns: 1fr; gap: 55px; }

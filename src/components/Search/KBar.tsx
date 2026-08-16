@@ -42,10 +42,14 @@ export const KBarSearchProvider: FC<{
     };
 
     async function fetchData() {
-      const posts = await getMiniPosts();
-      const actions = mapPosts(posts.data);
-      setSearchActions(actions);
-      setDataLoaded(true);
+      try {
+        const posts = await getMiniPosts();
+        setSearchActions(mapPosts(posts.data));
+      } catch {
+        setSearchActions([]);
+      } finally {
+        setDataLoaded(true);
+      }
     }
 
     if (!dataLoaded) {
