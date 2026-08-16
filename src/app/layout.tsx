@@ -20,9 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang={siteMetadata.language} suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <Header />
-          <main className="main">{children}</main>
-          <Footer />
+          <div className="site-frame">
+            <Header />
+            <main className="main">{children}</main>
+            <Footer />
+          </div>
         </ThemeProvider>
         <SpeedInsights />
         <Analytics />

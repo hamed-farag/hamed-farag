@@ -1,1 +1,26 @@
+.site-frame {
+  width: min(calc(100% - 72px), 1320px);
+  margin: 34px auto 64px;
+  border: var(--hard-rule);
+  background: hsl(var(--background));
+  box-shadow: 14px 14px 0 hsl(var(--foreground));
+}
+
 .main { min-height: 70vh; }
+
+.dark .site-frame {
+  box-shadow: 14px 14px 0 var(--electric);
+}
+
+@media (max-width: 760px) {
+  .site-frame {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .dark .site-frame {
+    box-shadow: none;
+  }
+}

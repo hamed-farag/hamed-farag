@@ -72,8 +72,9 @@
 
   * { border-color: hsl(var(--border)); box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-body); }
+  body { margin: 0; background: color-mix(in srgb, hsl(var(--background)) 82%, hsl(var(--foreground)) 18%); color: hsl(var(--foreground)); font-family: var(--font-body); }
   body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .22; background-image: radial-gradient(hsl(var(--foreground) / .22) .8px, transparent .8px); background-size: 18px 18px; }
+  .dark body { background: #07080d; }
   .dark body::before { opacity: .14; background-image: linear-gradient(hsl(var(--foreground) / .13) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / .13) 1px, transparent 1px); background-size: 28px 28px; }
   ::selection { background: var(--sun); color: #151516; }
   h1, h2, h3, h4 { font-family: var(--font-display); }
@@ -411,6 +412,7 @@
 }
 
 @media (max-width: 680px) {
+  body { background: hsl(var(--background)); }
   .hero-copy-panel { min-height: 610px; padding: 42px 20px 34px; }
   .portfolio-hero h1 { margin-top: 72px; font-size: 58px; }
   .hero-proof { display: block; }
