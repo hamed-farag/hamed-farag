@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { Close } from "pixelarticons/react/Close.js";
+import { Heart } from "pixelarticons/react/Heart.js";
 
-import { Button } from "@components/ui/Button";
+import { PixelIcon } from "@components/pixel";
 
 const loveMessages = [
   "Mai, you light up my world like nobody else 💖",
@@ -35,15 +36,27 @@ export function EasterEgg() {
   const secretWord = "maizein";
 
   function showMessage() {
-    toast.custom((t) => (
-      <div className="relative py-2 px-3 rounded bg-rose-100 border border-rose-300 w-96">
-        <h3 className="text-rose-900 font-bold mb-2">A Secret Message to Mai 💌</h3>
-        <p className="text-rose-800 text-wrap">{loveMessages[getRandomMessageIndex()]}</p>
-        <Button variant="link" size="icon" onClick={() => toast.dismiss(t)} className="absolute top-1 right-1">
-          <X className="w-4 h-4 text-red-700" />
-        </Button>
-      </div>
-    ));
+    // heart-themed message box (the toast frame switches to the "love" variant)
+    toast.custom(
+      (t) => (
+        <div className="relative w-full pr-12 text-px-ink">
+          <h3 className="px-title m-0 mb-2 flex items-center gap-2 text-lg font-bold">
+            <PixelIcon icon={Heart} className="text-px-love" />
+            A Secret Message to Mai 💌
+          </h3>
+          <p className="m-0 text-wrap">{loveMessages[getRandomMessageIndex()]}</p>
+          <button
+            type="button"
+            onClick={() => toast.dismiss(t)}
+            aria-label="Close"
+            className="px-frame px-btn px-btn--secondary absolute -right-1 -top-1 min-h-0 p-1.5"
+          >
+            <PixelIcon icon={Close} />
+          </button>
+        </div>
+      ),
+      { className: "px-frame--love" }
+    );
   }
 
   useEffect(() => {
