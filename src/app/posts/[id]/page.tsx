@@ -33,6 +33,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return generatePostMetadata(post);
 }
 
+// Every post is known at build time, so unknown slugs get the prebuilt (server-rendered) 404.
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const posts = getPosts();
 
