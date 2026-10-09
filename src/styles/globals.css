@@ -27,6 +27,22 @@
     var(--font-display), ui-sans-serif, system-ui, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
+  --font-pixel: var(--font-pixelify), ui-monospace, monospace;
+  --font-hud: var(--font-press-start), ui-monospace, monospace;
+
+  /* 16-bit palette + level tokens (values in pixel.css) */
+  --color-px-ink: var(--px-ink);
+  --color-px-paper: var(--px-paper);
+  --color-px-coin: var(--px-coin);
+  --color-px-coin-light: var(--px-coin-light);
+  --color-px-love: var(--px-love);
+  --color-px-msg: var(--px-msg-box);
+  --color-px-stone: var(--px-stone);
+  --color-lv-text: var(--lv-text);
+  --color-lv-muted: var(--lv-muted);
+  --color-lv-link: var(--lv-link);
+  --color-lv-error: var(--lv-error);
+
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
