@@ -6,6 +6,8 @@ const siteMetadata = {
   author: "Hamed Farag",
   authorAvatar: "/hf-avatar.jpg",
   jobTitle: "Lead AI Frontend Engineer / Frontend Architect",
+  // "building software since 2010" (data/author/about.mdx), drives the HUD years counter
+  careerStartYear: 2010,
   headerTitle: "HF",
   description:
     "Personal technical blog by Hamed Farag — articles on frontend engineering, AI-native architecture, LLM integration, agentic UI, React, and building for the web.",
