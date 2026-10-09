@@ -50,8 +50,6 @@ export const KBarSearchProvider: FC<{
 
     if (!dataLoaded) {
       fetchData();
-    } else {
-      setDataLoaded(true);
     }
   }, [defaultActions, dataLoaded, router]);
 

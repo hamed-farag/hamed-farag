@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import Giscus from "@giscus/react";
@@ -8,15 +8,17 @@ import { MessageSquare } from "lucide-react";
 
 import { giscusConfig } from "@configs/comments";
 
+const subscribeNoop = () => () => {};
+
 export function Comments() {
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  // Avoid hydration mismatch — only render after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Avoid hydration mismatch — only render after mount (false on the server and during hydration)
+  const mounted = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false
+  );
 
   if (!mounted) return null;
 
