@@ -119,7 +119,7 @@ export default async function PostsPage({
                   >
                     {/* Timeline dot */}
                     <div
-                      className="absolute -left-[33px] md:-left-[37px] top-1 w-3 h-3 rounded-full border-2 transition-colors duration-300 group-hover:scale-125"
+                      className="absolute left-[-33px] md:left-[-37px] top-1 w-3 h-3 rounded-full border-2 transition-colors duration-300 group-hover:scale-125"
                       style={{
                         borderColor: "var(--color-primary)",
                         background: index === 0 ? "var(--color-primary)" : "hsl(var(--background))",

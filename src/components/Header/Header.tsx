@@ -35,7 +35,7 @@ export function Header() {
           <Image
             src="/hf-logo.svg"
             alt="logo"
-            className="dark:invert transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110"
+            className="dark:invert transition-transform duration-500 group-hover:rotate-360 group-hover:scale-110"
             width={20}
             height={16}
             priority

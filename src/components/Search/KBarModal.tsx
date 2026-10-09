@@ -25,14 +25,14 @@ export const KBarModal = ({
 
   return (
     <KBarPortal>
-      <KBarPositioner className="bg-gray-300/50 p-4 backdrop-blur backdrop-filter dark:bg-black/50">
+      <KBarPositioner className="bg-gray-300/50 p-4 backdrop-blur-sm backdrop-filter dark:bg-black/50">
         <KBarAnimator className="w-full max-w-xl">
           <Card>
             <div className="flex items-center space-x-4 p-4">
               <span className="block w-5">
                 <Search className="h-4 w-4" />
               </span>
-              <KBarSearch className="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-none dark:text-gray-200 dark:placeholder-gray-500" />
+              <KBarSearch className="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-hidden dark:text-gray-200 dark:placeholder-gray-500" />
               <kbd className="inline-block whitespace-nowrap rounded border px-1.5 align-middle font-medium leading-4 tracking-wide text-xs text-gray-400 border-gray-400">
                 ESC
               </kbd>

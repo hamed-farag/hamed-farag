@@ -79,7 +79,7 @@ export default async function PostPage({ params }: Props) {
         >
           {formatDate(postData.data.date)}
         </span>
-        <h1 className="font-display text-4xl md:text-5xl leading-tight mb-4">
+        <h1 className="font-display text-4xl md:text-5xl leading-tight md:leading-none mb-4">
           {postData.data.title}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto my-0">

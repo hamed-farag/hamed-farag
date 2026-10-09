@@ -102,7 +102,7 @@ export async function Footer() {
               </h4>
               <ul className="space-y-2.5 list-none m-0 p-0">
                 {navLinks.map(({ label, href, icon: Icon }) => (
-                  <li key={label} className="m-0 p-0">
+                  <li key={label} className="p-0">
                     <Link
                       href={href}
                       className="group inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
@@ -113,7 +113,7 @@ export async function Footer() {
                     </Link>
                   </li>
                 ))}
-                <li className="m-0 p-0">
+                <li className="p-0">
                   <Link
                     href={`mailto:${siteMetadata.email}`}
                     className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
@@ -122,7 +122,7 @@ export async function Footer() {
                     Contact
                   </Link>
                 </li>
-                <li className="m-0 p-0">
+                <li className="p-0">
                   <Link
                     href="https://ko-fi.com/hamedfarag"
                     target="_blank"
