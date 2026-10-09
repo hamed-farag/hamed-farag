@@ -1,4 +1,4 @@
-import { RedirectType, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import Link from "next/link";
@@ -21,12 +21,12 @@ import {
 } from "@configs/siteMetadata";
 
 type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = getPostsById(params.id);
+  const { id } = await params;
+  const post = getPostsById(id);
 
   if (!post) return {};
 
@@ -42,9 +42,10 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({ params }: Props) {
-  const post = await getPostContentById(params.id);
+  const { id } = await params;
+  const post = await getPostContentById(id);
 
-  if (!post) redirect("/404", RedirectType.push);
+  if (!post) notFound();
 
   const { htmlContent, postData, headings } = post;
 
