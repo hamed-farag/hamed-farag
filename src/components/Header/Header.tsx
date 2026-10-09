@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
-import { ChevronUp, Search, Home, BookOpen, Sparkles, Briefcase, Handshake } from "lucide-react";
+import { ChevronUp, Search, House, BookOpen, Sparkles, Briefcase, Handshake } from "lucide-react";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { ThemeToggle } from "@components/ThemeToggle";
@@ -35,7 +35,7 @@ export function Header() {
           <Image
             src="/hf-logo.svg"
             alt="logo"
-            className="dark:invert transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110"
+            className="dark:invert transition-transform duration-500 group-hover:rotate-360 group-hover:scale-110"
             width={20}
             height={16}
             priority
@@ -51,7 +51,7 @@ export function Header() {
             className={`nav-pill ${pathname === "/" ? "nav-pill-active" : ""}`}
           >
             {isScrolled ? (
-              <Home className="h-4 w-4" />
+              <House className="h-4 w-4" />
             ) : (
               <span className="flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -115,7 +115,7 @@ export function Header() {
                     keywords: "back",
                     section: "Navigation",
                     perform: () => router.push("/"),
-                    icon: <Home className="h-4 w-4" />,
+                    icon: <House className="h-4 w-4" />,
                   },
                 ],
               },

@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import {
   Sparkles,
   GitPullRequest,
-  BarChart3,
+  ChartColumn,
   ListChecks,
-  Wand2,
+  WandSparkles,
   FlaskConical,
   ShieldCheck,
   MessageSquare,
@@ -13,10 +13,9 @@ import {
   Terminal,
   ArrowUpRight,
   Check,
-  Github,
-  Chrome,
 } from "lucide-react";
 
+import { Github, Chrome } from "@components/BrandIcons";
 import { Badge } from "@components/ui/Badge";
 import { Button } from "@components/ui/Button";
 import { WaveDivider } from "@components/WaveDivider";
@@ -64,7 +63,7 @@ const FEATURES = [
     body: "Select code in a diff and ask — answers stream in, grounded in the real diff hunk and the PR's stated intent.",
   },
   {
-    icon: BarChart3,
+    icon: ChartColumn,
     title: "PR overview",
     body: "A deterministic, no-AI change map: churn per file with bars and a by-module rollup, so you see where the weight is.",
   },
@@ -74,7 +73,7 @@ const FEATURES = [
     body: "A findings list tagged Blocker / Major / Minor / Nit / Praise, with Security, Performance, Error-handling and Readability lenses.",
   },
   {
-    icon: Wand2,
+    icon: WandSparkles,
     title: "Suggest a fix",
     body: "Generate a committable GitHub suggestion block for the selected lines — the author applies it in one click.",
   },

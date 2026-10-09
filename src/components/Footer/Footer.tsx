@@ -1,21 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Github,
-  Linkedin,
-  Twitter,
   Heart,
   ArrowUpRight,
   Mail,
   MapPin,
-  Code2,
+  CodeXml,
   Coffee,
-  Home,
+  House,
   BookOpen,
   Briefcase,
   Handshake,
 } from "lucide-react";
 
+import { Github, Linkedin, Twitter } from "@components/BrandIcons";
 import { WaveDivider } from "@components/WaveDivider";
 
 import { getUser } from "@services/user";
@@ -29,7 +27,7 @@ export async function Footer() {
   const currentYear = new Date().getFullYear();
 
   const navLinks = [
-    { label: "Home", href: "/", icon: Home },
+    { label: "Home", href: "/", icon: House },
     { label: "Blog", href: "/posts", icon: BookOpen },
     { label: "Works", href: "/works", icon: Briefcase },
     { label: "Hire Me", href: "/hire", icon: Handshake },
@@ -104,7 +102,7 @@ export async function Footer() {
               </h4>
               <ul className="space-y-2.5 list-none m-0 p-0">
                 {navLinks.map(({ label, href, icon: Icon }) => (
-                  <li key={label} className="m-0 p-0">
+                  <li key={label} className="p-0">
                     <Link
                       href={href}
                       className="group inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
@@ -115,7 +113,7 @@ export async function Footer() {
                     </Link>
                   </li>
                 ))}
-                <li className="m-0 p-0">
+                <li className="p-0">
                   <Link
                     href={`mailto:${siteMetadata.email}`}
                     className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
@@ -124,7 +122,7 @@ export async function Footer() {
                     Contact
                   </Link>
                 </li>
-                <li className="m-0 p-0">
+                <li className="p-0">
                   <Link
                     href="https://ko-fi.com/hamedfarag"
                     target="_blank"
@@ -151,7 +149,7 @@ export async function Footer() {
                     key={tech}
                     className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground px-2.5 py-1 rounded-full border border-border/60 transition-colors duration-200 hover:border-primary/40 hover:text-foreground"
                   >
-                    <Code2 className="w-3 h-3" />
+                    <CodeXml className="w-3 h-3" />
                     {tech}
                   </span>
                 ))}
@@ -174,7 +172,7 @@ export async function Footer() {
               © {currentYear} · Made with
               <Heart className="w-3 h-3 text-accent fill-accent" />
               and a lot of
-              <Code2 className="w-3 h-3 text-primary" />
+              <CodeXml className="w-3 h-3 text-primary" />
             </p>
           </div>
         </div>

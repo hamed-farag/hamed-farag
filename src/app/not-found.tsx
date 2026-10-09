@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <section className="flex gap-5 flex items-center justify-center w-100 my-4 md:my-20">
+    <section className="flex gap-5 flex items-center justify-center my-4 md:my-20">
       <h1 className="text-6xl md:text-8xl">404</h1>
       <div>
         <p className="text-xl md:text-3xl">

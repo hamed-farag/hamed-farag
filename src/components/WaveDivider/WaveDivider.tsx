@@ -4,7 +4,7 @@ export function WaveDivider({ flip = false }: { flip?: boolean }) {
 
   return (
     <div
-      className={`w-full overflow-hidden leading-[0] ${flip ? "rotate-180" : ""}`}
+      className={`w-full overflow-hidden leading-0 ${flip ? "rotate-180" : ""}`}
       aria-hidden="true"
     >
       <svg

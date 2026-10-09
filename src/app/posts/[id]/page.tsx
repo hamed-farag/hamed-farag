@@ -1,4 +1,4 @@
-import { RedirectType, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import Link from "next/link";
@@ -21,17 +21,20 @@ import {
 } from "@configs/siteMetadata";
 
 type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = getPostsById(params.id);
+  const { id } = await params;
+  const post = getPostsById(id);
 
   if (!post) return {};
 
   return generatePostMetadata(post);
 }
+
+// Every post is known at build time, so unknown slugs get the prebuilt (server-rendered) 404.
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const posts = getPosts();
@@ -42,9 +45,10 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({ params }: Props) {
-  const post = await getPostContentById(params.id);
+  const { id } = await params;
+  const post = await getPostContentById(id);
 
-  if (!post) redirect("/404", RedirectType.push);
+  if (!post) notFound();
 
   const { htmlContent, postData, headings } = post;
 
@@ -78,7 +82,7 @@ export default async function PostPage({ params }: Props) {
         >
           {formatDate(postData.data.date)}
         </span>
-        <h1 className="font-display text-4xl md:text-5xl leading-tight mb-4">
+        <h1 className="font-display text-4xl md:text-5xl leading-tight md:leading-none mb-4">
           {postData.data.title}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto my-0">

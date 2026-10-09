@@ -16,7 +16,7 @@ import { IPost } from "@interfaces/post";
 function extractPostFromPath(path: string) {
   // GET BLOG NAME BASED ON FOLDER NAME
   // filePathApart -> [ '', 'hamed-farag', 'app', 'posts', 'my-blog.mdx' ]
-  const filePathApart = path.split("/");
+  const filePathApart = path.split(/[\\/]/);
   let id = filePathApart[filePathApart.length - 1];
   id = id.replace(/\.[^/.]+$/, ""); // remove extension
 

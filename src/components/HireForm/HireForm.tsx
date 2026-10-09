@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  Code2,
+  CodeXml,
   Layers,
   Gauge,
   GraduationCap,
@@ -21,7 +21,7 @@ import { hireServices } from "@configs/hireServices";
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
   "ai-agentic-integration": <Bot className="h-5 w-5" />,
   "frontend-architecture": <Layers className="h-5 w-5" />,
-  "react-next-development": <Code2 className="h-5 w-5" />,
+  "react-next-development": <CodeXml className="h-5 w-5" />,
   performance: <Gauge className="h-5 w-5" />,
   consulting: <Boxes className="h-5 w-5" />,
   mentoring: <GraduationCap className="h-5 w-5" />,
@@ -102,7 +102,7 @@ export function HireForm({ email }: THireFormProps) {
                 className={cn(
                   "group relative flex items-start gap-3 rounded-2xl border p-4 text-left transition-all duration-300 hover:shadow-md",
                   isActive
-                    ? "border-primary bg-primary/5 shadow-sm"
+                    ? "border-primary bg-primary/5 shadow-xs"
                     : "border-border/50 hover:border-border"
                 )}
               >
@@ -187,7 +187,7 @@ export function HireForm({ email }: THireFormProps) {
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
           placeholder="Tell me about your project, timeline, and goals…"
-          className="mt-1.5 flex w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y"
+          className="mt-1.5 flex w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring resize-y"
         />
         {errors.message && (
           <p className="mt-1 text-xs text-destructive">{errors.message}</p>
@@ -202,7 +202,7 @@ export function HireForm({ email }: THireFormProps) {
         <Send className="h-4 w-4 mr-2" />
         Send via email
       </Button>
-      <p className="text-center text-xs text-muted-foreground -mt-4">
+      <p className="text-center text-xs text-muted-foreground my-0">
         Opens your email app with everything pre-filled — no data is stored.
       </p>
     </form>

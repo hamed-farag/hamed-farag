@@ -5,6 +5,8 @@ import { getPosts } from "@services/post";
 import { sortPostsByDate } from "@lib/utils/post";
 import { IMiniPost } from "@interfaces/post";
 
+export const dynamic = "force-static";
+
 export async function GET() {
   const allPosts = sortPostsByDate(getPosts());
   const miniPosts: Array<IMiniPost> = allPosts.map((post) => ({

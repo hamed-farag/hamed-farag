@@ -23,7 +23,7 @@ export function WorkCard({ work }: TWorkCardProps) {
       className="group card-whimsy h-full flex flex-col overflow-hidden border border-border/50"
     >
       {/* Cover image */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden">
+      <div className="relative aspect-video w-full overflow-hidden">
         <Image
           src={work.image}
           alt={work.title}

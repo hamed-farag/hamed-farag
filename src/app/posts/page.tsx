@@ -14,16 +14,17 @@ import { IPost, ISearchParams } from "@interfaces/post";
 
 export const metadata: Metadata = generatePostsPageMetadata();
 
-export default function PostsPage({
+export default async function PostsPage({
   searchParams,
 }: {
-  searchParams: ISearchParams;
+  searchParams: Promise<ISearchParams>;
 }) {
+  const params = await searchParams;
   const allPosts = getPosts();
-  const filteredPosts = filterPosts(allPosts, searchParams);
+  const filteredPosts = filterPosts(allPosts, params);
   const sortedPosts = sortPostsByDate(filteredPosts);
   const tagCounts = calculateTagCount(allPosts);
-  const activeTag = searchParams?.tag || null;
+  const activeTag = params?.tag || null;
   const totalPosts = allPosts.length;
 
   // Group posts by year
@@ -118,7 +119,7 @@ export default function PostsPage({
                   >
                     {/* Timeline dot */}
                     <div
-                      className="absolute -left-[33px] md:-left-[37px] top-1 w-3 h-3 rounded-full border-2 transition-colors duration-300 group-hover:scale-125"
+                      className="absolute left-[-33px] md:left-[-37px] top-1 w-3 h-3 rounded-full border-2 transition-colors duration-300 group-hover:scale-125"
                       style={{
                         borderColor: "var(--color-primary)",
                         background: index === 0 ? "var(--color-primary)" : "hsl(var(--background))",
