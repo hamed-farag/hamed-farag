@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  Code2,
+  CodeXml,
   Layers,
   Gauge,
   GraduationCap,
@@ -21,7 +21,7 @@ import { hireServices } from "@configs/hireServices";
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
   "ai-agentic-integration": <Bot className="h-5 w-5" />,
   "frontend-architecture": <Layers className="h-5 w-5" />,
-  "react-next-development": <Code2 className="h-5 w-5" />,
+  "react-next-development": <CodeXml className="h-5 w-5" />,
   performance: <Gauge className="h-5 w-5" />,
   consulting: <Boxes className="h-5 w-5" />,
   mentoring: <GraduationCap className="h-5 w-5" />,
