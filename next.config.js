@@ -1,4 +1,15 @@
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        // self-hosted fonts carry a content hash in their file names
+        source: "/fonts/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
