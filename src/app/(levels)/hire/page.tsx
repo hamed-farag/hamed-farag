@@ -1,7 +1,10 @@
-import { Sparkles } from "lucide-react";
 import type { Metadata } from "next";
+import { Zap } from "pixelarticons/react/Zap.js";
 
 import { HireForm } from "@components/HireForm";
+import { LevelScene } from "@components/level";
+import { Badge, MsgBox, PixelFrame, PixelIcon, Sign } from "@components/pixel";
+import { Sprite } from "@components/pixel/Sprite";
 
 import { hireServices } from "@configs/hireServices";
 import {
@@ -28,9 +31,11 @@ const SKILLS = [
   "CI/CD",
 ];
 
+// World 4: the Item Shop
 export default function HirePage() {
   return (
-    <div className="animate-reveal">
+    <>
+      <LevelScene id="hire" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -48,47 +53,57 @@ export default function HirePage() {
           ),
         }}
       />
+
       {/* Pitch / intro */}
-      <section className="relative mb-12">
-        <span className="inline-flex items-center gap-1.5 text-xs font-display font-semibold tracking-wider uppercase px-3 py-1 rounded-full border border-border/60 text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5" />
-          Available for select work
-        </span>
-        <h1 className="font-display mt-4 mb-3">
-          <span className="gradient-text">Let&apos;s build something</span>
-        </h1>
-        <p className="text-muted-foreground my-0 max-w-xl leading-relaxed">
-          I&apos;m {siteMetadata.author}, a Lead AI Frontend Engineer /
-          Frontend Architect who helps teams ship fast, maintainable,
-          AI-native frontends. With 15 years across frontend and backend, I
-          now focus on the AI and agentic transformation of software — from
-          LLM integrations and MCP servers to design systems that AI coding
-          agents can consume directly. Pick what you need below, tell me about
-          your project, and I&apos;ll get back to you.
-        </p>
+      <section className="mb-14 mt-12 flex flex-col items-start gap-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <p className="px-frame px-frame--wood px-hud-text m-0 px-4 py-2.5 text-[10px]">
+            Item Shop
+          </p>
+          <Badge variant="coin">
+            <PixelIcon icon={Zap} />
+            Available for select work
+          </Badge>
+        </div>
+        <Sign as="h1" className="text-3xl md:text-5xl">
+          Let&apos;s build something
+        </Sign>
+        <PixelFrame className="max-w-3xl p-6 md:p-8">
+          <p className="m-0 leading-relaxed">
+            I&apos;m {siteMetadata.author}, a Lead AI Frontend Engineer /
+            Frontend Architect who helps teams ship fast, maintainable,
+            AI-native frontends. With 15 years across frontend and backend, I
+            now focus on the AI and agentic transformation of software — from
+            LLM integrations and MCP servers to design systems that AI coding
+            agents can consume directly. Pick what you need below, tell me about
+            your project, and I&apos;ll get back to you.
+          </p>
+        </PixelFrame>
       </section>
 
       {/* Skills / tech stack */}
-      <section className="mb-12 animate-reveal-delay-1">
-        <h2 className="font-display text-lg mb-4">Tech I work with</h2>
-        <div className="flex flex-wrap gap-2">
+      <section className="mb-14 flex flex-col items-start gap-6" aria-labelledby="hire-skills">
+        <Sign id="hire-skills" className="text-xl md:text-2xl">
+          Tech I work with
+        </Sign>
+        <ul className="m-0 flex list-none flex-wrap gap-3 p-0">
           {SKILLS.map((skill) => (
-            <span
-              key={skill}
-              className="text-xs font-display font-semibold px-3.5 py-1.5 rounded-full border border-border/60 text-muted-foreground transition-all duration-300 hover:scale-105 hover:border-primary hover:text-primary cursor-default"
-            >
-              {skill}
-            </span>
+            <li key={skill} className="p-0">
+              <Badge>{skill}</Badge>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       {/* Interactive contact form */}
-      <section className="animate-reveal-delay-2">
-        <div className="card-whimsy border border-border/50 p-6 md:p-8">
-          <HireForm email={siteMetadata.email} />
-        </div>
+      <section aria-label="Send me a project inquiry">
+        <MsgBox>
+          <HireForm
+            email={siteMetadata.email}
+            victory={<Sprite sheet="hero/hero" tag="victory" scale={3} />}
+          />
+        </MsgBox>
       </section>
-    </div>
+    </>
   );
 }
