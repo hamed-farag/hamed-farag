@@ -4,8 +4,6 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@components/Header";
 import { Footer } from "@components/Footer";
 
-import "./layout.css";
-
 // Rendered outside the route groups, so it brings the classic chrome itself
 // (the "Lost in the Woods" level replaces this in a later phase).
 export default function NotFound() {

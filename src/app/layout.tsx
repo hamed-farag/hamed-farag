@@ -12,6 +12,10 @@ import "@styles/fonts.css";
 import "@styles/hljs-tokyo-night.css";
 import "@styles/globals.css";
 import "@styles/pixel.css";
+// classic chrome (Header / main) for pages not yet on the level shell; loaded here
+// so it's part of the main stylesheet instead of an unused preload on level pages
+import "@components/Header/header.css";
+import "./layout.css";
 
 // Self-hosted fonts (styles/fonts.css): preload the latin files, as next/font did.
 // Pixelify Sans (level titles) and Press Start 2P (HUD, labels) are the 16-bit fonts.
