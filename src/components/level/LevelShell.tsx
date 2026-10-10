@@ -33,7 +33,7 @@ export function LevelShell({ children }: { children: React.ReactNode }) {
           />
         }
       />
-      <main id="level-main" className="mx-auto w-11/12 max-w-[68.75rem] pb-16 pt-10 md:w-2/3">
+      <main id="level-main" className="mx-auto w-11/12 max-w-[72rem] pb-16 pt-10 xl:w-3/4">
         {children}
       </main>
       <Ground />

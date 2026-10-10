@@ -35,7 +35,8 @@ type TSpriteProps = {
   sheet: string;
   /** Aseprite frame tag, e.g. "spin" */
   tag: string;
-  scale?: 1 | 2 | 3 | 4;
+  /** whole-number scale, or "var" to read it from the --sprite-scale CSS variable (responsive) */
+  scale?: 1 | 2 | 3 | 4 | "var";
   /** show the first frame only */
   still?: boolean;
   /** omit for decorative sprites */
@@ -57,7 +58,8 @@ export function Sprite({ sheet, tag, scale = 2, still = false, label, className 
     }
   });
 
-  const px = (n: number) => `${n * scale}px`;
+  const px = (n: number) =>
+    scale === "var" ? `calc(${n}px * var(--sprite-scale, 2))` : `${n * scale}px`;
   const animate = !still && frames.length > 1;
   const style = {
     "--sprite-src": `url(/game/${path.posix.dirname(sheet)}/${data.meta.image})`,

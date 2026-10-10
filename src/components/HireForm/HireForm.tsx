@@ -7,6 +7,7 @@ import { Mail } from "pixelarticons/react/Mail.js";
 import { WarningDiamond } from "pixelarticons/react/WarningDiamond.js";
 
 import { Block, PixelButton, PixelIcon } from "@components/pixel";
+import { useHireLevel } from "@components/HireLevel";
 import { playSfx } from "@lib/sound";
 import { cn } from "@lib/utils/tailwindUtils";
 
@@ -61,6 +62,9 @@ type THireFormProps = {
 export function HireForm({ email, victory }: THireFormProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const [collected, setCollected] = useState<{ id: string; n: number } | null>(null);
+  // the item info box shows whichever item was last hovered, focused or toggled
+  const [infoId, setInfoId] = useState(hireServices[0].id);
+  const { setCleared } = useHireLevel();
   const [name, setName] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -72,6 +76,7 @@ export function HireForm({ email, victory }: THireFormProps) {
 
   const toggleService = (id: string) => {
     const adding = !selected.includes(id);
+    setInfoId(id);
     setSelected((prev) => (adding ? [...prev, id] : prev.filter((s) => s !== id)));
     if (adding) {
       setCollected((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
@@ -121,6 +126,7 @@ export function HireForm({ email, victory }: THireFormProps) {
 
     // COURSE CLEAR! first, then the same mailto: hand-off as before
     setMailto(href);
+    setCleared(true);
     playSfx("clear");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     handoff.current = window.setTimeout(() => {
@@ -130,13 +136,13 @@ export function HireForm({ email, victory }: THireFormProps) {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-7" noValidate>
         {/* Services: power-up items in item boxes */}
         <fieldset className="m-0 border-0 p-0">
           <legend className="px-label mb-4 p-0 text-px-coin">
             What can I help with? <span className="text-px-stone">(select any)</span>
           </legend>
-          <ul className="m-0 grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2">
+          <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
             {hireServices.map((service) => {
               const isActive = selected.includes(service.id);
               return (
@@ -144,38 +150,41 @@ export function HireForm({ email, victory }: THireFormProps) {
                   <button
                     type="button"
                     onClick={() => toggleService(service.id)}
+                    onMouseEnter={() => setInfoId(service.id)}
+                    onFocus={() => setInfoId(service.id)}
                     aria-pressed={isActive}
-                    className="px-frame px-switch relative flex h-full w-full cursor-pointer items-center gap-4 px-4 pb-4 pt-7 text-left"
+                    aria-describedby={`hire-item-${service.id}`}
+                    className="px-frame px-switch relative flex h-full w-full cursor-pointer items-center gap-3 py-2 pl-2 pr-3 text-left"
                   >
                     <span className="relative flex-none">
-                      <Block size={64} used={isActive}>
+                      <Block size={48} used={isActive}>
                         <PowerUp id={service.id} />
                       </Block>
                       {collected?.id === service.id && isActive && (
-                        <span key={collected.n} className="px-collect absolute left-4 top-4">
+                        <span key={collected.n} className="px-collect absolute left-2 top-2">
                           <PowerUp id={service.id} />
                         </span>
                       )}
                     </span>
-                    <span className="flex-1">
-                      <span className="px-title block text-lg font-bold leading-tight">
-                        {service.label}
-                      </span>
-                      <span className="mt-1 block text-sm leading-relaxed text-lv-muted">
-                        {service.description}
-                      </span>
+                    <span className="px-title flex-1 text-base font-bold leading-tight">
+                      {service.label}
                     </span>
+                    {/* selected = sunken shape + check mark, never colour alone */}
                     {isActive && (
-                      <span className="px-frame px-frame--coin px-badge absolute right-3 top-0 -translate-y-1/2">
+                      <span className="px-frame px-frame--coin grid h-8 w-8 flex-none place-items-center">
                         <PixelIcon icon={Check} />
-                        Got it
                       </span>
                     )}
                   </button>
+                  <span id={`hire-item-${service.id}`} className="sr-only">
+                    {service.description}
+                  </span>
                 </li>
               );
             })}
           </ul>
+          {/* item info: visual only, screen readers get each description on its button */}
+          <ItemInfo service={hireServices.find((s) => s.id === infoId) ?? hireServices[0]} selected={selected.includes(infoId)} />
         </fieldset>
 
         {/* Contact fields */}
@@ -223,7 +232,7 @@ export function HireForm({ email, victory }: THireFormProps) {
             id="hire-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows={5}
+            rows={3}
             placeholder="Tell me about your project, timeline, and goals…"
             aria-invalid={!!errors.message}
             aria-describedby={errors.message ? "hire-message-error" : undefined}
@@ -250,10 +259,32 @@ export function HireForm({ email, victory }: THireFormProps) {
           onClose={() => {
             window.clearTimeout(handoff.current);
             setMailto(null);
+            setCleared(false);
           }}
         />
       )}
     </>
+  );
+}
+
+function ItemInfo({
+  service,
+  selected,
+}: {
+  service: (typeof hireServices)[number];
+  selected: boolean;
+}) {
+  return (
+    <div aria-hidden="true" className="px-frame px-frame--paper-2 mt-4 flex items-start gap-3 p-4">
+      <PowerUp id={service.id} />
+      <div className="min-w-0 flex-1">
+        <p className="px-hud-text m-0 mb-1.5 text-[10px] text-lv-muted">
+          Item info {selected ? "· in your bag" : ""}
+        </p>
+        <p className="px-title m-0 font-bold leading-tight">{service.label}</p>
+        <p className="m-0 mt-1 text-sm leading-relaxed">{service.description}</p>
+      </div>
+    </div>
   );
 }
 
