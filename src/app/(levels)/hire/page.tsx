@@ -56,7 +56,7 @@ export default function HirePage() {
       />
 
       <HireLevelProvider>
-        <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-10">
+        <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-10">
           {/* left: the hero walks out of a pipe and stands under the magnifier */}
           <HireStage
             walker={<Sprite sheet="hero/hero" tag="walk-right" scale="var" />}
