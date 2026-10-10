@@ -1,0 +1,556 @@
+/* =====================================================================
+   Hamed's World: 16-bit design system
+   - Palette: docs/mario-world/game-assets.md §2 (+ CSS-only surfaces)
+   - Day = :root, Night = .dark (next-themes class)
+   - shadcn tokens are remapped only inside .level, so pages that still use
+     the classic layout are untouched until they move to the level shell.
+   ===================================================================== */
+
+:root {
+  /* master palette */
+  --px-ink: #1c1018;
+  --px-ink-2: #282840;
+  --px-ocean-deep: #1c3c9c;
+  --px-ocean: #2c5cd8;
+  --px-wave: #a8d0ff;
+  --px-grass-dark: #186818;
+  --px-grass: #48b848;
+  --px-grass-light: #78d860;
+  --px-cliff: #e09848;
+  --px-cliff-light: #f8c078;
+  --px-cliff-shadow: #b86828;
+  --px-wood-dark: #5a2808;
+  --px-wood: #8a4818;
+  --px-wood-light: #c8742c;
+  --px-stone: #b8b8d0;
+  --px-stone-light: #e8e8f0;
+  --px-red-dark: #a01810;
+  --px-red: #e83828;
+  --px-coin-dark: #c07800;
+  --px-coin: #f8c800;
+  --px-coin-light: #fff3a8;
+  --px-love: #f04878;
+  /* CSS-only surfaces */
+  --px-paper: #f8f0d8;
+  --px-paper-2: #ecdcb2;
+  --px-msg-box: #102070;
+  --px-msg-border: #f8f8f8;
+  --px-night-sky: #10184c;
+
+  /* semantic tokens: Day */
+  --lv-text: var(--px-ink);
+  --lv-muted: #6a4a30;
+  --lv-panel: var(--px-paper);
+  --lv-panel-2: var(--px-paper-2);
+  --lv-line: var(--px-ink);
+  --lv-hi: #ffffff;
+  --lv-lo: #d8c08c;
+  --lv-link: var(--px-ocean-deep);
+  --lv-error: var(--px-red-dark);
+  --lv-focus: var(--px-ocean-deep);
+  --lv-drop: rgb(28 16 24 / 0.4);
+  --lv-sky: linear-gradient(180deg, #78b8f8 0%, #c8e8ff 100%);
+  --lv-art-filter: none;
+  --lv-stars: 0;
+
+  --hud-h: 64px;
+  --px-scale: 3; /* scenery art is drawn at 3x */
+}
+
+/* semantic tokens: Night world */
+.dark {
+  --lv-text: var(--px-paper);
+  --lv-muted: var(--px-stone);
+  --lv-panel: #1c2450;
+  --lv-panel-2: #28306a;
+  --lv-line: #06040c;
+  --lv-hi: #3c4888;
+  --lv-lo: #121838;
+  --lv-link: var(--px-wave);
+  --lv-error: #ff9a8a;
+  --lv-focus: var(--px-coin);
+  --lv-drop: rgb(0 0 0 / 0.5);
+  --lv-sky: linear-gradient(180deg, var(--px-night-sky) 0%, #28306a 100%);
+  --lv-art-filter: brightness(0.6) saturate(0.8);
+  --lv-stars: 1;
+}
+
+/* shadcn tokens -> palette inside levels (HSL triplets, see globals.css) */
+.level {
+  --background: 45 70% 91%;
+  --foreground: 320 27% 9%;
+  --card: 45 70% 91%;
+  --card-foreground: 320 27% 9%;
+  --popover: 45 70% 91%;
+  --popover-foreground: 320 27% 9%;
+  --primary: 120 63% 25%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 43 60% 81%;
+  --secondary-foreground: 320 27% 9%;
+  --muted: 43 60% 81%;
+  --muted-foreground: 27 38% 30%;
+  --accent: 48 100% 49%;
+  --accent-foreground: 320 27% 9%;
+  --destructive: 3 82% 35%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 320 27% 9%;
+  --input: 320 27% 9%;
+  --ring: 225 70% 36%;
+  --radius: 0px;
+}
+
+.dark .level {
+  --background: 231 48% 21%;
+  --foreground: 45 70% 91%;
+  --card: 231 48% 21%;
+  --card-foreground: 45 70% 91%;
+  --popover: 231 48% 21%;
+  --popover-foreground: 45 70% 91%;
+  --secondary: 233 45% 29%;
+  --secondary-foreground: 45 70% 91%;
+  --muted: 233 45% 29%;
+  --muted-foreground: 240 20% 77%;
+  --border: 260 50% 3%;
+  --input: 260 50% 3%;
+  --ring: 48 100% 49%;
+}
+
+@layer base {
+  .level {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--lv-text);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  }
+  .level :where(h1, h2, h3, h4) {
+    font-family: var(--font-pixelify), ui-monospace, monospace;
+    letter-spacing: 0;
+  }
+  .level :where(a:not([class])) {
+    color: var(--lv-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .level :focus-visible {
+    outline: 3px solid var(--lv-focus);
+    outline-offset: 3px;
+  }
+  .level ::selection {
+    background: var(--px-coin);
+    color: var(--px-ink);
+  }
+}
+
+@layer components {
+  /* ---------- pixel frame: stepped corners, outline, bevel, hard shadow ----------
+     Drawn with background layers (not borders or clip-path) so it follows the
+     theme tokens, never affects layout, and the drop-shadow filter traces the
+     stepped outline. */
+  .px-frame {
+    --frame-b: 4px;
+    --frame-bv: 4px;
+    --frame-line: var(--lv-line);
+    --frame-fill: var(--lv-panel);
+    --frame-hi: var(--lv-hi);
+    --frame-lo: var(--lv-lo);
+    --frame-drop: 4px;
+    color: var(--lv-text);
+    background:
+      linear-gradient(var(--frame-line) 0 0) var(--frame-b) 0 / calc(100% - 2 * var(--frame-b)) var(--frame-b),
+      linear-gradient(var(--frame-line) 0 0) var(--frame-b) 100% / calc(100% - 2 * var(--frame-b)) var(--frame-b),
+      linear-gradient(var(--frame-line) 0 0) 0 var(--frame-b) / var(--frame-b) calc(100% - 2 * var(--frame-b)),
+      linear-gradient(var(--frame-line) 0 0) 100% var(--frame-b) / var(--frame-b) calc(100% - 2 * var(--frame-b)),
+      linear-gradient(var(--frame-hi) 0 0) var(--frame-b) var(--frame-b) / calc(100% - 2 * var(--frame-b)) var(--frame-bv),
+      linear-gradient(var(--frame-hi) 0 0) var(--frame-b) var(--frame-b) / var(--frame-bv) calc(100% - 2 * var(--frame-b)),
+      linear-gradient(var(--frame-lo) 0 0) var(--frame-b) calc(100% - var(--frame-b)) / calc(100% - 2 * var(--frame-b)) var(--frame-bv),
+      linear-gradient(var(--frame-lo) 0 0) calc(100% - var(--frame-b)) var(--frame-b) / var(--frame-bv) calc(100% - 2 * var(--frame-b)),
+      linear-gradient(var(--frame-fill) 0 0) var(--frame-b) var(--frame-b) / calc(100% - 2 * var(--frame-b)) calc(100% - 2 * var(--frame-b));
+    background-repeat: no-repeat;
+    filter: drop-shadow(var(--frame-drop) var(--frame-drop) 0 var(--lv-drop));
+  }
+  /* ---------- type helpers ---------- */
+  .px-hud-text {
+    font-family: var(--font-press-start), ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+  .px-title {
+    font-family: var(--font-pixelify), ui-monospace, monospace;
+    letter-spacing: 0;
+  }
+
+  /* ---------- button ---------- */
+  .px-btn {
+    --frame-b: 4px;
+    --frame-bv: 4px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 12px 18px;
+    font-family: var(--font-press-start), ui-monospace, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 120ms steps(2), filter 120ms steps(2);
+  }
+  .px-btn:hover { animation: px-bump 220ms steps(2); }
+  .px-btn:active {
+    transform: translateY(2px) scaleY(0.92);
+    filter: drop-shadow(1px 1px 0 var(--lv-drop));
+  }
+  .px-btn:focus-visible { outline: 3px solid var(--lv-focus); outline-offset: 4px; }
+  .px-btn:disabled, .px-btn[aria-disabled="true"] { opacity: 0.6; cursor: not-allowed; animation: none; transform: none; }
+  .px-btn--primary {
+    --frame-fill: var(--px-grass-dark);
+    --frame-hi: var(--px-grass);
+    --frame-lo: #0c400c;
+    --frame-line: var(--px-ink);
+    color: #ffffff;
+  }
+  .px-btn--secondary {
+    --frame-fill: var(--lv-panel);
+    --frame-hi: var(--lv-hi);
+    --frame-lo: var(--lv-lo);
+    color: var(--lv-text);
+  }
+  .px-btn--hud {
+    --frame-b: 3px;
+    --frame-bv: 3px;
+    --frame-fill: var(--px-ink-2);
+    --frame-hi: #484868;
+    --frame-lo: #100c18;
+    --frame-line: #000000;
+    --frame-drop: 3px;
+    min-height: 40px;
+    min-width: 40px;
+    padding: 8px 12px;
+    font-size: 10px;
+    color: var(--px-paper);
+  }
+  .px-btn--hud[aria-pressed="true"], .px-btn--hud[aria-checked="true"] {
+    --frame-fill: #3c3c64;
+    --frame-hi: #100c18;
+    --frame-lo: #585880;
+  }
+  .px-kbd {
+    font-family: var(--font-press-start), ui-monospace, monospace;
+    font-size: 8px;
+    line-height: 1;
+    padding: 3px 4px;
+    border: 2px solid currentColor;
+    opacity: 0.85;
+  }
+
+  /* ---------- form fields ---------- */
+  .px-input {
+    --frame-b: 3px;
+    --frame-bv: 3px;
+    --frame-fill: var(--px-paper);
+    --frame-hi: #d8c08c;
+    --frame-lo: #ffffff;
+    --frame-line: var(--px-ink);
+    --frame-drop: 0px;
+    filter: none;
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    color: var(--px-ink);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    border: 0;
+    outline: none;
+  }
+  .px-input::placeholder { color: #6a4a30; opacity: 1; }
+  .px-input:focus-visible { outline: 3px solid var(--px-coin); outline-offset: 3px; }
+  .px-input[aria-invalid="true"] { --frame-line: var(--px-red-dark); --frame-b: 4px; }
+  .px-label {
+    display: block;
+    margin-bottom: 8px;
+    font-family: var(--font-press-start), ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.6;
+    text-transform: uppercase;
+  }
+
+  /* ---------- badge ---------- */
+  .px-badge {
+    --frame-b: 2px;
+    --frame-bv: 2px;
+    --frame-drop: 2px;
+    --frame-fill: var(--lv-panel-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px 6px;
+    font-family: var(--font-press-start), ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  /* ---------- ?-block (item box) ---------- */
+  .px-block {
+    --frame-fill: var(--px-cliff);
+    --frame-hi: var(--px-cliff-light);
+    --frame-lo: var(--px-cliff-shadow);
+    --frame-line: var(--px-ink);
+    --rivet: var(--px-ink);
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+  }
+  .px-block::after {
+    /* corner rivets */
+    content: "";
+    position: absolute;
+    inset: 10px;
+    background:
+      linear-gradient(var(--rivet) 0 0) 0 0 / 4px 4px,
+      linear-gradient(var(--rivet) 0 0) 100% 0 / 4px 4px,
+      linear-gradient(var(--rivet) 0 0) 0 100% / 4px 4px,
+      linear-gradient(var(--rivet) 0 0) 100% 100% / 4px 4px;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+  .px-block--used {
+    --frame-fill: var(--px-wood);
+    --frame-hi: var(--px-wood-light);
+    --frame-lo: var(--px-wood-dark);
+    --rivet: var(--px-wood-dark);
+  }
+
+  /* ---------- wooden level sign (section headers) ---------- */
+  .px-sign {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px 12px;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .px-sign::before, .px-sign::after {
+    /* nails */
+    content: "";
+    flex: none;
+    width: 6px;
+    height: 6px;
+    background: var(--px-wood-dark);
+    box-shadow: inset -2px -2px 0 0 var(--px-ink);
+  }
+
+  /* ---------- switch block: pressed state = shape + icon, never colour alone ---------- */
+  .px-switch[aria-pressed="true"], .px-switch[aria-checked="true"] {
+    --frame-hi: var(--lv-lo);
+    --frame-lo: var(--lv-hi);
+    --frame-fill: var(--lv-panel-2);
+    --frame-drop: 0px;
+    filter: none;
+    transform: translateY(2px);
+  }
+
+  /* ---------- sprites (Aseprite sheets, see components/pixel/Sprite.tsx) ---------- */
+  .px-sprite {
+    display: inline-block;
+    flex: none;
+    width: var(--sprite-w);
+    height: var(--sprite-h);
+    background-image: var(--sprite-src);
+    background-repeat: no-repeat;
+    background-size: var(--sprite-sheet-w) var(--sprite-sheet-h);
+    background-position: var(--sprite-x) var(--sprite-y);
+    image-rendering: pixelated;
+  }
+  .px-sprite[data-animate] {
+    animation: px-sprite var(--sprite-duration) steps(var(--sprite-steps)) infinite;
+  }
+  .px-pixelated { image-rendering: pixelated; }
+  .px-icon { flex: none; shape-rendering: crispEdges; }
+
+  /* ---------- sr-only skip link ---------- */
+  .lv-skip {
+    position: absolute;
+    left: 8px;
+    top: -100px;
+    z-index: 60;
+  }
+  .lv-skip:focus { top: 8px; }
+
+  /* ---------- HUD ---------- */
+  .lv-hud {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    height: var(--hud-h);
+    color: var(--px-paper);
+    background: var(--px-ink);
+    border-bottom: 4px solid #000000;
+    box-shadow: 0 4px 0 0 rgb(0 0 0 / 0.25), inset 0 -4px 0 0 var(--px-ink-2);
+  }
+
+  /* ---------- scene: sky, stars, parallax layers ---------- */
+  .lv-scene {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--lv-sky);
+  }
+  .lv-scene::before, .lv-scene::after {
+    /* star pixels (Night only), drawn in code */
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: var(--lv-stars);
+    image-rendering: pixelated;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' shape-rendering='crispEdges'%3E%3Cg fill='%23fff3a8'%3E%3Crect x='5' y='9' width='1' height='1'/%3E%3Crect x='41' y='4' width='1' height='1'/%3E%3Crect x='23' y='30' width='1' height='1'/%3E%3Crect x='56' y='44' width='1' height='1'/%3E%3Crect x='12' y='52' width='1' height='1'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 192px 192px;
+  }
+  .lv-scene::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' shape-rendering='crispEdges'%3E%3Cg fill='%23ffffff'%3E%3Crect x='30' y='14' width='1' height='1'/%3E%3Crect x='50' y='24' width='1' height='1'/%3E%3Crect x='3' y='38' width='1' height='1'/%3E%3Crect x='36' y='58' width='1' height='1'/%3E%3C/g%3E%3C/svg%3E");
+    animation: lv-twinkle 2.4s steps(1) infinite;
+  }
+  .lv-layer {
+    position: absolute;
+    z-index: 1; /* above the star pixels, which only show where no layer covers the sky */
+    inset: 0;
+    background-image: var(--layer-src);
+    background-repeat: var(--layer-repeat, repeat-x);
+    background-size: var(--layer-w) var(--layer-h);
+    background-position: 0 var(--layer-y, 0px);
+    image-rendering: pixelated;
+    filter: var(--lv-art-filter);
+  }
+
+  /* ---------- ground (footer) ---------- */
+  .lv-ground {
+    position: relative;
+    isolation: isolate;
+    margin-top: auto;
+    padding-top: calc(32px * var(--px-scale));
+    color: var(--px-paper);
+  }
+  .lv-ground::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      url("/game/ui/ground.png") 0 0 / calc(16px * var(--px-scale)) calc(32px * var(--px-scale)) repeat-x,
+      url("/game/ui/dirt.png") 0 calc(32px * var(--px-scale)) / calc(16px * var(--px-scale)) calc(16px * var(--px-scale)) repeat;
+    image-rendering: pixelated;
+    filter: var(--lv-art-filter);
+  }
+  .lv-ground a { color: var(--px-paper); text-underline-offset: 4px; }
+  .lv-ground a:hover { color: var(--px-coin-light); }
+
+  /* ---------- frame colour variants: last, so they beat component defaults ---------- */
+  .px-frame--flat { --frame-drop: 0px; filter: none; }
+  .px-frame--paper-2 { --frame-fill: var(--lv-panel-2); }
+  /* classic dialog: dark outline, white inner ring, navy fill (same in Day and Night) */
+  .px-frame--msg {
+    --frame-fill: var(--px-msg-box);
+    --frame-hi: var(--px-msg-border);
+    --frame-lo: var(--px-msg-border);
+    --frame-line: var(--px-ink);
+    --frame-bv: 3px;
+    color: #ffffff;
+  }
+  .px-frame--wood {
+    --frame-fill: var(--px-wood);
+    --frame-hi: var(--px-wood-light);
+    --frame-lo: var(--px-wood-dark);
+    --frame-line: var(--px-ink);
+    color: var(--px-paper);
+  }
+  .px-frame--coin {
+    --frame-fill: var(--px-coin);
+    --frame-hi: var(--px-coin-light);
+    --frame-lo: var(--px-coin-dark);
+    --frame-line: var(--px-ink);
+    color: var(--px-ink);
+  }
+  .px-frame--love {
+    --frame-fill: #fff0f4;
+    --frame-hi: #ffffff;
+    --frame-lo: #f8b8cc;
+    --frame-line: var(--px-love);
+    color: var(--px-ink);
+  }
+
+  /* ---------- collect pop (power-ups, coins) ---------- */
+  .px-collect { animation: px-collect 600ms steps(6) both; }
+
+  /* ---------- course clear banner ---------- */
+  .px-clear-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgb(0 0 0 / 0.55);
+  }
+  .px-clear-box { animation: px-clear-in 360ms steps(4) both; }
+}
+
+@keyframes px-bump {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes px-sprite {
+  from { background-position-x: var(--sprite-x); }
+  to { background-position-x: var(--sprite-x-end); }
+}
+@keyframes px-collect {
+  0% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(-24px); opacity: 1; }
+  100% { transform: translateY(-32px); opacity: 0; }
+}
+@keyframes px-clear-in {
+  from { transform: scale(0.4); }
+  to { transform: scale(1); }
+}
+@keyframes lv-twinkle {
+  50% { opacity: calc(var(--lv-stars) * 0.25); }
+}
+@keyframes lv-drift {
+  from { background-position-y: var(--layer-y, 0px); }
+  to { background-position-y: calc(var(--layer-y, 0px) - var(--layer-depth, 0) * 640px); }
+}
+
+/* scroll-linked parallax where the browser supports scroll-driven animations */
+@supports (animation-timeline: scroll()) {
+  .lv-layer {
+    animation: lv-drift linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lv-layer,
+  .lv-scene::after,
+  .px-sprite[data-animate],
+  .px-btn:hover,
+  .px-collect,
+  .px-clear-box {
+    animation: none !important;
+  }
+  .px-btn, .px-btn:active, .px-switch[aria-pressed="true"] {
+    transition: none;
+    transform: none;
+  }
+}

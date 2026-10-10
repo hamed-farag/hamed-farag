@@ -5,6 +5,8 @@ import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
+// Toasts look like 16-bit message boxes (styles in styles/pixel.css). Custom toasts get the
+// same frame and can swap its variant through their own className.
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
@@ -13,14 +15,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{
+        unstyled: true,
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
-          actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-          cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+            "px-frame px-frame--msg flex w-full items-start gap-3 p-4 text-sm",
+          description: "text-px-stone",
+          actionButton: "px-frame px-btn px-btn--primary",
+          cancelButton: "px-frame px-btn px-btn--secondary",
         },
       }}
       {...props}

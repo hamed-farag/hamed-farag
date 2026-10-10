@@ -2,8 +2,6 @@ import { preload } from "react-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { Header } from "@components/Header";
-import { Footer } from "@components/Footer";
 import { ThemeProvider } from "@components/ThemeProvider";
 import { Toaster } from "@components/ui/sonner";
 import { EasterEgg } from "@components/EasterEgg/EasterEgg";
@@ -13,13 +11,19 @@ import { generateSiteMetadata, siteMetadata } from "@configs/siteMetadata";
 import "@styles/fonts.css";
 import "@styles/hljs-tokyo-night.css";
 import "@styles/globals.css";
-
+import "@styles/pixel.css";
+// classic chrome (Header / main) for pages not yet on the level shell; loaded here
+// so it's part of the main stylesheet instead of an unused preload on level pages
+import "@components/Header/header.css";
 import "./layout.css";
 
-// Self-hosted fonts (styles/fonts.css): preload the latin files, as next/font did
+// Self-hosted fonts (styles/fonts.css): preload the latin files, as next/font did.
+// Pixelify Sans (level titles) and Press Start 2P (HUD, labels) are the 16-bit fonts.
 const PRELOADED_FONTS = [
   "/fonts/quicksand-latin.4a7551bc.woff2",
   "/fonts/nunito-latin.07454f8a.woff2",
+  "/fonts/pixelify-sans-latin.01d67e7c.woff2",
+  "/fonts/press-start-2p-latin.de161955.woff2",
 ];
 
 export const metadata = generateSiteMetadata();
@@ -48,9 +52,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main className="main">{children}</main>
-          <Footer />
+          {children}
         </ThemeProvider>
         <SpeedInsights />
         <Analytics />

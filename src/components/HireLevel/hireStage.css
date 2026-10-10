@@ -1,0 +1,168 @@
+/* Item Shop stage. Positions are in art pixels times --s (the scene scale), so
+   the art stays on whole pixels: 2x as a strip on small screens, 3x in the
+   desktop column. Scene: 140 x 128 art px. Floor at y 120; magnifier lens
+   (inner radius 40) centred on (82, 75). */
+
+.hw-stage {
+  --s: 2;
+  --lens: 4; /* the lens magnifies by --lens / --s (2x) */
+  display: grid;
+  place-items: end center;
+}
+
+@media (min-width: 1024px) {
+  .hw-stage {
+    --s: 3;
+    --lens: 6;
+    position: sticky;
+    top: calc(var(--hud-h) + 40px);
+  }
+}
+
+.hw-scene {
+  position: relative;
+  width: calc(140px * var(--s));
+  height: calc(128px * var(--s));
+  filter: var(--lv-art-filter);
+}
+
+.hw-scene > * {
+  position: absolute;
+}
+
+.hw-scene img {
+  image-rendering: pixelated;
+}
+
+/* soft pixel spotlight falling on the magnifier */
+.hw-spot {
+  inset: 0;
+  z-index: 1;
+  background: rgb(255 243 168 / 0.18);
+  clip-path: polygon(
+    calc(72px * var(--s)) 0,
+    calc(92px * var(--s)) 0,
+    calc(126px * var(--s)) calc(120px * var(--s)),
+    calc(38px * var(--s)) calc(120px * var(--s))
+  );
+}
+
+.dark .hw-spot {
+  background: rgb(255 243 168 / 0.28);
+}
+
+/* hero in the hoodie: starts hidden behind the pipe, walks right into the lens */
+.hw-walker {
+  left: 0;
+  top: calc(88px * var(--s));
+  z-index: 2;
+  --sprite-scale: var(--s);
+  animation: hw-walk 1.4s steps(22) 0.3s both;
+}
+
+.hw-pipe {
+  left: 0;
+  top: calc(88px * var(--s));
+  z-index: 3;
+  width: calc(32px * var(--s));
+  height: calc(32px * var(--s));
+}
+
+/* the glass: clear while he walks behind it, then frosted so only the
+   magnified suit view shows inside the rim */
+.hw-lens {
+  left: calc(41px * var(--s));
+  top: calc(34px * var(--s));
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: calc(82px * var(--s));
+  height: calc(82px * var(--s));
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: #d8ecff;
+  background-image: linear-gradient(135deg, rgb(255 255 255 / 0.55) 0 18%, transparent 18% 100%);
+  animation: hw-glass 360ms steps(3) 1.55s both;
+}
+
+.hw-suit {
+  --sprite-scale: var(--lens);
+  margin-top: calc(4px * var(--s));
+}
+
+.hw-suit--idle {
+  animation: hw-reveal 360ms steps(3) 1.55s both;
+}
+
+.hw-suit--victory,
+.hw-stage[data-cleared] .hw-suit--idle {
+  display: none;
+}
+
+.hw-stage[data-cleared] .hw-suit--victory {
+  display: block;
+}
+
+.hw-magnifier {
+  left: calc(34px * var(--s));
+  top: calc(11px * var(--s));
+  z-index: 5;
+  width: calc(104px * var(--s));
+  height: calc(112px * var(--s));
+}
+
+.hw-floor {
+  left: calc(-16px * var(--s));
+  right: 0; /* stays inside the stage column */
+  bottom: 0;
+  z-index: 0;
+  height: calc(8px * var(--s));
+  background:
+    linear-gradient(var(--px-wood-light) 0 0) 0 0 / 100% calc(1px * var(--s)) no-repeat,
+    linear-gradient(var(--px-ink) 0 0) 0 calc(1px * var(--s)) / 100% calc(1px * var(--s)) no-repeat,
+    var(--px-wood-dark);
+}
+
+@keyframes hw-walk {
+  from {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  99% {
+    visibility: visible;
+  }
+  to {
+    transform: translateX(calc(66px * var(--s)));
+    visibility: hidden;
+  }
+}
+
+@keyframes hw-glass {
+  from {
+    background-color: rgb(216 236 255 / 0.15);
+  }
+  to {
+    background-color: #d8ecff;
+  }
+}
+
+@keyframes hw-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-walker {
+    display: none;
+  }
+  .hw-suit--idle,
+  .hw-lens {
+    animation: none;
+  }
+}

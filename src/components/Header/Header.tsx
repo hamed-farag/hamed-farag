@@ -10,7 +10,6 @@ import { useWindowScroll } from "@uidotdev/usehooks";
 import { ThemeToggle } from "@components/ThemeToggle";
 import { SearchProvider, SearchButton } from "@components/Search";
 
-import "./header.css";
 
 export function Header() {
   const router = useRouter();
